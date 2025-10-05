@@ -1,5 +1,5 @@
 const { Level } = require('../models');
-const { generateChallengesFromTemplates } = require('./challenge.service');
+const { generateChallengesFromUserData  } = require('./challenge.service');
 
 /**
  * Genera niveles con sus retos
@@ -30,7 +30,7 @@ const generateLevels = async (userId, gameSetId, seed, levelCount = 3) => {
       await level.save();
 
       // Generar retos para este nivel
-      const challenges = await generateChallengesFromTemplates(
+      const challenges = await generateChallengesFromUserData (
         userId,
         level._id,
         seed + i.toString(),

@@ -4,6 +4,112 @@ const { replaceVariables, extractVariables } = require('../utils/template.util')
 const { selectRandomItems } = require('../utils/seed.util');
 
 /**
+ * Obtiene valores de variables desde UserData del usuario
+ */
+const getUserDataValues = async (userId, variableKeys) => {
+  const values = {};
+  
+  for (const key of variableKeys) {
+    // Buscar en los datos del usuario
+    const userData = await UserData.findOne({ 
+      userId, 
+      tipoDato: key, 
+      active: true 
+    });
+    
+    if (userData) {
+      values[key] = userData.valor;
+    } else {
+      // Valor por defecto si no existe
+      values[key] = `[${key}]`;
+    }
+  }
+  
+  return values;
+};
+
+/**
+ * Genera retos a partir de UserData del usuario
+ */
+const generateChallengesFromUserData = async (userId, levelId, seed, count = 3) => {
+  try {
+    // Obtener todos los datos del usuario
+    const userDataItems = await UserData.find({ userId, active: true });
+    
+    if (userDataItems.length === 0) {
+      throw new Error('El usuario no tiene datos personalizados aún');
+    }
+
+    // Seleccionar datos aleatorios
+    const selectedData = selectRandomItems(userDataItems, count, seed);
+    
+    // Generar retos
+    const challenges = [];
+    
+    for (let i = 0; i < selectedData.length; i++) {
+      const dataItem = selectedData[i];
+      const challenge = await createChallengeFromUserData(
+        dataItem,
+        userId,
+        levelId,
+        i + 1
+      );
+      challenges.push(challenge);
+    }
+
+    return challenges;
+    
+  } catch (error) {
+    console.error('Error generando retos desde UserData:', error);
+    throw error;
+  }
+};
+
+/**
+ * Crea un reto desde un UserData
+ */
+const createChallengeFromUserData = async (userData, userId, levelId, order) => {
+  try {
+    // Obtener el tipo de variable para determinar el tipo de reto
+    const variable = await Variable.findOne({ key: userData.tipoDato });
+    
+    let challengeType = 'question';
+    if (variable) {
+      if (variable.type === 'date') challengeType = 'date_guess';
+      else if (variable.type === 'location') challengeType = 'location';
+      else if (variable.type === 'image') challengeType = 'photo_puzzle';
+    }
+
+    // Generar salt y hash de la respuesta
+    const salt = generateSalt();
+    const answerHash = hashAnswer(userData.valor, salt);
+
+    // Crear el reto
+    const challenge = new Challenge({
+      type: challengeType,
+      question: userData.pregunta,
+      hints: userData.pistas || [],
+      answerHash,
+      salt,
+      imagePath: userData.imagePath || null,
+      maxAttempts: 5,
+      currentAttempts: 0,
+      levelId,
+      userId,
+      completed: false,
+      order
+    });
+
+    await challenge.save();
+    return challenge;
+    
+  } catch (error) {
+    console.error('Error creando reto desde UserData:', error);
+    throw error;
+  }
+};
+
+/**
  * Genera retos a partir de plantillas
  */
 const generateChallengesFromTemplates = async (userId, levelId, seed, count = 3) => {
@@ -154,5 +260,7 @@ module.exports = {
   generateChallengesFromTemplates,
   createChallengeFromTemplate,
   createCustomChallenge,
-  getVariableValues
+  getVariableValues: getUserDataValues,
+  generateChallengesFromUserData,
+  createChallengeFromUserData
 };

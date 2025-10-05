@@ -341,6 +341,23 @@ const getStats = async (req, res) => {
   }
 };
 
+const getUserDataById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { UserData } = require('../models');
+
+    const userData = await UserData.find({ userId: id, active: true })
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: { userData }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   // Templates
   getTemplates,
@@ -363,6 +380,7 @@ module.exports = {
   getUserById,
   generateGameForUser,
   resetUserProgress,
+  getUserDataById,
   // Upload
   uploadImage,
   // Stats

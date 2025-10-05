@@ -32,6 +32,7 @@ router.get('/users', adminController.getUsers);
 router.get('/users/:id', adminController.getUserById);
 router.post('/users/:id/generate', adminController.generateGameForUser);
 router.post('/users/:id/reset', adminController.resetUserProgress);
+router.get('/users/:id/userdata', adminController.getUserDataById);
 
 // Subida de imágenes
 router.post('/upload', upload.single('image'), adminController.uploadImage);

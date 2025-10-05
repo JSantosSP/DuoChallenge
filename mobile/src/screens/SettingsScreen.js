@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { useGame } from '../hooks/useGame';
 import AppButton from '../components/AppButton';
 
-const SettingsScreen = () => {
+const SettingsScreen = ({ navigation }) => {
   const { user, logout } = useAuth();
   const { resetGame, progress } = useGame();
 
@@ -103,6 +103,19 @@ const SettingsScreen = () => {
         {/* Actions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Acciones</Text>
+
+          <TouchableOpacity 
+            style={styles.actionCard} 
+            onPress={() => navigation.navigate('MyData')}
+          >
+            <Text style={styles.actionIcon}>📝</Text>
+            <View style={styles.actionInfo}>
+              <Text style={styles.actionTitle}>Mis Datos Personales</Text>
+              <Text style={styles.actionDescription}>
+                Gestiona la información para tus retos
+              </Text>
+            </View>
+          </TouchableOpacity>
           
           <TouchableOpacity style={styles.actionCard} onPress={handleResetGame}>
             <Text style={styles.actionIcon}>🔄</Text>

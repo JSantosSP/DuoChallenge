@@ -58,4 +58,20 @@ export const apiService = {
   getProgress: () => api.get('/api/progress'),
   getPrize: () => api.get('/api/prize'),
   resetGame: () => api.post('/api/reset'),
+
+  // UserData (NUEVO)
+  getUserData: () => api.get('/api/userdata'),
+  getAvailableTypes: () => api.get('/api/userdata/types'),
+  createUserData: (data) => api.post('/api/userdata', data),
+  updateUserData: (id, data) => api.put(`/api/userdata/${id}`, data),
+  deleteUserData: (id) => api.delete(`/api/userdata/${id}`),
+  
+  // Upload
+  uploadImage: (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return api.post('/admin/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
 };

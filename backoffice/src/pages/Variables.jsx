@@ -72,7 +72,6 @@ const Variables = () => {
         </span>
       )
     },
-    { key: 'value', label: 'Valor' },
     { 
       key: 'type', 
       label: 'Tipo',
@@ -83,7 +82,20 @@ const Variables = () => {
       )
     },
     { key: 'category', label: 'Categoría' },
-    { key: 'description', label: 'Descripción' }
+    { key: 'description', label: 'Descripción' },
+    {
+      key: 'isSystemVariable',
+      label: 'Sistema',
+      render: (row) => (
+        <span className={`px-2 py-1 rounded-full text-xs ${
+          row.isSystemVariable 
+            ? 'bg-blue-100 text-blue-800' 
+            : 'bg-green-100 text-green-800'
+        }`}>
+          {row.isSystemVariable ? 'Sistema' : 'Usuario'}
+        </span>
+      )
+    }
   ];
 
   return (
@@ -91,14 +103,16 @@ const Variables = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Variables</h1>
-            <p className="text-gray-600 mt-2">Gestiona las variables personalizadas del juego</p>
+            <h1 className="text-3xl font-bold text-gray-800">Tipos de Datos</h1>
+            <p className="text-gray-600 mt-2">
+              Define los tipos de datos que los usuarios pueden crear
+            </p>
           </div>
           <button
             onClick={() => openModal()}
             className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
-            ➕ Nueva Variable
+            ➕ Nuevo Tipo
           </button>
         </div>
 
@@ -113,12 +127,12 @@ const Variables = () => {
         <Modal
           isOpen={isModalOpen}
           onClose={closeModal}
-          title={editingVariable ? 'Editar Variable' : 'Nueva Variable'}
+          title={editingVariable ? 'Editar Tipo de Dato' : 'Nuevo Tipo de Dato'}
         >
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Clave (sin espacios, usar guiones bajos)
+                Clave (identificador único)
               </label>
               <input
                 {...register('key', { required: true })}
@@ -126,45 +140,36 @@ const Variables = () => {
                 placeholder="primera_cita"
                 disabled={!!editingVariable}
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Usa minúsculas y guiones bajos. No se puede cambiar después.
+              </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Valor
+                Tipo de Dato
               </label>
-              <input
-                {...register('value', { required: true })}
+              <select
+                {...register('type', { required: true })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                placeholder="2020-06-15"
-              />
+              >
+                <option value="date">Fecha</option>
+                <option value="text">Texto</option>
+                <option value="location">Lugar</option>
+                <option value="number">Número</option>
+                <option value="image">Imagen</option>
+              </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipo
-                </label>
-                <select
-                  {...register('type', { required: true })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                >
-                  <option value="date">Fecha</option>
-                  <option value="text">Texto</option>
-                  <option value="location">Lugar</option>
-                  <option value="number">Número</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Categoría
-                </label>
-                <input
-                  {...register('category')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                  placeholder="fechas, lugares..."
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Categoría
+              </label>
+              <input
+                {...register('category')}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                placeholder="fechas, lugares, personal..."
+              />
             </div>
 
             <div>
@@ -175,8 +180,19 @@ const Variables = () => {
                 {...register('description')}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 rows="3"
-                placeholder="Descripción de la variable"
+                placeholder="Descripción del tipo de dato"
               />
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                {...register('isSystemVariable')}
+                className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+              />
+              <label className="ml-2 text-sm text-gray-700">
+                Variable de sistema (no editable por usuarios)
+              </label>
             </div>
 
             <div className="flex justify-end space-x-4 pt-4">

@@ -10,6 +10,7 @@ import Variables from '../pages/Variables';
 import Prizes from '../pages/Prizes';
 import Users from '../pages/Users';
 import Stats from '../pages/Stats';
+import UserDataPage from '../pages/UserData';
 
 const AppRouter = () => {
   return (
@@ -65,6 +66,14 @@ const AppRouter = () => {
             element={
               <ProtectedRoute>
                 <Stats />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/userdata"
+            element={
+              <ProtectedRoute>
+                <UserDataPage />
               </ProtectedRoute>
             }
           />

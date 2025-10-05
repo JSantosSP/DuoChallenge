@@ -11,6 +11,8 @@ import LevelScreen from '../screens/LevelScreen';
 import ChallengeScreen from '../screens/ChallengeScreen';
 import PrizeScreen from '../screens/PrizeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import MyDataScreen from '../screens/MyDataScreen'; // NUEVO
+import EditDataScreen from '../screens/EditDataScreen'; // NUEVO
 
 const Stack = createNativeStackNavigator();
 
@@ -78,11 +80,27 @@ const MainStack = () => {
           presentation: 'modal',
         }}
       />
+      <Stack.Screen
+        name="MyData"
+        component={MyDataScreen}
+        options={{
+          title: 'Mis Datos Personales',
+          headerBackTitle: 'Atrás',
+        }}
+      />
+      <Stack.Screen
+        name="EditData"
+        component={EditDataScreen}
+        options={({ route }) => ({
+          title: route.params?.mode === 'edit' ? 'Editar Dato' : 'Nuevo Dato',
+          headerBackTitle: 'Atrás',
+        })}
+      />
     </Stack.Navigator>
   );
 };
 
-// Auth Stack
+// Auth Stack (sin cambios)
 const AuthStack = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -91,7 +109,7 @@ const AuthStack = () => {
   );
 };
 
-// Main Navigator
+// Main Navigator (sin cambios)
 const AppNavigator = () => {
   const { isAuthenticated, loading } = useAuth();
 

@@ -9,7 +9,8 @@ const Sidebar = () => {
     { path: '/dashboard', icon: '🏠', label: 'Dashboard' },
     { path: '/users', icon: '👤', label: 'Usuarios' },
     { path: '/templates', icon: '🧩', label: 'Plantillas' },
-    { path: '/variables', icon: '📝', label: 'Variables' },
+    { path: '/variables', icon: '📝', label: 'Tipos de Datos' },
+  { path: '/userdata', icon: '💾', label: 'Datos Usuarios' }, 
     { path: '/prizes', icon: '🏆', label: 'Premios' },
     { path: '/stats', icon: '📊', label: 'Estadísticas' }
   ];
