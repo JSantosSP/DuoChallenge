@@ -10,6 +10,7 @@ const Prizes = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPrize, setEditingPrize] = useState(null);
   const [imagePath, setImagePath] = useState(null);
+  const [filterType, setFilterType] = useState('all'); // all, system, users
   const { register, handleSubmit, reset, setValue } = useForm();
 
   const { data: prizes, isLoading } = useFetch('prizes', async () => {
@@ -40,11 +41,13 @@ const Prizes = () => {
       setValue('description', prize.description);
       setValue('weight', prize.weight);
       setValue('category', prize.category);
+      setValue('isDefault', prize.isDefault);
       setImagePath(prize.imagePath);
     } else {
       setEditingPrize(null);
       reset();
       setImagePath(null);
+      setValue('isDefault', true); // Por defecto, los del admin son de sistema
     }
     setIsModalOpen(true);
   };
@@ -60,7 +63,8 @@ const Prizes = () => {
     const prizeData = {
       ...data,
       imagePath,
-      weight: parseInt(data.weight)
+      weight: parseInt(data.weight),
+      userId: data.isDefault ? null : undefined, // null = sistema
     };
 
     if (editingPrize) {
@@ -78,10 +82,17 @@ const Prizes = () => {
   };
 
   const handleResetPrizes = async () => {
-    if (window.confirm('¿Estás seguro de marcar todos los premios como no usados?')) {
+    if (window.confirm('¿Estás seguro de marcar todos los premios del sistema como no usados?')) {
       await resetPrizesMutation.mutateAsync();
     }
   };
+
+  // Filtrar premios
+  const filteredPrizes = prizes?.filter(prize => {
+    if (filterType === 'system') return prize.isDefault;
+    if (filterType === 'users') return !prize.isDefault;
+    return true;
+  });
 
   if (isLoading) {
     return (
@@ -99,14 +110,14 @@ const Prizes = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Premios</h1>
-            <p className="text-gray-600 mt-2">Gestiona los premios del juego</p>
+            <p className="text-gray-600 mt-2">Gestiona los premios del sistema</p>
           </div>
           <div className="flex space-x-4">
             <button
               onClick={handleResetPrizes}
               className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
             >
-              🔄 Reiniciar Premios
+              🔄 Reiniciar Sistema
             </button>
             <button
               onClick={() => openModal()}
@@ -117,14 +128,48 @@ const Prizes = () => {
           </div>
         </div>
 
+        {/* Filtros */}
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setFilterType('all')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              filterType === 'all'
+                ? 'bg-yellow-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Todos ({prizes?.length || 0})
+          </button>
+          <button
+            onClick={() => setFilterType('system')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              filterType === 'system'
+                ? 'bg-yellow-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Sistema ({prizes?.filter(p => p.isDefault).length || 0})
+          </button>
+          <button
+            onClick={() => setFilterType('users')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              filterType === 'users'
+                ? 'bg-yellow-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Usuarios ({prizes?.filter(p => !p.isDefault).length || 0})
+          </button>
+        </div>
+
         {/* Grid de premios */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {prizes?.map((prize) => (
+          {filteredPrizes?.map((prize) => (
             <div
               key={prize._id}
               className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
             >
-              <div className="h-48 bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+              <div className="h-48 bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center relative">
                 {prize.imagePath ? (
                   <img
                     src={`${import.meta.env.VITE_API_URL}${prize.imagePath}`}
@@ -133,6 +178,16 @@ const Prizes = () => {
                   />
                 ) : (
                   <span className="text-6xl">🏆</span>
+                )}
+                {prize.isDefault && (
+                  <span className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                    Sistema
+                  </span>
+                )}
+                {!prize.isDefault && (
+                  <span className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                    Usuario
+                  </span>
                 )}
               </div>
               <div className="p-6">
@@ -149,20 +204,27 @@ const Prizes = () => {
                   <span>Peso: {prize.weight}/10</span>
                   <span>{prize.category}</span>
                 </div>
-                <div className="flex space-x-2 mt-4">
-                  <button
-                    onClick={() => openModal(prize)}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors text-sm"
-                  >
-                    ✏️ Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(prize)}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition-colors text-sm"
-                  >
-                    🗑️ Eliminar
-                  </button>
-                </div>
+                {prize.isDefault && (
+                  <div className="flex space-x-2 mt-4">
+                    <button
+                      onClick={() => openModal(prize)}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors text-sm"
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(prize)}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition-colors text-sm"
+                    >
+                      🗑️ Eliminar
+                    </button>
+                  </div>
+                )}
+                {!prize.isDefault && (
+                  <div className="mt-4 text-center text-sm text-gray-500">
+                    <span>Creado por usuario</span>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -222,6 +284,17 @@ const Prizes = () => {
                   placeholder="comida, viaje..."
                 />
               </div>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                {...register('isDefault')}
+                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+              />
+              <label className="ml-2 text-sm text-gray-700">
+                Premio del sistema (disponible para todos los usuarios)
+              </label>
             </div>
 
             <div>

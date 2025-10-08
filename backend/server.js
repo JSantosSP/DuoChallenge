@@ -67,12 +67,14 @@ const authRoutes = require('./src/routes/auth.routes');
 const gameRoutes = require('./src/routes/game.routes');
 const adminRoutes = require('./src/routes/admin.routes');
 const userDataRoutes = require('./src/routes/userdata.routes');
+const prizeRoutes = require('./src/routes/prize.routes');
 
 // Usar rutas
 app.use('/auth', authRoutes);
 app.use('/api', gameRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api/userdata', userDataRoutes);
+app.use('/api/prizes', prizeRoutes);
 
 // ========================================
 // MANEJO DE ERRORES

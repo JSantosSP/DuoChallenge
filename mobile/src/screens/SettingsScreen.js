@@ -116,6 +116,19 @@ const SettingsScreen = ({ navigation }) => {
               </Text>
             </View>
           </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.actionCard} 
+            onPress={() => navigation.navigate('MyPrizes')}
+          >
+            <Text style={styles.actionIcon}>🎁</Text>
+            <View style={styles.actionInfo}>
+              <Text style={styles.actionTitle}>Mis Premios</Text>
+              <Text style={styles.actionDescription}>
+                Gestiona tus premios personalizados
+              </Text>
+            </View>
+          </TouchableOpacity>
           
           <TouchableOpacity style={styles.actionCard} onPress={handleResetGame}>
             <Text style={styles.actionIcon}>🔄</Text>

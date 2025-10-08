@@ -2,14 +2,16 @@ const { Prize, User } = require('../models');
 const { seededRandom } = require('../utils/seed.util');
 
 /**
- * Asigna un premio aleatorio a un usuario
+ * Asigna un premio aleatorio al usuario (de sus premios + sistema)
  */
 const assignPrize = async (userId, seed) => {
   try {
-    // Buscar premios disponibles (no usados y activos)
+    // Buscar premios disponibles del usuario y del sistema
     const availablePrizes = await Prize.find({ 
-      used: false, 
-      active: true 
+      $or: [
+        { userId, active: true, used: false }, // Premios del usuario
+        { isDefault: true, active: true, used: false } // Premios del sistema
+      ]
     });
 
     if (availablePrizes.length === 0) {
@@ -53,7 +55,6 @@ const selectPrizeByWeight = (prizes, seed) => {
     }
   }
   
-  // Fallback: retornar el último premio
   return prizes[prizes.length - 1];
 };
 
@@ -71,15 +72,23 @@ const getUserPrize = async (userId) => {
 };
 
 /**
- * Reinicia premios (marca todos como no usados) - Solo para admin
+ * Reinicia premios del usuario (marca todos como no usados)
  */
-const resetPrizes = async () => {
+const resetUserPrizes = async (userId) => {
   try {
-    await Prize.updateMany({}, {
-      used: false,
-      usedBy: null,
-      usedAt: null
-    });
+    await Prize.updateMany(
+      { 
+        $or: [
+          { userId },
+          { isDefault: true }
+        ]
+      },
+      {
+        used: false,
+        usedBy: null,
+        usedAt: null
+      }
+    );
     
     return { success: true, message: 'Premios reiniciados' };
   } catch (error) {
@@ -88,9 +97,31 @@ const resetPrizes = async () => {
   }
 };
 
+/**
+ * Reinicia premios del sistema (solo admin)
+ */
+const resetSystemPrizes = async () => {
+  try {
+    await Prize.updateMany(
+      { isDefault: true },
+      {
+        used: false,
+        usedBy: null,
+        usedAt: null
+      }
+    );
+    
+    return { success: true, message: 'Premios del sistema reiniciados' };
+  } catch (error) {
+    console.error('Error reiniciando premios del sistema:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   assignPrize,
   getUserPrize,
-  resetPrizes,
+  resetUserPrizes,
+  resetSystemPrizes,
   selectPrizeByWeight
 };

@@ -179,3 +179,61 @@ export const useUserData = () => {
     isUpdating: updateMutation.isPending,
   };
 };
+
+// Hook para Premios del Usuario
+export const useUserPrizes = () => {
+  const queryClient = useQueryClient();
+
+  // Obtener premios del usuario
+  const { data: prizes, isLoading, refetch } = useQuery({
+    queryKey: ['userprizes'],
+    queryFn: async () => {
+      const response = await apiService.getUserPrizes();
+      return response.data.data;
+    },
+  });
+
+  // Crear premio
+  const createMutation = useMutation({
+    mutationFn: (data) => apiService.createPrize(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['userprizes']);
+      Alert.alert('Éxito', 'Premio creado correctamente');
+    },
+    onError: (error) => {
+      Alert.alert('Error', error.response?.data?.message || 'Error al crear premio');
+    },
+  });
+
+  // Actualizar premio
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => apiService.updatePrize(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['userprizes']);
+      Alert.alert('Éxito', 'Premio actualizado correctamente');
+    },
+    onError: (error) => {
+      Alert.alert('Error', error.response?.data?.message || 'Error al actualizar premio');
+    },
+  });
+
+  // Eliminar premio
+  const deleteMutation = useMutation({
+    mutationFn: (id) => apiService.deletePrize(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['userprizes']);
+      Alert.alert('Éxito', 'Premio eliminado correctamente');
+    },
+  });
+
+  return {
+    prizes,
+    isLoading,
+    refetch,
+    createPrize: createMutation.mutate,
+    updatePrize: updateMutation.mutate,
+    deletePrize: deleteMutation.mutate,
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+  };
+};

@@ -247,70 +247,90 @@ const seedDatabase = async () => {
         description: 'Una deliciosa cena hecha por mí con velas y música romántica',
         imagePath: null,
         weight: 3,
-        category: 'comida'
+        category: 'comida',
+        isDefault: true, 
+        userId: null
       },
       {
         title: 'Masaje Relajante 💆',
         description: 'Un masaje completo de 1 hora con aceites esenciales',
         imagePath: null,
         weight: 4,
-        category: 'relax'
+        category: 'relax',
+        isDefault: true, 
+        userId: null
       },
       {
         title: 'Día de Spa en Casa 🛁',
         description: 'Día completo de spa con baño de burbujas, mascarillas y mimos',
         imagePath: null,
         weight: 2,
-        category: 'relax'
+        category: 'relax',
+        isDefault: true, 
+        userId: null
       },
       {
         title: 'Picnic en el Parque 🧺',
         description: 'Picnic sorpresa en tu lugar favorito con toda tu comida preferida',
         imagePath: null,
         weight: 3,
-        category: 'salida'
+        category: 'salida',
+        isDefault: true, 
+        userId: null
       },
       {
         title: 'Noche de Películas 🎬',
         description: 'Maratón de tus películas favoritas con palomitas, dulces y abrazos',
         imagePath: null,
         weight: 5,
-        category: 'hogar'
+        category: 'hogar',
+        isDefault: true, 
+        userId: null
       },
       {
         title: 'Desayuno en la Cama ☕',
         description: 'Desayuno sorpresa preparado con amor y servido en la cama',
         imagePath: null,
         weight: 4,
-        category: 'comida'
+        category: 'comida',
+        isDefault: true, 
+        userId: null
       },
       {
         title: 'Escapada de Fin de Semana 🏖️',
         description: 'Viaje sorpresa de fin de semana a un lugar especial',
         imagePath: null,
         weight: 1,
-        category: 'viaje'
+        category: 'viaje',
+        isDefault: true, 
+        userId: null
       },
       {
         title: 'Clase de Cocina Juntos 👨‍🍳',
         description: 'Aprenderemos a cocinar tu plato favorito juntos',
         imagePath: null,
         weight: 3,
-        category: 'actividad'
+        category: 'actividad',
+        isDefault: true, 
+        userId: null
       },
       {
         title: 'Carta de Amor Personalizada 💌',
         description: 'Una hermosa carta escrita a mano expresando todo mi amor',
         imagePath: null,
         weight: 5,
-        category: 'romántico'
+        category: 'romántico',
+        isDefault: true, 
+        userId: null
       },
       {
         title: 'Sesión de Fotos 📸',
         description: 'Sesión de fotos profesional para capturar nuestros mejores momentos',
         imagePath: null,
         weight: 2,
-        category: 'actividad'
+        category: 'actividad',
+        isDefault: true, 
+        userId: null
       }
     ];
 

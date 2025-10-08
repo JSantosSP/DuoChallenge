@@ -13,6 +13,8 @@ import PrizeScreen from '../screens/PrizeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import MyDataScreen from '../screens/MyDataScreen'; // NUEVO
 import EditDataScreen from '../screens/EditDataScreen'; // NUEVO
+import EditPrizeScreen from '../screens/EditPrizeScreen';
+import MyPrizesScreen from '../screens/MyPrizesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -93,6 +95,22 @@ const MainStack = () => {
         component={EditDataScreen}
         options={({ route }) => ({
           title: route.params?.mode === 'edit' ? 'Editar Dato' : 'Nuevo Dato',
+          headerBackTitle: 'Atrás',
+        })}
+      />
+      <Stack.Screen
+        name="MyPrizes"
+        component={MyPrizesScreen}
+        options={{
+          title: 'Mis Premios',
+          headerBackTitle: 'Atrás',
+        }}
+      />
+      <Stack.Screen
+        name="EditPrize"
+        component={EditPrizeScreen}
+        options={({ route }) => ({
+          title: route.params?.mode === 'edit' ? 'Editar Premio' : 'Nuevo Premio',
           headerBackTitle: 'Atrás',
         })}
       />

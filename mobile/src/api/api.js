@@ -74,4 +74,10 @@ export const apiService = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
+
+  // Prizes
+  getUserPrizes: () => api.get('/api/prizes'),
+  createPrize: (data) => api.post('/api/prizes', data),
+  updatePrize: (id, data) => api.put(`/api/prizes/${id}`, data),
+  deletePrize: (id) => api.delete(`/api/prizes/${id}`),
 };

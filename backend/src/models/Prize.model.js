@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const prizeSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null // null = premio del sistema
+  },
   title: {
     type: String,
     required: true,
@@ -13,6 +18,10 @@ const prizeSchema = new mongoose.Schema({
   imagePath: {
     type: String,
     default: null
+  },
+  isDefault: {
+    type: Boolean,
+    default: false // true = premio del sistema (creado por admin)
   },
   used: {
     type: Boolean,
@@ -44,5 +53,9 @@ const prizeSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Índice para búsquedas rápidas
+prizeSchema.index({ userId: 1, active: 1 });
+prizeSchema.index({ isDefault: 1, active: 1 });
 
 module.exports = mongoose.model('Prize', prizeSchema);
