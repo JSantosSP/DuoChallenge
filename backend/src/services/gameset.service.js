@@ -1,25 +1,42 @@
-const { GameSet, User, Challenge, Level } = require('../models');
+const { GameSet, User, Challenge, Level, GameInstance } = require('../models');
 const { generateGameSeed } = require('../utils/seed.util');
-const { generateLevels } = require('./level.service');
-const { assignPrize } = require('./prize.service');
+const { generateLevels } = require('../services/level.service');
+const { assignPrize } = require('../services/prize.service');
 
 /**
  * Genera un nuevo set de juego completo
  */
-const generateNewGameSet = async (userId) => {
+const generateNewGameSet = async (creatorId, gameInstanceId = null) => {
   try {
     // Generar seed único
     const seed = generateGameSeed();
 
-    // Desactivar el set anterior si existe
-    await GameSet.updateMany(
-      { userId, active: true },
-      { active: false }
-    );
+    // Si hay instancia, usamos el playerId de la instancia
+    let targetUserId = creatorId;
+    if (gameInstanceId) {
+      const instance = await GameInstance.findById(gameInstanceId);
+      if (instance) {
+        targetUserId = instance.playerId;
+      }
+    }
+
+    // Desactivar el set anterior
+    if (gameInstanceId) {
+      await GameSet.updateMany(
+        { gameInstanceId, active: true },
+        { active: false }
+      );
+    } else {
+      await GameSet.updateMany(
+        { userId: targetUserId, active: true, gameInstanceId: null },
+        { active: false }
+      );
+    }
 
     // Crear nuevo set
     const gameSet = new GameSet({
-      userId,
+      userId: targetUserId,
+      gameInstanceId: gameInstanceId || null,
       levels: [],
       seed,
       prizeId: null,
@@ -29,20 +46,29 @@ const generateNewGameSet = async (userId) => {
 
     await gameSet.save();
 
-    // Generar niveles
-    const levels = await generateLevels(userId, gameSet._id, seed, 3);
+    // Generar niveles usando los datos del CREADOR
+    const levels = await generateLevels(creatorId, gameSet._id, seed, 3);
 
     // Actualizar el set con los niveles
     gameSet.levels = levels.map(l => l._id);
     await gameSet.save();
 
-    // Actualizar usuario
-    await User.findByIdAndUpdate(userId, {
-      currentSetId: gameSet._id,
-      completedChallenges: [],
-      completedLevels: [],
-      currentPrizeId: null
-    });
+    // Actualizar usuario o instancia
+    if (gameInstanceId) {
+      await GameInstance.findByIdAndUpdate(gameInstanceId, {
+        currentSetId: gameSet._id,
+        completedChallenges: [],
+        completedLevels: [],
+        currentPrizeId: null
+      });
+    } else {
+      await User.findByIdAndUpdate(targetUserId, {
+        currentSetId: gameSet._id,
+        completedChallenges: [],
+        completedLevels: [],
+        currentPrizeId: null
+      });
+    }
 
     return gameSet;
     

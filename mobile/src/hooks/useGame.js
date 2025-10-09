@@ -237,3 +237,79 @@ export const useUserPrizes = () => {
     isUpdating: updateMutation.isPending,
   };
 };
+
+export const useGameShare = () => {
+  const queryClient = useQueryClient();
+
+  // Obtener códigos del usuario
+  const { data: shareCodes, isLoading: codesLoading, refetch: refetchCodes } = useQuery({
+    queryKey: ['sharecodes'],
+    queryFn: async () => {
+      const response = await apiService.getUserShareCodes();
+      return response.data.data.shareCodes;
+    },
+  });
+
+  // Obtener instancias de juego
+  const { data: instances, isLoading: instancesLoading, refetch: refetchInstances } = useQuery({
+    queryKey: ['gameinstances'],
+    queryFn: async () => {
+      const response = await apiService.getGameInstances();
+      return response.data.data.instances;
+    },
+  });
+
+  // Crear código
+  const createCodeMutation = useMutation({
+    mutationFn: () => apiService.createShareCode(),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['sharecodes']);
+      Alert.alert('Éxito', 'Código generado correctamente');
+    },
+    onError: (error) => {
+      Alert.alert('Error', error.response?.data?.message || 'Error al generar código');
+    },
+  });
+
+  // Verificar código
+  const verifyCodeMutation = useMutation({
+    mutationFn: (code) => apiService.verifyShareCode(code),
+  });
+
+  // Unirse a juego
+  const joinGameMutation = useMutation({
+    mutationFn: (code) => apiService.joinGame(code),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['gameinstances']);
+      queryClient.invalidateQueries(['levels']);
+      Alert.alert('¡Genial!', 'Te has unido al juego exitosamente');
+    },
+    onError: (error) => {
+      Alert.alert('Error', error.response?.data?.message || 'Error al unirse al juego');
+    },
+  });
+
+  // Desactivar código
+  const deactivateCodeMutation = useMutation({
+    mutationFn: (id) => apiService.deactivateShareCode(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['sharecodes']);
+      Alert.alert('Éxito', 'Código desactivado');
+    },
+  });
+
+  return {
+    shareCodes,
+    codesLoading,
+    instances,
+    instancesLoading,
+    refetchCodes,
+    refetchInstances,
+    createCode: createCodeMutation.mutate,
+    verifyCode: verifyCodeMutation.mutateAsync,
+    joinGame: joinGameMutation.mutate,
+    deactivateCode: deactivateCodeMutation.mutate,
+    isCreatingCode: createCodeMutation.isPending,
+    isJoining: joinGameMutation.isPending,
+  };
+};

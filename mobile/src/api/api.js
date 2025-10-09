@@ -80,4 +80,12 @@ export const apiService = {
   createPrize: (data) => api.post('/api/prizes', data),
   updatePrize: (id, data) => api.put(`/api/prizes/${id}`, data),
   deletePrize: (id) => api.delete(`/api/prizes/${id}`),
+
+  // Share
+  createShareCode: () => api.post('/api/share/create'),
+  getUserShareCodes: () => api.get('/api/share/codes'),
+  verifyShareCode: (code) => api.get(`/api/share/verify/${code}`),
+  joinGame: (code) => api.post('/api/share/join', { code }),
+  getGameInstances: () => api.get('/api/share/instances'),
+  deactivateShareCode: (id) => api.delete(`/api/share/${id}`),
 };
