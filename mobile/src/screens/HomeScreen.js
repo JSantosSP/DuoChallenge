@@ -43,6 +43,10 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const handleUnirse = () => {
+    navigation.navigate('JoinGame');
+  };
+
   const handleGenerateGame = () => {
     generateGame();
   };
@@ -147,7 +151,16 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.emptyEmoji}>🎮</Text>
             <Text style={styles.emptyTitle}>¡Comienza tu Aventura!</Text>
             <Text style={styles.emptyText}>
-              Genera tu primer juego y descubre los retos que he preparado para ti
+              Unete a un juego existente con un código de invitación o genera tu propio juego para empezar a jugar.
+            </Text>
+            <AppButton
+              title="Unirse a un Juego"
+              onPress={handleUnirse}
+              icon="🔗"
+              style={styles.generateButton}
+            />
+            <Text style={styles.emptyText}>
+              Genera tu propio juego para empezar a jugar.
             </Text>
             <AppButton
               title="Generar Juego"

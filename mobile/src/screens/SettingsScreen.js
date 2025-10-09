@@ -104,6 +104,19 @@ const SettingsScreen = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Acciones</Text>
 
+
+          <TouchableOpacity 
+            style={styles.actionCard} 
+            onPress={() => navigation.navigate('Share')}
+          >
+            <Text style={styles.actionIcon}>🔗</Text>
+            <View style={styles.actionInfo}>
+              <Text style={styles.actionTitle}>Comparte tus retos</Text>
+              <Text style={styles.actionDescription}>
+                Compartir tus retos personalizados con amigos
+              </Text>
+            </View>
+          </TouchableOpacity>
           <TouchableOpacity 
             style={styles.actionCard} 
             onPress={() => navigation.navigate('MyData')}

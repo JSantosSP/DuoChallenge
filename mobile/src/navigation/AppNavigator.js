@@ -15,6 +15,8 @@ import MyDataScreen from '../screens/MyDataScreen'; // NUEVO
 import EditDataScreen from '../screens/EditDataScreen'; // NUEVO
 import EditPrizeScreen from '../screens/EditPrizeScreen';
 import MyPrizesScreen from '../screens/MyPrizesScreen';
+import JoinGameScreen from '../screens/JoinGameScreen';
+import ShareScreen from '../screens/ShareScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -113,6 +115,22 @@ const MainStack = () => {
           title: route.params?.mode === 'edit' ? 'Editar Premio' : 'Nuevo Premio',
           headerBackTitle: 'Atrás',
         })}
+      />
+      <Stack.Screen
+        name="JoinGame"
+        component={JoinGameScreen}
+        options={{
+          title:  'Unirse a un Juego',
+          headerBackTitle: 'Atrás',
+        }}
+      />
+      <Stack.Screen
+        name="Share"
+        component={ShareScreen}
+        options={{
+          title: 'Compartir Juego',
+          headerBackTitle: 'Atrás',
+        }}
       />
     </Stack.Navigator>
   );
