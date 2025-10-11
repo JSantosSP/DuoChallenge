@@ -9,7 +9,8 @@ import api from '../api/axios';
 const Templates = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
-  const { register, handleSubmit, reset, setValue } = useForm();
+  const { register, handleSubmit, reset, setValue, watch } = useForm();
+  const selectedType = watch('type');
 
   const { data: templates, isLoading } = useFetch('templates', async () => {
     const res = await api.get('/admin/templates');
@@ -217,16 +218,32 @@ const Templates = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ejemplo de Respuesta (opcional - para retos de texto)
+                Ejemplo de Respuesta (opcional - solo para retos de texto)
               </label>
               <input
                 {...register('answerExample')}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Ej: París, María, 2020-05-15..."
+                placeholder="Ej: París, María, etc."
+                disabled={selectedType === 'date'}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                💡 Ayuda visual para saber qué formato de respuesta se espera en retos tipo texto
-              </p>
+              {selectedType !== 'date' && (
+                <p className="text-xs text-gray-500 mt-1">
+                  💡 Ayuda visual para saber qué formato de respuesta se espera en retos tipo texto
+                </p>
+              )}
+              {selectedType === 'date' && (
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800 font-medium">
+                    📅 Retos de tipo fecha:
+                  </p>
+                  <ul className="text-xs text-blue-700 mt-2 space-y-1 list-disc list-inside">
+                    <li>El jugador elegirá la fecha usando un selector de calendario</li>
+                    <li>No se permite entrada manual de texto</li>
+                    <li>El formato esperado por el backend es YYYY-MM-DD</li>
+                    <li>Ejemplo de respuesta correcta: 2020-06-15</li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             <div>

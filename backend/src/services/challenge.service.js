@@ -1,5 +1,5 @@
-const { ChallengeTemplate, Challenge, Variable } = require('../models');
-const { generateSalt, hashAnswer } = require('../utils/hash.util');
+const { ChallengeTemplate, Challenge, Variable, UserData } = require('../models');
+const { generateSalt, hashAnswer, hashDateAnswer } = require('../utils/hash.util');
 const { replaceVariables, extractVariables } = require('../utils/template.util');
 const { selectRandomItems } = require('../utils/seed.util');
 
@@ -82,7 +82,14 @@ const createChallengeFromUserData = async (userData, userId, levelId, order) => 
 
     // Generar salt y hash de la respuesta
     const salt = generateSalt();
-    const answerHash = hashAnswer(userData.valor, salt);
+    let answerHash;
+    
+    // Para fechas, usar normalización específica
+    if (challengeType === 'date') {
+      answerHash = hashDateAnswer(userData.valor, salt);
+    } else {
+      answerHash = hashAnswer(userData.valor, salt);
+    }
 
     // Crear el reto
     const challenge = new Challenge({
@@ -230,7 +237,14 @@ const createCustomChallenge = async (challengeData) => {
 
     // Generar salt y hash
     const salt = generateSalt();
-    const answerHash = hashAnswer(answer, salt);
+    let answerHash;
+    
+    // Para fechas, usar normalización específica
+    if (type === 'date') {
+      answerHash = hashDateAnswer(answer, salt);
+    } else {
+      answerHash = hashAnswer(answer, salt);
+    }
 
     const challenge = new Challenge({
       type,

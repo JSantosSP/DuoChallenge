@@ -2,7 +2,7 @@ const { User, Challenge, Level, GameSet } = require('../models');
 const { generateNewGameSet, checkGameSetCompletion, resetAndGenerateNewSet } = require('../services/gameset.service');
 const { checkLevelCompletion } = require('../services/level.service');
 const { getUserPrize } = require('../services/prize.service');
-const { verifyAnswer } = require('../utils/hash.util');
+const { verifyAnswer, verifyDateAnswer } = require('../utils/hash.util');
 
 /**
  * Generar nuevo set de juego
@@ -166,8 +166,8 @@ const verifyChallenge = async (req, res) => {
         break;
       
       case 'date':
-        // Para retos de fecha: también normalizar pero preparado para validaciones específicas futuras
-        isCorrect = verifyAnswer(answer, challenge.answerHash, challenge.salt);
+        // Para retos de fecha: normalizar a formato YYYY-MM-DD y comparar
+        isCorrect = verifyDateAnswer(answer, challenge.answerHash, challenge.salt);
         break;
       
       case 'photo':
