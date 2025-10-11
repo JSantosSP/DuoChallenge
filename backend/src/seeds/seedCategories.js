@@ -1,6 +1,6 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const { Category } = require('../models');
-require('dotenv').config();
 
 const categories = [
   {
@@ -45,28 +45,30 @@ const categories = [
   }
 ];
 
-async function seed() {
+const connectDB = async () => {
   try {
-    // Conectar a MongoDB
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/duochallenge';
+    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/duochallenge';
     await mongoose.connect(mongoUri);
-    console.log('');
-    console.log('============================================');
-    console.log('📦 Conectado a MongoDB');
-    console.log('============================================');
-    console.log('');
+    console.log('✅ Conectado a MongoDB');
+  } catch (error) {
+    console.error('❌ Error conectando a MongoDB:', error);
+    process.exit(1);
+  }
+};
+
+async function seedCategories() {
+  try {
+    console.log('🌱 Iniciando seed de categorías...\n');
 
     // Limpiar categorías existentes
+    console.log('🧹 Limpiando categorías...');
     const deletedCount = await Category.deleteMany({});
-    console.log(`🗑️  ${deletedCount.deletedCount} categoría(s) anterior(es) eliminada(s)`);
-    console.log('');
+    console.log(`   🗑️  ${deletedCount.deletedCount} categoría(s) eliminada(s)\n`);
 
     // Insertar nuevas categorías
+    console.log('📁 Creando categorías...');
     const result = await Category.insertMany(categories);
-    console.log('============================================');
-    console.log(`✅ ${result.length} categorías creadas exitosamente`);
-    console.log('============================================');
-    console.log('');
+    console.log(`✅ ${result.length} categorías creadas\n`);
     
     // Mostrar categorías creadas
     console.log('📋 Categorías creadas:');
@@ -78,39 +80,45 @@ async function seed() {
     });
 
     console.log('============================================');
-    console.log('✅ Seed completado exitosamente');
-    console.log('============================================');
-    console.log('');
-    console.log('💡 Próximos pasos:');
-    console.log('   1. Inicia el servidor backend: npm run dev');
-    console.log('   2. Inicia el backoffice: cd ../backoffice && npm run dev');
-    console.log('   3. Accede a http://localhost:5173');
-    console.log('   4. Crea plantillas de nivel usando estas categorías');
-    console.log('');
+    console.log('✅ Seed de categorías completado');
+    console.log('============================================\n');
 
-    await mongoose.connection.close();
-    process.exit(0);
   } catch (error) {
-    console.error('');
-    console.error('============================================');
-    console.error('❌ Error al crear categorías:');
-    console.error('============================================');
-    console.error(error.message);
-    console.error('');
-    console.error('💡 Verifica que:');
-    console.error('   1. MongoDB esté corriendo');
-    console.error('   2. La URL de conexión sea correcta');
-    console.error('   3. Tengas permisos de escritura');
-    console.error('');
-    process.exit(1);
+    console.error('❌ Error al crear categorías:', error);
+    throw error;
   }
-}
+};
 
 // Ejecutar seed
-console.log('');
-console.log('============================================');
-console.log('🌱 Iniciando seed de categorías...');
-console.log('============================================');
-console.log('');
+const run = async () => {
+  try {
+    console.log('');
+    console.log('============================================');
+    console.log('🌱 SEED DE CATEGORÍAS');
+    console.log('============================================');
+    console.log('');
 
-seed();
+    await connectDB();
+    await seedCategories();
+    
+    console.log('💡 Próximos pasos:');
+    console.log('   1. Ejecuta: node src/seeds/seedLevelTemplates.js');
+    console.log('   2. O ejecuta todo: node src/seeds/seedAll.js');
+    console.log('');
+    
+    await mongoose.connection.close();
+    console.log('✅ Proceso completado. Cerrando conexión...\n');
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Error fatal:', error);
+    await mongoose.connection.close();
+    process.exit(1);
+  }
+};
+
+// Ejecutar solo si se llama directamente
+if (require.main === module) {
+  run();
+}
+
+module.exports = { seed: seedCategories };

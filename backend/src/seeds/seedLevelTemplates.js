@@ -1,27 +1,31 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const { Category, LevelTemplate } = require('../models');
-require('dotenv').config();
 
-async function seed() {
+const connectDB = async () => {
   try {
-    // Conectar a MongoDB
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/duochallenge';
+    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/duochallenge';
     await mongoose.connect(mongoUri);
-    console.log('');
-    console.log('============================================');
-    console.log('📦 Conectado a MongoDB');
-    console.log('============================================');
-    console.log('');
+    console.log('✅ Conectado a MongoDB');
+  } catch (error) {
+    console.error('❌ Error conectando a MongoDB:', error);
+    process.exit(1);
+  }
+};
+
+async function seedLevelTemplates() {
+  try {
+    console.log('🌱 Iniciando seed de plantillas de nivel...\n');
 
     // Obtener categorías
+    console.log('📁 Buscando categorías...');
     const categories = await Category.find();
     if (categories.length === 0) {
-      console.error('❌ No hay categorías. Ejecuta primero: node seedCategories.js');
-      process.exit(1);
+      console.error('❌ No hay categorías en la base de datos');
+      console.error('   Ejecuta primero: node src/seeds/seedCategories.js\n');
+      throw new Error('No hay categorías disponibles');
     }
-
-    console.log(`📁 Encontradas ${categories.length} categorías`);
-    console.log('');
+    console.log(`✅ Encontradas ${categories.length} categorías\n`);
 
     // Crear un mapa de categorías por nombre
     const categoryMap = {};
@@ -30,11 +34,12 @@ async function seed() {
     });
 
     // Limpiar plantillas existentes
+    console.log('🧹 Limpiando plantillas...');
     const deletedCount = await LevelTemplate.deleteMany({});
-    console.log(`🗑️  ${deletedCount.deletedCount} plantilla(s) anterior(es) eliminada(s)`);
-    console.log('');
+    console.log(`   🗑️  ${deletedCount.deletedCount} plantilla(s) eliminada(s)\n`);
 
     // Definir plantillas de nivel
+    console.log('📋 Creando plantillas de nivel...');
     const templates = [
       {
         name: 'Nivel de Aniversarios',
@@ -140,13 +145,9 @@ async function seed() {
 
     // Insertar plantillas
     const result = await LevelTemplate.insertMany(templates);
+    console.log(`✅ ${result.length} plantillas creadas\n`);
     
-    console.log('============================================');
-    console.log(`✅ ${result.length} plantillas de nivel creadas`);
-    console.log('============================================');
-    console.log('');
-    
-    // Agrupar por categoría
+    // Agrupar por categoría para mostrar
     const byCategory = {};
     for (const template of result) {
       await template.populate('categoryId', 'name');
@@ -174,7 +175,7 @@ async function seed() {
     });
 
     console.log('============================================');
-    console.log('✅ Seed completado exitosamente');
+    console.log('✅ Seed de plantillas completado');
     console.log('============================================');
     console.log('');
     console.log('📊 Resumen:');
@@ -184,32 +185,41 @@ async function seed() {
     console.log(`   • ${result.filter(t => t.difficulty === 'medium').length} plantillas medias`);
     console.log(`   • ${result.filter(t => t.difficulty === 'hard').length} plantillas difíciles`);
     console.log('');
-    console.log('💡 El sistema está listo para generar niveles automáticamente');
-    console.log('');
 
-    await mongoose.connection.close();
-    process.exit(0);
   } catch (error) {
-    console.error('');
-    console.error('============================================');
-    console.error('❌ Error al crear plantillas:');
-    console.error('============================================');
-    console.error(error.message);
-    console.error('');
-    console.error('💡 Verifica que:');
-    console.error('   1. Hayas ejecutado primero seedCategories.js');
-    console.error('   2. MongoDB esté corriendo');
-    console.error('   3. Tengas permisos de escritura');
-    console.error('');
-    process.exit(1);
+    console.error('❌ Error al crear plantillas:', error);
+    throw error;
   }
 }
 
 // Ejecutar seed
-console.log('');
-console.log('============================================');
-console.log('🌱 Iniciando seed de plantillas de nivel...');
-console.log('============================================');
-console.log('');
+const run = async () => {
+  try {
+    console.log('');
+    console.log('============================================');
+    console.log('🌱 SEED DE PLANTILLAS DE NIVEL');
+    console.log('============================================');
+    console.log('');
 
-seed();
+    await connectDB();
+    await seedLevelTemplates();
+    
+    console.log('💡 El sistema está listo para generar niveles automáticamente');
+    console.log('');
+    
+    await mongoose.connection.close();
+    console.log('✅ Proceso completado. Cerrando conexión...\n');
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Error fatal:', error);
+    await mongoose.connection.close();
+    process.exit(1);
+  }
+};
+
+// Ejecutar solo si se llama directamente
+if (require.main === module) {
+  run();
+}
+
+module.exports = { seed: seedLevelTemplates };
