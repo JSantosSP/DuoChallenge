@@ -97,6 +97,38 @@ const verifyDateAnswer = (userAnswer, correctHash, salt) => {
   return userHash === correctHash;
 };
 
+/**
+ * Genera hash para un puzzle resuelto correctamente
+ * El orden correcto es siempre [1,2,3,4,5,6,7,8,9,...] 
+ */
+const hashPuzzleAnswer = (puzzleGrid, salt) => {
+  const totalPieces = puzzleGrid * puzzleGrid;
+  const correctOrder = Array.from({ length: totalPieces }, (_, i) => i + 1);
+  const puzzleString = correctOrder.join(',');
+  return crypto
+    .createHash('sha256')
+    .update(salt + puzzleString)
+    .digest('hex');
+};
+
+/**
+ * Verifica si el orden del puzzle es correcto
+ * @param {Array} userOrder - Array con el orden de las piezas del usuario [1,2,3,4,...]
+ * @param {String} correctHash - Hash de la respuesta correcta
+ * @param {String} salt - Salt del reto
+ */
+const verifyPuzzleAnswer = (userOrder, correctHash, salt) => {
+  if (!Array.isArray(userOrder)) {
+    return false;
+  }
+  const puzzleString = userOrder.join(',');
+  const userHash = crypto
+    .createHash('sha256')
+    .update(salt + puzzleString)
+    .digest('hex');
+  return userHash === correctHash;
+};
+
 module.exports = {
   generateSalt,
   hashAnswer,
@@ -104,5 +136,7 @@ module.exports = {
   verifyAnswer,
   normalizeDateAnswer,
   hashDateAnswer,
-  verifyDateAnswer
+  verifyDateAnswer,
+  hashPuzzleAnswer,
+  verifyPuzzleAnswer
 };

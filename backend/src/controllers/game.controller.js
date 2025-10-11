@@ -2,7 +2,7 @@ const { User, Challenge, Level, GameSet } = require('../models');
 const { generateNewGameSet, checkGameSetCompletion, resetAndGenerateNewSet } = require('../services/gameset.service');
 const { checkLevelCompletion } = require('../services/level.service');
 const { getUserPrize } = require('../services/prize.service');
-const { verifyAnswer, verifyDateAnswer } = require('../utils/hash.util');
+const { verifyAnswer, verifyDateAnswer, verifyPuzzleAnswer } = require('../utils/hash.util');
 
 /**
  * Generar nuevo set de juego
@@ -114,10 +114,10 @@ const getChallenge = async (req, res) => {
 const verifyChallenge = async (req, res) => {
   try {
     const { challengeId } = req.params;
-    const { answer } = req.body;
+    const { answer, puzzleOrder } = req.body;
     const userId = req.user._id;
 
-    if (!answer) {
+    if (!answer && !puzzleOrder) {
       return res.status(400).json({
         success: false,
         message: 'La respuesta es requerida'
@@ -171,8 +171,14 @@ const verifyChallenge = async (req, res) => {
         break;
       
       case 'photo':
-        // Para retos de foto: preparado para lógica futura (ej: upload de imagen)
-        isCorrect = verifyAnswer(answer, challenge.answerHash, challenge.salt);
+        // Para retos de foto: verificar el orden del puzzle
+        if (!puzzleOrder || !Array.isArray(puzzleOrder)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Orden del puzzle inválido'
+          });
+        }
+        isCorrect = verifyPuzzleAnswer(puzzleOrder, challenge.answerHash, challenge.salt);
         break;
       
       default:

@@ -31,8 +31,8 @@ export const useGame = () => {
 
   // Verificar reto
   const verifyMutation = useMutation({
-    mutationFn: ({ challengeId, answer }) => 
-      apiService.verifyChallenge(challengeId, answer),
+    mutationFn: ({ challengeId, payload }) => 
+      apiService.verifyChallenge(challengeId, payload),
     onSuccess: (data) => {
       queryClient.invalidateQueries(['levels']);
       queryClient.invalidateQueries(['progress']);

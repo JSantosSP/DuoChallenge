@@ -28,6 +28,7 @@ const EditDataScreen = ({ route, navigation }) => {
     pistas: ['', '', ''],
     categorias: [],
     imagePath: null,
+    puzzleGrid: 3, // Tamaño de grid por defecto para puzzles
   });
 
   const [selectedType, setSelectedType] = useState(null);
@@ -44,6 +45,7 @@ const EditDataScreen = ({ route, navigation }) => {
         pistas: [...dataItem.pistas, '', '', ''].slice(0, 3),
         categorias: dataItem.categorias || [],
         imagePath: dataItem.imagePath,
+        puzzleGrid: dataItem.puzzleGrid || 3,
       });
       const type = availableTypes?.find(t => t.key === dataItem.tipoDato);
       setSelectedType(type);
@@ -309,36 +311,71 @@ const EditDataScreen = ({ route, navigation }) => {
             />
           </View>
 
-          {/* Imagen */}
+          {/* Imagen y Configuración de Puzzle */}
           {selectedType?.type === 'image' && (
-            <View style={styles.section}>
-              <Text style={styles.label}>Imagen (opcional)</Text>
-              {formData.imagePath ? (
-                <View style={styles.imagePreview}>
-                  <Image
-                    source={{ uri: `${process.env.EXPO_PUBLIC_API_URL}${formData.imagePath}` }}
-                    style={styles.image}
-                    resizeMode="cover"
-                  />
+            <>
+              <View style={styles.section}>
+                <Text style={styles.label}>Imagen del Puzzle *</Text>
+                <Text style={styles.helperText}>
+                  Esta imagen se dividirá en un puzzle interactivo para el jugador
+                </Text>
+                {formData.imagePath ? (
+                  <View style={styles.imagePreview}>
+                    <Image
+                      source={{ uri: `${process.env.EXPO_PUBLIC_API_URL_DEV || 'http://localhost:4000'}${formData.imagePath}` }}
+                      style={styles.image}
+                      resizeMode="cover"
+                    />
+                    <TouchableOpacity
+                      style={styles.removeImageButton}
+                      onPress={() => setFormData({ ...formData, imagePath: null })}
+                    >
+                      <Text style={styles.removeImageText}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
                   <TouchableOpacity
-                    style={styles.removeImageButton}
-                    onPress={() => setFormData({ ...formData, imagePath: null })}
+                    style={styles.uploadButton}
+                    onPress={handlePickImage}
+                    disabled={uploading}
                   >
-                    <Text style={styles.removeImageText}>✕</Text>
+                    <Text style={styles.uploadButtonText}>
+                      {uploading ? 'Subiendo...' : '📷 Seleccionar Imagen'}
+                    </Text>
                   </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Grid Size Selector */}
+              <View style={styles.section}>
+                <Text style={styles.label}>Dificultad del Puzzle</Text>
+                <Text style={styles.helperText}>
+                  Selecciona el tamaño de la cuadrícula (mayor = más difícil)
+                </Text>
+                <View style={styles.gridSelector}>
+                  {[2, 3, 4, 5].map((size) => (
+                    <TouchableOpacity
+                      key={size}
+                      style={[
+                        styles.gridOption,
+                        formData.puzzleGrid === size && styles.gridOptionSelected,
+                      ]}
+                      onPress={() => setFormData({ ...formData, puzzleGrid: size })}
+                    >
+                      <Text style={[
+                        styles.gridOptionText,
+                        formData.puzzleGrid === size && styles.gridOptionTextSelected,
+                      ]}>
+                        {size}x{size}
+                      </Text>
+                      <Text style={styles.gridPiecesText}>
+                        ({size * size} piezas)
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
-              ) : (
-                <TouchableOpacity
-                  style={styles.uploadButton}
-                  onPress={handlePickImage}
-                  disabled={uploading}
-                >
-                  <Text style={styles.uploadButtonText}>
-                    {uploading ? 'Subiendo...' : '📷 Seleccionar Imagen'}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
+              </View>
+            </>
           )}
 
           {/* Botones */}
@@ -499,6 +536,44 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  helperText: {
+    fontSize: 12,
+    color: '#666666',
+    marginBottom: 8,
+    fontStyle: 'italic',
+  },
+  gridSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  gridOption: {
+    flex: 1,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 8,
+    padding: 16,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#E0E0E0',
+  },
+  gridOptionSelected: {
+    backgroundColor: '#FFE6F0',
+    borderColor: '#FF6B9D',
+  },
+  gridOptionText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#666666',
+  },
+  gridOptionTextSelected: {
+    color: '#FF6B9D',
+  },
+  gridPiecesText: {
+    fontSize: 10,
+    color: '#999999',
+    marginTop: 4,
   },
 });
 

@@ -25,6 +25,12 @@ const challengeSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  puzzleGrid: {
+    type: Number,
+    default: 3, // 3x3 por defecto
+    min: 2,
+    max: 5
+  },
   maxAttempts: {
     type: Number,
     default: 5
