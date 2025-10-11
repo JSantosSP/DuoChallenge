@@ -1,5 +1,5 @@
 const { ChallengeTemplate, Challenge, Variable, UserData } = require('../models');
-const { generateSalt, hashAnswer, hashDateAnswer } = require('../utils/hash.util');
+const { generateSalt, hashAnswer, hashDateAnswer, hashPuzzleAnswer } = require('../utils/hash.util');
 const { replaceVariables, extractVariables } = require('../utils/template.util');
 const { selectRandomItems } = require('../utils/seed.util');
 
@@ -87,6 +87,9 @@ const createChallengeFromUserData = async (userData, userId, levelId, order) => 
     // Para fechas, usar normalización específica
     if (challengeType === 'date') {
       answerHash = hashDateAnswer(userData.valor, salt);
+    } else if (challengeType === 'photo') {
+      // Para puzzles, el hash representa el orden correcto [1,2,3,...]
+      answerHash = hashPuzzleAnswer(userData.puzzleGrid || 3, salt);
     } else {
       answerHash = hashAnswer(userData.valor, salt);
     }
@@ -99,6 +102,7 @@ const createChallengeFromUserData = async (userData, userId, levelId, order) => 
       answerHash,
       salt,
       imagePath: userData.imagePath || null,
+      puzzleGrid: userData.puzzleGrid || 3,
       maxAttempts: 5,
       currentAttempts: 0,
       levelId,

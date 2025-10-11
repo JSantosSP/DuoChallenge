@@ -26,24 +26,40 @@ const ChallengeScreen = ({ route, navigation }) => {
   const { verifyChallenge, verifyLoading } = useGame();
   
   const [answer, setAnswer] = useState('');
+  const [puzzleOrder, setPuzzleOrder] = useState(null);
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
   const [attempts, setAttempts] = useState(0);
 
   const handleSubmit = async () => {
-    if (!answer.trim()) {
-      Alert.alert('Error', 'Por favor ingresa una respuesta');
-      return;
+    // Validar según el tipo de reto
+    if (challenge.type === 'photo') {
+      if (!puzzleOrder) {
+        Alert.alert('Error', 'Por favor completa el puzzle');
+        return;
+      }
+    } else {
+      if (!answer.trim()) {
+        Alert.alert('Error', 'Por favor ingresa una respuesta');
+        return;
+      }
     }
 
+    // Preparar payload según tipo de reto
+    const payload = challenge.type === 'photo' 
+      ? { puzzleOrder }
+      : { answer: answer.trim() };
+
     verifyChallenge(
-      { challengeId: challenge._id, answer: answer.trim() },
+      { challengeId: challenge._id, payload },
       {
         onSuccess: (data) => {
           if (data.data.correct) {
             navigation.goBack();
           } else {
             setAttempts(attempts + 1);
-            setAnswer('');
+            if (challenge.type !== 'photo') {
+              setAnswer('');
+            }
             
             // Mostrar siguiente pista si hay intentos fallidos
             if (data.data.hint && currentHintIndex < challenge.hints?.length - 1) {
@@ -59,6 +75,33 @@ const ChallengeScreen = ({ route, navigation }) => {
         },
       }
     );
+  };
+
+  const handlePuzzleComplete = (order) => {
+    // Guardar el orden del puzzle y enviar automáticamente
+    setPuzzleOrder(order);
+    
+    // Enviar verificación automáticamente
+    setTimeout(() => {
+      const payload = { puzzleOrder: order };
+      verifyChallenge(
+        { challengeId: challenge._id, payload },
+        {
+          onSuccess: (data) => {
+            if (data.data.correct) {
+              navigation.goBack();
+            } else {
+              setAttempts(attempts + 1);
+              Alert.alert(
+                'Intenta de nuevo 💭',
+                data.data.message + 
+                (data.data.attemptsLeft ? `\n\nIntentos restantes: ${data.data.attemptsLeft}` : '')
+              );
+            }
+          },
+        }
+      );
+    }, 500); // Pequeño delay para que se vea la animación
   };
 
   const showNextHint = () => {
@@ -78,8 +121,8 @@ const ChallengeScreen = ({ route, navigation }) => {
           </Text>
         </View>
 
-        {/* Image if exists */}
-        {challenge.imagePath && (
+        {/* Image if exists (only for non-puzzle challenges) */}
+        {challenge.imagePath && challenge.type !== 'photo' && (
           <View style={styles.imageContainer}>
             <Image
               source={{ uri: `http://localhost:4000${challenge.imagePath}` }}
@@ -118,21 +161,27 @@ const ChallengeScreen = ({ route, navigation }) => {
 
         {/* Answer Input */}
         <View style={styles.answerContainer}>
-          <Text style={styles.answerLabel}>Tu respuesta:</Text>
+          {challenge.type !== 'photo' && (
+            <Text style={styles.answerLabel}>Tu respuesta:</Text>
+          )}
           <ChallengeInput
             type={challenge.type}
             value={answer}
             onChangeText={setAnswer}
+            challenge={challenge}
+            onPuzzleComplete={handlePuzzleComplete}
             style={styles.input}
           />
           
-          <AppButton
-            title="Verificar Respuesta"
-            onPress={handleSubmit}
-            loading={verifyLoading}
-            icon="✨"
-            style={styles.submitButton}
-          />
+          {challenge.type !== 'photo' && (
+            <AppButton
+              title="Verificar Respuesta"
+              onPress={handleSubmit}
+              loading={verifyLoading}
+              icon="✨"
+              style={styles.submitButton}
+            />
+          )}
           
           {attempts > 0 && (
             <Text style={styles.attemptsText}>

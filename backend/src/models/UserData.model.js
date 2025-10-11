@@ -29,6 +29,12 @@ const userDataSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  puzzleGrid: {
+    type: Number,
+    default: 3, // 3x3 por defecto para retos de foto
+    min: 2,
+    max: 5
+  },
   active: {
     type: Boolean,
     default: true

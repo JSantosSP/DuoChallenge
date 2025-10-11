@@ -244,6 +244,20 @@ const Templates = () => {
                   </ul>
                 </div>
               )}
+              {selectedType === 'photo' && (
+                <div className="mt-2 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                  <p className="text-sm text-purple-800 font-medium">
+                    🧩 Retos de tipo foto (Puzzle):
+                  </p>
+                  <ul className="text-xs text-purple-700 mt-2 space-y-1 list-disc list-inside">
+                    <li>El creador sube una imagen que se convertirá en un puzzle interactivo</li>
+                    <li>El jugador debe reordenar las piezas para completar la imagen</li>
+                    <li>El creador puede seleccionar la dificultad (grid 2x2, 3x3, 4x4, 5x5)</li>
+                    <li>El sistema valida automáticamente cuando el puzzle está correcto</li>
+                    <li>Las imágenes solo se gestionan desde la app móvil del creador</li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             <div>

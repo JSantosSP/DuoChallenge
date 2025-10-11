@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { TextInput, StyleSheet, View, TouchableOpacity, Text, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import PuzzleGame from './PuzzleGame';
 
 /**
  * Componente genérico para entrada de respuestas de retos
  * Renderiza según el tipo de reto (text, date, photo)
  */
-const ChallengeInput = ({ type, value, onChangeText, style }) => {
+const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete, style }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(value ? new Date(value) : new Date());
 
@@ -82,15 +83,23 @@ const ChallengeInput = ({ type, value, onChangeText, style }) => {
       );
     
     case 'photo':
-      // Por ahora manejamos como texto, en el futuro podría ser un selector de imagen
+      // Puzzle interactivo
+      if (challenge && challenge.imagePath) {
+        const API_URL = process.env.EXPO_PUBLIC_API_URL_DEV || 'http://localhost:4000';
+        return (
+          <PuzzleGame
+            imageUri={`${API_URL}${challenge.imagePath}`}
+            gridSize={challenge.puzzleGrid || 3}
+            onComplete={onPuzzleComplete}
+            style={style}
+          />
+        );
+      }
+      // Fallback si no hay imagen
       return (
-        <TextInput
-          style={[styles.input, style]}
-          placeholder="Tu respuesta..."
-          value={value}
-          onChangeText={onChangeText}
-          autoCapitalize="sentences"
-        />
+        <View style={[styles.input, style, { justifyContent: 'center', alignItems: 'center' }]}>
+          <Text style={styles.errorText}>No hay imagen disponible para este puzzle</Text>
+        </View>
       );
     
     case 'text':
@@ -154,6 +163,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  errorText: {
+    color: '#999999',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
 

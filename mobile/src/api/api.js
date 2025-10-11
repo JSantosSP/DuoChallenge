@@ -53,8 +53,8 @@ export const apiService = {
   generateGame: () => api.post('/api/generate'),
   getLevels: () => api.get('/api/levels'),
   getChallenge: (challengeId) => api.get(`/api/challenge/${challengeId}`),
-  verifyChallenge: (challengeId, answer) => 
-    api.post(`/api/challenge/${challengeId}/verify`, { answer }),
+  verifyChallenge: (challengeId, payload) => 
+    api.post(`/api/challenge/${challengeId}/verify`, payload),
   getProgress: () => api.get('/api/progress'),
   getPrize: () => api.get('/api/prize'),
   resetGame: () => api.post('/api/reset'),
