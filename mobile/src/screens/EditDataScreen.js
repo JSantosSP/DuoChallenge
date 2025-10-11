@@ -8,8 +8,10 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useUserData } from '../hooks/useGame';
 import AppButton from '../components/AppButton';
 import * as ImagePicker from 'expo-image-picker';
@@ -30,6 +32,8 @@ const EditDataScreen = ({ route, navigation }) => {
 
   const [selectedType, setSelectedType] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
     if (mode === 'edit' && dataItem) {
@@ -43,6 +47,15 @@ const EditDataScreen = ({ route, navigation }) => {
       });
       const type = availableTypes?.find(t => t.key === dataItem.tipoDato);
       setSelectedType(type);
+      
+      // Si es fecha, inicializar el date picker con el valor
+      if (type?.type === 'date' && dataItem.valor) {
+        try {
+          setSelectedDate(new Date(dataItem.valor));
+        } catch (error) {
+          setSelectedDate(new Date());
+        }
+      }
     }
   }, [mode, dataItem, availableTypes]);
 
@@ -120,18 +133,72 @@ const EditDataScreen = ({ route, navigation }) => {
     }
   };
 
+  const handleDateChange = (event, date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+    
+    if (date) {
+      setSelectedDate(date);
+      // Formatear a YYYY-MM-DD
+      const formatted = date.toISOString().split('T')[0];
+      setFormData({ ...formData, valor: formatted });
+    }
+  };
+
+  const formatDateDisplay = (dateString) => {
+    if (!dateString) return 'Seleccionar fecha';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
   const renderInputByType = () => {
     if (!selectedType) return null;
 
     switch (selectedType.type) {
       case 'date':
         return (
-          <TextInput
-            style={styles.input}
-            placeholder="YYYY-MM-DD"
-            value={formData.valor}
-            onChangeText={(text) => setFormData({ ...formData, valor: text })}
-          />
+          <View>
+            <TouchableOpacity 
+              style={styles.dateInput}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={[styles.dateText, !formData.valor && styles.placeholderText]}>
+                {formatDateDisplay(formData.valor)}
+              </Text>
+              <Text style={styles.calendarIcon}>📅</Text>
+            </TouchableOpacity>
+            
+            {showDatePicker && (
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={handleDateChange}
+                maximumDate={new Date()}
+                locale="es-ES"
+              />
+            )}
+            
+            {Platform.OS === 'ios' && showDatePicker && (
+              <View style={styles.iosButtonContainer}>
+                <TouchableOpacity 
+                  style={styles.iosButton}
+                  onPress={() => setShowDatePicker(false)}
+                >
+                  <Text style={styles.iosButtonText}>Confirmar</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
         );
       case 'number':
         return (
@@ -392,6 +459,46 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     marginTop: 12,
+  },
+  dateInput: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  dateText: {
+    fontSize: 16,
+    color: '#333333',
+    flex: 1,
+  },
+  placeholderText: {
+    color: '#999999',
+  },
+  calendarIcon: {
+    fontSize: 24,
+    marginLeft: 8,
+  },
+  iosButtonContainer: {
+    marginTop: 12,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  iosButton: {
+    backgroundColor: '#FF6B9D',
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  iosButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
