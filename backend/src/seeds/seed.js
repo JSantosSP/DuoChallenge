@@ -128,7 +128,7 @@ const seedDatabase = async () => {
     
     const templates = [
       {
-        type: 'date_guess',
+        type: 'date',
         title: 'Primera Cita',
         questionTemplate: '¿Qué fecha fue {{primera_cita}}?',
         variables: ['primera_cita'],
@@ -141,7 +141,7 @@ const seedDatabase = async () => {
         category: 'fechas'
       },
       {
-        type: 'date_guess',
+        type: 'date',
         title: 'Primer Beso',
         questionTemplate: '¿En qué fecha nos dimos nuestro primer beso?',
         variables: ['primer_beso'],
@@ -154,7 +154,7 @@ const seedDatabase = async () => {
         category: 'fechas'
       },
       {
-        type: 'date_guess',
+        type: 'date',
         title: 'Aniversario',
         questionTemplate: '¿Cuándo es nuestro aniversario?',
         variables: ['aniversario'],
@@ -167,7 +167,7 @@ const seedDatabase = async () => {
         category: 'fechas'
       },
       {
-        type: 'location',
+        type: 'text',
         title: 'Lugar Especial',
         questionTemplate: '¿Cuál es nuestro lugar favorito para pasear?',
         variables: ['lugar_favorito'],
@@ -180,7 +180,7 @@ const seedDatabase = async () => {
         category: 'lugares'
       },
       {
-        type: 'location',
+        type: 'text',
         title: 'Primera Cena',
         questionTemplate: '¿En qué restaurante tuvimos nuestra primera cita?',
         variables: ['restaurante_primera_cita'],
@@ -193,7 +193,7 @@ const seedDatabase = async () => {
         category: 'lugares'
       },
       {
-        type: 'riddle',
+        type: 'text',
         title: 'Apodo Cariñoso',
         questionTemplate: '¿Cómo me gusta llamarte con cariño?',
         variables: ['apodo_cariñoso'],
@@ -206,7 +206,7 @@ const seedDatabase = async () => {
         category: 'personal'
       },
       {
-        type: 'riddle',
+        type: 'text',
         title: 'Nuestra Canción',
         questionTemplate: '¿Cuál es nuestra canción especial?',
         variables: ['cancion_favorita'],
@@ -219,7 +219,7 @@ const seedDatabase = async () => {
         category: 'personal'
       },
       {
-        type: 'question',
+        type: 'text',
         title: 'Primera Película',
         questionTemplate: '¿Cuál fue la primera película que vimos juntos?',
         variables: ['pelicula_primera_cita'],

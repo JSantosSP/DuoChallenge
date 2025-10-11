@@ -4,21 +4,19 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   Image,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGame } from '../hooks/useGame';
 import AppButton from '../components/AppButton';
+import ChallengeInput from '../components/ChallengeInput';
 
 const getChallengeTypeLabel = (type) => {
   const labels = {
-    date_guess: '📅 Adivina la Fecha',
-    riddle: '🤔 Acertijo',
-    photo_puzzle: '🖼️ Puzzle Visual',
-    location: '📍 Adivina el Lugar',
-    question: '❓ Pregunta',
+    text: '✏️ Reto de Texto',
+    date: '📅 Adivina la Fecha',
+    photo: '🖼️ Reto Visual',
   };
   return labels[type] || '🎯 Reto';
 };
@@ -69,34 +67,6 @@ const ChallengeScreen = ({ route, navigation }) => {
     }
   };
 
-  const renderInputByType = () => {
-    switch (challenge.type) {
-      case 'date_guess':
-        return (
-          <TextInput
-            style={styles.input}
-            placeholder="YYYY-MM-DD (ej: 2020-06-15)"
-            value={answer}
-            onChangeText={setAnswer}
-            keyboardType="default"
-          />
-        );
-      
-      case 'location':
-      case 'riddle':
-      case 'question':
-      default:
-        return (
-          <TextInput
-            style={styles.input}
-            placeholder="Tu respuesta..."
-            value={answer}
-            onChangeText={setAnswer}
-            autoCapitalize="sentences"
-          />
-        );
-    }
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -149,7 +119,12 @@ const ChallengeScreen = ({ route, navigation }) => {
         {/* Answer Input */}
         <View style={styles.answerContainer}>
           <Text style={styles.answerLabel}>Tu respuesta:</Text>
-          {renderInputByType()}
+          <ChallengeInput
+            type={challenge.type}
+            value={answer}
+            onChangeText={setAnswer}
+            style={styles.input}
+          />
           
           <AppButton
             title="Verificar Respuesta"

@@ -73,11 +73,11 @@ const createChallengeFromUserData = async (userData, userId, levelId, order) => 
     // Obtener el tipo de variable para determinar el tipo de reto
     const variable = await Variable.findOne({ key: userData.tipoDato });
     
-    let challengeType = 'question';
+    let challengeType = 'text'; // Por defecto tipo texto
     if (variable) {
-      if (variable.type === 'date') challengeType = 'date_guess';
-      else if (variable.type === 'location') challengeType = 'location';
-      else if (variable.type === 'image') challengeType = 'photo_puzzle';
+      if (variable.type === 'date') challengeType = 'date';
+      else if (variable.type === 'image') challengeType = 'photo';
+      else challengeType = 'text'; // text, location, number → tipo 'text'
     }
 
     // Generar salt y hash de la respuesta
