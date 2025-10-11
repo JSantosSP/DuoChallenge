@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const challengeSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['date_guess', 'riddle', 'photo_puzzle', 'location', 'question'],
+    enum: ['text', 'date', 'photo'],
     required: true
   },
   question: {

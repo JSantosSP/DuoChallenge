@@ -13,11 +13,9 @@ import { useGame } from '../hooks/useGame';
 
 const getChallengeTypeLabel = (type) => {
   const labels = {
-    date_guess: '📅 Adivina la Fecha',
-    riddle: '🤔 Acertijo',
-    photo_puzzle: '🖼️ Puzzle Visual',
-    location: '📍 Adivina el Lugar',
-    question: '❓ Pregunta',
+    text: '✏️ Reto de Texto',
+    date: '📅 Adivina la Fecha',
+    photo: '🖼️ Reto Visual',
   };
   return labels[type] || '🎯 Reto';
 };

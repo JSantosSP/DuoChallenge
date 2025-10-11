@@ -156,8 +156,29 @@ const verifyChallenge = async (req, res) => {
     // Incrementar intentos
     challenge.currentAttempts += 1;
 
-    // Verificar respuesta
-    const isCorrect = verifyAnswer(answer, challenge.answerHash, challenge.salt);
+    // Verificar respuesta según el tipo de reto
+    let isCorrect = false;
+    
+    switch (challenge.type) {
+      case 'text':
+        // Para retos de texto: comparar texto normalizado (insensible a mayúsculas y espacios)
+        isCorrect = verifyAnswer(answer, challenge.answerHash, challenge.salt);
+        break;
+      
+      case 'date':
+        // Para retos de fecha: también normalizar pero preparado para validaciones específicas futuras
+        isCorrect = verifyAnswer(answer, challenge.answerHash, challenge.salt);
+        break;
+      
+      case 'photo':
+        // Para retos de foto: preparado para lógica futura (ej: upload de imagen)
+        isCorrect = verifyAnswer(answer, challenge.answerHash, challenge.salt);
+        break;
+      
+      default:
+        // Fallback a verificación estándar
+        isCorrect = verifyAnswer(answer, challenge.answerHash, challenge.salt);
+    }
 
     if (isCorrect) {
       challenge.completed = true;

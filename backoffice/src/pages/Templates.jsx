@@ -38,6 +38,7 @@ const Templates = () => {
       setValue('hintsTemplate', template.hintsTemplate?.join('\n') || '');
       setValue('difficulty', template.difficulty);
       setValue('category', template.category);
+      setValue('answerExample', template.answerExample || '');
     } else {
       setEditingTemplate(null);
       reset();
@@ -55,7 +56,8 @@ const Templates = () => {
     const formattedData = {
       ...data,
       variables: data.variables.split(',').map(v => v.trim()).filter(Boolean),
-      hintsTemplate: data.hintsTemplate.split('\n').filter(Boolean)
+      hintsTemplate: data.hintsTemplate.split('\n').filter(Boolean),
+      answerExample: data.answerExample || null
     };
 
     if (editingTemplate) {
@@ -157,11 +159,9 @@ const Templates = () => {
                   {...register('type', { required: true })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="date_guess">Adivinar Fecha</option>
-                  <option value="riddle">Acertijo</option>
-                  <option value="photo_puzzle">Puzzle de Foto</option>
-                  <option value="location">Adivinar Lugar</option>
-                  <option value="question">Pregunta</option>
+                  <option value="text">Texto (nombres, apodos, lugares, canciones, etc.)</option>
+                  <option value="date">Fecha</option>
+                  <option value="photo">Foto</option>
                 </select>
               </div>
 
@@ -213,6 +213,20 @@ const Templates = () => {
                 rows="4"
                 placeholder="Primera pista&#10;Segunda pista&#10;Tercera pista"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ejemplo de Respuesta (opcional - para retos de texto)
+              </label>
+              <input
+                {...register('answerExample')}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Ej: París, María, 2020-05-15..."
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                💡 Ayuda visual para saber qué formato de respuesta se espera en retos tipo texto
+              </p>
             </div>
 
             <div>
