@@ -40,4 +40,11 @@ router.post('/upload', upload.single('image'), adminController.uploadImage);
 // Estadísticas
 router.get('/stats', adminController.getStats);
 
+// Datos de usuarios (read-only para admin)
+router.get('/userdata', adminController.getAllUserData);
+router.patch('/userdata/:id/toggle', adminController.toggleUserDataActive);
+
+// Niveles generados automáticamente (read-only)
+router.get('/levels', adminController.getGeneratedLevels);
+
 module.exports = router;

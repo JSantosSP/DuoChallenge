@@ -358,6 +358,79 @@ const getUserDataById = async (req, res) => {
   }
 };
 
+// ========== DATOS DE USUARIOS (READ-ONLY) ==========
+
+const getAllUserData = async (req, res) => {
+  try {
+    const { UserData } = require('../models');
+    const { tipoDato, active } = req.query;
+    
+    const filter = {};
+    if (tipoDato) filter.tipoDato = tipoDato;
+    if (active !== undefined) filter.active = active === 'true';
+    
+    const userData = await UserData.find(filter)
+      .populate('userId', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(1000); // Limitar para no sobrecargar
+    
+    res.json({
+      success: true,
+      data: { userData }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const toggleUserDataActive = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { UserData } = require('../models');
+    
+    const userData = await UserData.findById(id);
+    if (!userData) {
+      return res.status(404).json({ success: false, message: 'Dato no encontrado' });
+    }
+    
+    userData.active = !userData.active;
+    await userData.save();
+    
+    res.json({
+      success: true,
+      message: `Dato ${userData.active ? 'activado' : 'desactivado'} exitosamente`,
+      data: { userData }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ========== NIVELES GENERADOS (READ-ONLY) ==========
+
+const getGeneratedLevels = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const filter = {};
+    
+    if (userId) filter.userId = userId;
+    
+    const levels = await Level.find(filter)
+      .populate('userId', 'name email')
+      .populate('gameSetId')
+      .populate('challenges')
+      .sort({ createdAt: -1 })
+      .limit(500); // Limitar resultados
+    
+    res.json({
+      success: true,
+      data: { levels }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   // Templates
   getTemplates,
@@ -384,5 +457,10 @@ module.exports = {
   // Upload
   uploadImage,
   // Stats
-  getStats
+  getStats,
+  // UserData (Read-only)
+  getAllUserData,
+  toggleUserDataActive,
+  // Generated Levels (Read-only)
+  getGeneratedLevels
 };
