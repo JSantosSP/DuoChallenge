@@ -6,13 +6,24 @@ const Sidebar = () => {
   const { user, logout } = useAuth();
 
   const menuItems = [
-    { path: '/dashboard', icon: '🏠', label: 'Dashboard' },
-    { path: '/users', icon: '👤', label: 'Usuarios' },
-    { path: '/templates', icon: '🧩', label: 'Plantillas' },
-    { path: '/variables', icon: '📝', label: 'Tipos de Datos' },
-  { path: '/userdata', icon: '💾', label: 'Datos Usuarios' }, 
-    { path: '/prizes', icon: '🏆', label: 'Premios' },
-    { path: '/stats', icon: '📊', label: 'Estadísticas' }
+    { path: '/dashboard', icon: '🏠', label: 'Dashboard', section: 'main' },
+    { path: '/categories', icon: '📁', label: 'Categorías', section: 'config' },
+    { path: '/level-templates', icon: '📋', label: 'Plantillas Nivel', section: 'config' },
+    { path: '/generated-levels', icon: '🎯', label: 'Niveles Generados', section: 'view' },
+    { path: '/templates', icon: '🧩', label: 'Plantillas (Legacy)', section: 'legacy' },
+    { path: '/variables', icon: '📝', label: 'Variables (Legacy)', section: 'legacy' },
+    { path: '/users', icon: '👤', label: 'Usuarios', section: 'management' },
+    { path: '/userdata', icon: '💾', label: 'Datos Usuarios', section: 'view' }, 
+    { path: '/prizes', icon: '🏆', label: 'Premios Base', section: 'config' },
+    { path: '/stats', icon: '📊', label: 'Estadísticas', section: 'main' }
+  ];
+
+  const sections = [
+    { key: 'main', label: 'Principal' },
+    { key: 'config', label: 'Configuración' },
+    { key: 'view', label: 'Consulta' },
+    { key: 'management', label: 'Gestión' },
+    { key: 'legacy', label: 'Sistema Antiguo' }
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -39,24 +50,31 @@ const Sidebar = () => {
       </div>
 
       {/* Menu Items */}
-      <nav className="flex-1 p-4">
-        <ul className="space-y-2">
-          {menuItems.map((item) => (
-            <li key={item.path}>
-              <Link
-                to={item.path}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive(item.path)
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-800'
-                }`}
-              >
-                <span className="text-xl">{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+      <nav className="flex-1 p-4 overflow-y-auto">
+        {sections.map((section) => (
+          <div key={section.key} className="mb-6">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-4">
+              {section.label}
+            </h3>
+            <ul className="space-y-1">
+              {menuItems.filter(item => item.section === section.key).map((item) => (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
+                      isActive(item.path)
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-300 hover:bg-gray-800'
+                    }`}
+                  >
+                    <span className="text-lg">{item.icon}</span>
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </nav>
 
       {/* Logout Button */}
