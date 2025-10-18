@@ -68,6 +68,7 @@ const gameRoutes = require('./src/routes/game.routes');
 const adminRoutes = require('./src/routes/admin.routes');
 const userDataRoutes = require('./src/routes/userdata.routes');
 const prizeRoutes = require('./src/routes/prize.routes');
+const prizeTemplateRoutes = require('./src/routes/prizeTemplate.routes');
 const shareRoutes = require('./src/routes/share.routes');
 const categoryRoutes = require('./src/routes/category.routes');
 
@@ -77,6 +78,7 @@ app.use('/api', gameRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api/userdata', userDataRoutes);
 app.use('/api/prizes', prizeRoutes);
+app.use('/api/prize-templates', prizeTemplateRoutes);
 app.use('/api/share', shareRoutes);
 app.use('/admin/categories', categoryRoutes);
 
