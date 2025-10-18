@@ -8,10 +8,7 @@ const assignPrize = async (userId, seed) => {
   try {
     // Buscar premios disponibles del usuario y del sistema
     const availablePrizes = await Prize.find({ 
-      $or: [
-        { userId, active: true, used: false }, // Premios del usuario
-        { isDefault: true, active: true, used: false } // Premios del sistema
-      ]
+      userId, active: true, used: false  // Premios del usuario
     });
 
     if (availablePrizes.length === 0) {
@@ -29,7 +26,7 @@ const assignPrize = async (userId, seed) => {
 
     // Actualizar usuario
     await User.findByIdAndUpdate(userId, {
-      currentPrizeId: selectedPrize._id
+      $push: { currentPrizeId: selectedPrize._id }
     });
 
     return selectedPrize;
@@ -77,12 +74,7 @@ const getUserPrize = async (userId) => {
 const resetUserPrizes = async (userId) => {
   try {
     await Prize.updateMany(
-      { 
-        $or: [
-          { userId },
-          { isDefault: true }
-        ]
-      },
+      {  userId },
       {
         used: false,
         usedBy: null,
@@ -97,31 +89,11 @@ const resetUserPrizes = async (userId) => {
   }
 };
 
-/**
- * Reinicia premios del sistema (solo admin)
- */
-const resetSystemPrizes = async () => {
-  try {
-    await Prize.updateMany(
-      { isDefault: true },
-      {
-        used: false,
-        usedBy: null,
-        usedAt: null
-      }
-    );
-    
-    return { success: true, message: 'Premios del sistema reiniciados' };
-  } catch (error) {
-    console.error('Error reiniciando premios del sistema:', error);
-    throw error;
-  }
-};
+
 
 module.exports = {
   assignPrize,
   getUserPrize,
   resetUserPrizes,
-  resetSystemPrizes,
   selectPrizeByWeight
 };

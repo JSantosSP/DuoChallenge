@@ -48,12 +48,6 @@ const createShareCode = async (req, res) => {
 
     await gameShare.save();
 
-    // Actualizar rol del usuario a creator si no lo tiene
-    if (!req.user.roles.includes('creator')) {
-      req.user.roles.push('creator');
-      await req.user.save();
-    }
-
     res.status(201).json({
       success: true,
       message: 'Código generado exitosamente',
@@ -193,12 +187,6 @@ const joinGame = async (req, res) => {
           joinedAt: new Date()
         });
         await gameShare.save();
-      }
-
-      // Actualizar rol del jugador si no lo tiene
-      if (!req.user.roles.includes('player')) {
-        req.user.roles.push('player');
-        await req.user.save();
       }
 
       // Añadir instancia a las activas del usuario

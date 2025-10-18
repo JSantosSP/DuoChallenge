@@ -2,7 +2,6 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 
 const { seed: seedCategories } = require('./seedCategories');
-const { seed: seedLevelTemplates } = require('./seedLevelTemplates');
 
 const connectDB = async () => {
   try {
@@ -29,21 +28,6 @@ async function seedAll() {
     console.log('============================================');
     console.log('📋 PASO 2/2: Creando plantillas de nivel');
     console.log('============================================\n');
-    await seedLevelTemplates();
-
-    console.log('');
-    console.log('============================================');
-    console.log('🎉 ¡SEED COMPLETO FINALIZADO!');
-    console.log('============================================');
-    console.log('');
-    console.log('✅ Sistema listo para usar');
-    console.log('');
-    console.log('💡 Próximos pasos:');
-    console.log('   1. Inicia el servidor backend: npm run dev');
-    console.log('   2. Inicia el backoffice: cd ../backoffice && npm run dev');
-    console.log('   3. Accede a http://localhost:5173');
-    console.log('   4. Comienza a crear contenido');
-    console.log('');
 
   } catch (error) {
     console.error('❌ Error en seed completo:', error);

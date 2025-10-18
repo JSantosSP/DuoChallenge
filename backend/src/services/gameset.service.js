@@ -46,8 +46,9 @@ const generateNewGameSet = async (creatorId, gameInstanceId = null) => {
 
     await gameSet.save();
 
+    const nlevels = seededRandom(seed, 0) * 5;
     // Generar niveles usando los datos del CREADOR
-    const levels = await generateLevels(creatorId, gameSet._id, seed, 3);
+    const levels = await generateLevels(creatorId, gameSet._id, seed, nlevels);
 
     // Actualizar el set con los niveles
     gameSet.levels = levels.map(l => l._id);
@@ -142,8 +143,7 @@ const resetAndGenerateNewSet = async (userId) => {
     // Eliminar retos y niveles antiguos activos
     const oldSets = await GameSet.find({ userId, active: false });
     const oldLevelIds = oldSets.flatMap(set => set.levels);
-    
-    await Challenge.deleteMany({ levelId: { $in: oldLevelIds } });
+
     await Level.deleteMany({ _id: { $in: oldLevelIds } });
 
     // Generar nuevo set

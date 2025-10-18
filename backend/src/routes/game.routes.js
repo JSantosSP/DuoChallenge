@@ -13,8 +13,6 @@ router.get('/progress', gameController.getProgress);
 
 // Niveles y retos
 router.get('/levels', gameController.getLevels);
-router.get('/challenge/:challengeId', gameController.getChallenge);
-router.post('/challenge/:challengeId/verify', gameController.verifyChallenge);
 
 // Premios
 router.get('/prize', gameController.getPrize);

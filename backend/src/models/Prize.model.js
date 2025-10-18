@@ -4,7 +4,6 @@ const prizeSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    default: null // null = premio del sistema
   },
   title: {
     type: String,
@@ -18,10 +17,6 @@ const prizeSchema = new mongoose.Schema({
   imagePath: {
     type: String,
     default: null
-  },
-  isDefault: {
-    type: Boolean,
-    default: false // true = premio del sistema (creado por admin)
   },
   used: {
     type: Boolean,
@@ -41,10 +36,6 @@ const prizeSchema = new mongoose.Schema({
     default: 1,
     min: 1,
     max: 10
-  },
-  category: {
-    type: String,
-    default: 'general'
   },
   active: {
     type: Boolean,

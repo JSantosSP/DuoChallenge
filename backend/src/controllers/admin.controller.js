@@ -1,68 +1,12 @@
-const { 
-  ChallengeTemplate, 
-  Variable, 
-  Prize, 
+const {  
+  Variable,
   User,
-  Challenge,
-  Level,
-  GameSet
+  GameSet,
+  PrizeTemplate,
+  Prize
 } = require('../models');
-const { generateNewGameSet, resetAndGenerateNewSet } = require('../services/gameset.service');
-const { resetPrizes } = require('../services/prize.service');
+const { resetAndGenerateNewSet } = require('../services/gameset.service');
 
-// ========== PLANTILLAS ==========
-
-const getTemplates = async (req, res) => {
-  try {
-    const templates = await ChallengeTemplate.find().sort({ createdAt: -1 });
-    res.json({ success: true, data: { templates } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-const createTemplate = async (req, res) => {
-  try {
-    const template = new ChallengeTemplate(req.body);
-    await template.save();
-    res.status(201).json({ 
-      success: true, 
-      message: 'Plantilla creada',
-      data: { template } 
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-const updateTemplate = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const template = await ChallengeTemplate.findByIdAndUpdate(
-      id, 
-      req.body, 
-      { new: true }
-    );
-    
-    if (!template) {
-      return res.status(404).json({ success: false, message: 'Plantilla no encontrada' });
-    }
-    
-    res.json({ success: true, data: { template } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-const deleteTemplate = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await ChallengeTemplate.findByIdAndDelete(id);
-    res.json({ success: true, message: 'Plantilla eliminada' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
 
 // ========== VARIABLES ==========
 
@@ -118,12 +62,11 @@ const deleteVariable = async (req, res) => {
   }
 };
 
-// ========== PREMIOS ==========
+// ========== PREMIOS TEMPLATE ==========
 
 const getPrizes = async (req, res) => {
   try {
-    const prizes = await Prize.find()
-      .populate('usedBy', 'name email')
+    const prizes = await PrizeTemplate.find()
       .sort({ createdAt: -1 });
     res.json({ success: true, data: { prizes } });
   } catch (error) {
@@ -133,7 +76,7 @@ const getPrizes = async (req, res) => {
 
 const createPrize = async (req, res) => {
   try {
-    const prize = new Prize(req.body);
+    const prize = new PrizeTemplate(req.body);
     await prize.save();
     res.status(201).json({ 
       success: true, 
@@ -148,7 +91,7 @@ const createPrize = async (req, res) => {
 const updatePrize = async (req, res) => {
   try {
     const { id } = req.params;
-    const prize = await Prize.findByIdAndUpdate(
+    const prize = await PrizeTemplate.findByIdAndUpdate(
       id, 
       req.body, 
       { new: true }
@@ -167,21 +110,13 @@ const updatePrize = async (req, res) => {
 const deletePrize = async (req, res) => {
   try {
     const { id } = req.params;
-    await Prize.findByIdAndDelete(id);
+    await PrizeTemplate.findByIdAndDelete(id);
     res.json({ success: true, message: 'Premio eliminado' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-const resetPrizesController = async (req, res) => {
-  try {
-    await resetPrizes();
-    res.json({ success: true, message: 'Todos los premios han sido reiniciados' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
 
 // ========== USUARIOS ==========
 
@@ -203,7 +138,6 @@ const getUserById = async (req, res) => {
     const user = await User.findById(id)
       .populate('currentSetId')
       .populate('currentPrizeId')
-      .populate('completedChallenges')
       .populate('completedLevels');
     
     if (!user) {
@@ -211,20 +145,6 @@ const getUserById = async (req, res) => {
     }
     
     res.json({ success: true, data: { user } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-const generateGameForUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const gameSet = await generateNewGameSet(id);
-    res.json({ 
-      success: true, 
-      message: 'Juego generado para el usuario',
-      data: { gameSet } 
-    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -279,18 +199,9 @@ const getStats = async (req, res) => {
     const totalPlayers = await User.countDocuments({ role: 'player' });
     const totalAdmins = await User.countDocuments({ role: 'admin' });
     
-    const totalTemplates = await ChallengeTemplate.countDocuments();
-    const activeTemplates = await ChallengeTemplate.countDocuments({ active: true });
-    
     const totalPrizes = await Prize.countDocuments();
     const usedPrizes = await Prize.countDocuments({ used: true });
     const availablePrizes = await Prize.countDocuments({ used: false, active: true });
-    
-    const totalChallenges = await Challenge.countDocuments();
-    const completedChallenges = await Challenge.countDocuments({ completed: true });
-    
-    const totalLevels = await Level.countDocuments();
-    const completedLevels = await Level.countDocuments({ completed: true });
     
     const totalGameSets = await GameSet.countDocuments();
     const completedGameSets = await GameSet.countDocuments({ completed: true });
@@ -306,34 +217,16 @@ const getStats = async (req, res) => {
           players: totalPlayers,
           admins: totalAdmins
         },
-        templates: {
-          total: totalTemplates,
-          active: activeTemplates
-        },
         prizes: {
           total: totalPrizes,
           used: usedPrizes,
           available: availablePrizes
-        },
-        challenges: {
-          total: totalChallenges,
-          completed: completedChallenges,
-          completionRate: totalChallenges > 0 
-            ? Math.round((completedChallenges / totalChallenges) * 100) 
-            : 0
-        },
-        levels: {
-          total: totalLevels,
-          completed: completedLevels
         },
         gameSets: {
           total: totalGameSets,
           completed: completedGameSets,
           active: activeGameSets
         },
-        variables: {
-          total: totalVariables
-        }
       }
     });
   } catch (error) {
@@ -408,35 +301,8 @@ const toggleUserDataActive = async (req, res) => {
 
 // ========== NIVELES GENERADOS (READ-ONLY) ==========
 
-const getGeneratedLevels = async (req, res) => {
-  try {
-    const { userId } = req.query;
-    const filter = {};
-    
-    if (userId) filter.userId = userId;
-    
-    const levels = await Level.find(filter)
-      .populate('userId', 'name email')
-      .populate('gameSetId')
-      .populate('challenges')
-      .sort({ createdAt: -1 })
-      .limit(500); // Limitar resultados
-    
-    res.json({
-      success: true,
-      data: { levels }
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
 
 module.exports = {
-  // Templates
-  getTemplates,
-  createTemplate,
-  updateTemplate,
-  deleteTemplate,
   // Variables
   getVariables,
   createVariable,
@@ -447,11 +313,9 @@ module.exports = {
   createPrize,
   updatePrize,
   deletePrize,
-  resetPrizes: resetPrizesController,
   // Users
   getUsers,
   getUserById,
-  generateGameForUser,
   resetUserProgress,
   getUserDataById,
   // Upload
@@ -461,6 +325,4 @@ module.exports = {
   // UserData (Read-only)
   getAllUserData,
   toggleUserDataActive,
-  // Generated Levels (Read-only)
-  getGeneratedLevels
 };

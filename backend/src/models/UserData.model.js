@@ -7,12 +7,12 @@ const userDataSchema = new mongoose.Schema({
     required: true
   },
   tipoDato: {
-    type: String,
-    required: true,
-    // Hace referencia a Variable.key
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Variable',
+    required: true
   },
   valor: {
-    type: String,
+    type: Object,
     required: true
   },
   pregunta: {
@@ -22,18 +22,21 @@ const userDataSchema = new mongoose.Schema({
   pistas: [{
     type: String
   }],
-  categorias: [{
-    type: String
-  }],
-  imagePath: {
-    type: String,
-    default: null
+  categorias: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: true
   },
   puzzleGrid: {
     type: Number,
     default: 3, // 3x3 por defecto para retos de foto
     min: 2,
     max: 5
+  },
+  difficulty: {
+    type: String,
+    enum: ['easy', 'medium', 'hard'],
+    default: 'medium'
   },
   active: {
     type: Boolean,

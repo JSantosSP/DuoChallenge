@@ -8,11 +8,6 @@ const upload = require('../middlewares/upload.middleware');
 router.use(verifyToken);
 router.use(checkRole('admin'));
 
-// Gestión de plantillas
-router.get('/templates', adminController.getTemplates);
-router.post('/templates', adminController.createTemplate);
-router.put('/templates/:id', adminController.updateTemplate);
-router.delete('/templates/:id', adminController.deleteTemplate);
 
 // Gestión de variables
 router.get('/variables', adminController.getVariables);
@@ -25,12 +20,10 @@ router.get('/prizes', adminController.getPrizes);
 router.post('/prizes', adminController.createPrize);
 router.put('/prizes/:id', adminController.updatePrize);
 router.delete('/prizes/:id', adminController.deletePrize);
-router.post('/prizes/reset', adminController.resetPrizes);
 
 // Gestión de usuarios
 router.get('/users', adminController.getUsers);
 router.get('/users/:id', adminController.getUserById);
-router.post('/users/:id/generate', adminController.generateGameForUser);
 router.post('/users/:id/reset', adminController.resetUserProgress);
 router.get('/users/:id/userdata', adminController.getUserDataById);
 
@@ -44,7 +37,5 @@ router.get('/stats', adminController.getStats);
 router.get('/userdata', adminController.getAllUserData);
 router.patch('/userdata/:id/toggle', adminController.toggleUserDataActive);
 
-// Niveles generados automáticamente (read-only)
-router.get('/levels', adminController.getGeneratedLevels);
 
 module.exports = router;

@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'creator', 'player'],
+    enum: ['admin', 'player'],
     default: 'player'
   },
   currentSetId: {
@@ -28,19 +28,14 @@ const userSchema = new mongoose.Schema({
     ref: 'GameSet',
     default: null
   },
-  completedChallenges: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Challenge'
-  }],
   completedLevels: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Level'
   }],
-  currentPrizeId: {
+  currentPrizeId: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Prize',
-    default: null
-  },
+    ref: 'Prize'
+  }],
   totalSetsCompleted: {
     type: Number,
     default: 0

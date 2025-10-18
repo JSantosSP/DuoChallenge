@@ -1,32 +1,38 @@
 const mongoose = require('mongoose');
 
 const levelSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  description: {
-    type: String,
-    default: ''
-  },
-  order: {
-    type: Number,
-    required: true
-  },
-  challenges: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Challenge'
-  }],
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
   gameSetId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'GameSet',
     required: true
+  },
+  categoryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: true
+  },
+  tipoDato: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Variable',
+    required: true
+  },
+  difficulty: {
+    type: String,
+    enum: ['easy', 'medium', 'hard'],
+    default: 'medium'
+  },
+  order: {
+    type: Number,
+    required: true,
+    default: 0
+  },  
+  currentAttempts:{
+    type: Number,
+    default: 0  
+  },
+  maxAttempts:{
+    type: Number,
+    default: 5
   },
   completed: {
     type: Boolean,
@@ -35,7 +41,24 @@ const levelSchema = new mongoose.Schema({
   completedAt: {
     type: Date,
     default: null
-  }
+  },  
+  valor: {
+    type: Object,
+    required: true
+  },
+  pregunta: {
+    type: String,
+    required: true
+  },
+  pistas: [{
+    type: String
+  }],
+  puzzleGrid: {
+    type: Number,
+    default: 3, // 3x3 por defecto para retos de foto
+    min: 2,
+    max: 5
+  },
 }, {
   timestamps: true
 });

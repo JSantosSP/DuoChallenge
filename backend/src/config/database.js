@@ -24,8 +24,7 @@ const createIndexes = async () => {
     
     // Índices para optimizar queries
     await User.collection.createIndex({ email: 1 }, { unique: true });
-    await Challenge.collection.createIndex({ userId: 1, completed: 1 });
-    await Level.collection.createIndex({ userId: 1, order: 1 });
+    await Level.collection.createIndex({ gameSetId: 1, order: 1 });
     
     console.log('✅ Índices de base de datos creados');
   } catch (error) {

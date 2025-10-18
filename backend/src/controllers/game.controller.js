@@ -1,6 +1,5 @@
-const { User, Challenge, Level, GameSet } = require('../models');
+const { User, Level, GameSet } = require('../models');
 const { generateNewGameSet, checkGameSetCompletion, resetAndGenerateNewSet } = require('../services/gameset.service');
-const { checkLevelCompletion } = require('../services/level.service');
 const { getUserPrize } = require('../services/prize.service');
 const { verifyAnswer, verifyDateAnswer, verifyPuzzleAnswer } = require('../utils/hash.util');
 
@@ -48,15 +47,15 @@ const getLevels = async (req, res) => {
       });
     }
 
-    const levels = await Level.find({
-      gameSetId: user.currentSetId
+    const gameSet = await GameSet.find({
+      _id: user.currentSetId
     })
-      .populate('challenges')
+      .populate('levels')
       .sort({ order: 1 });
 
     res.json({
       success: true,
-      data: { levels }
+      data: { levels: gameSet.levels }
     });
 
   } catch (error) {
@@ -72,48 +71,46 @@ const getLevels = async (req, res) => {
 /**
  * Obtener un reto específico
  */
-const getChallenge = async (req, res) => {
+const getLevel = async (req, res) => {
   try {
-    const { challengeId } = req.params;
-    const userId = req.user._id;
+    const { LevelId } = req.params;
 
-    const challenge = await Challenge.findOne({
-      _id: challengeId,
-      userId
+    const level = await Level.findOne({
+      _id: LevelId
     });
 
-    if (!challenge) {
+    if (!level) {
       return res.status(404).json({
         success: false,
-        message: 'Reto no encontrado'
+        message: 'Nivel no encontrado'
       });
     }
 
     // No enviar salt ni answerHash al cliente
-    const challengeData = challenge.toObject();
-    delete challengeData.salt;
-    delete challengeData.answerHash;
+    const levelData = level.toObject();
+    delete levelData.salt;
+    delete levelData.answerHash;
 
     res.json({
       success: true,
-      data: { challenge: challengeData }
+      data: { level: levelData }
     });
 
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error al obtener reto',
+      message: 'Error al obtener nivel',
       error: error.message
     });
   }
 };
 
 /**
- * Verificar respuesta de un reto
+ * Verificar respuesta de un nivel
  */
-const verifyChallenge = async (req, res) => {
+const verifyLevel = async (req, res) => {
   try {
-    const { challengeId } = req.params;
+    const { levelId } = req.params;
     const { answer, puzzleOrder } = req.body;
     const userId = req.user._id;
 
@@ -124,28 +121,27 @@ const verifyChallenge = async (req, res) => {
       });
     }
 
-    const challenge = await Challenge.findOne({
-      _id: challengeId,
-      userId
-    });
+    const level = await Level.findOne({
+      _id: levelId,
+    }).populate('tipoDato');
 
-    if (!challenge) {
+    if (!level) {
       return res.status(404).json({
         success: false,
-        message: 'Reto no encontrado'
+        message: 'Nivel no encontrado'
       });
     }
 
     // Verificar si ya está completado
-    if (challenge.completed) {
+    if (level.completed) {
       return res.status(400).json({
         success: false,
-        message: 'Este reto ya ha sido completado'
+        message: 'Este nivel ya ha sido completado'
       });
     }
 
     // Verificar intentos
-    if (challenge.currentAttempts >= challenge.maxAttempts) {
+    if (level.currentAttempts >= level.maxAttempts) {
       return res.status(400).json({
         success: false,
         message: 'Has alcanzado el máximo de intentos',
@@ -154,23 +150,28 @@ const verifyChallenge = async (req, res) => {
     }
 
     // Incrementar intentos
-    challenge.currentAttempts += 1;
+    level.currentAttempts += 1;
 
     // Verificar respuesta según el tipo de reto
     let isCorrect = false;
     
-    switch (challenge.type) {
-      case 'text':
+    switch (level?.tipoDato?.type) {
+      case 'texto':
         // Para retos de texto: comparar texto normalizado (insensible a mayúsculas y espacios)
-        isCorrect = verifyAnswer(answer, challenge.answerHash, challenge.salt);
+        isCorrect = verifyAnswer(answer, level?.valor["texto"]?.answerHash, level?.valor["texto"]?.salt);
         break;
       
-      case 'date':
+      case 'fecha':
         // Para retos de fecha: normalizar a formato YYYY-MM-DD y comparar
-        isCorrect = verifyDateAnswer(answer, challenge.answerHash, challenge.salt);
+        isCorrect = verifyDateAnswer(answer, level?.valor["fecha"]?.answerHash, level?.valor["fecha"]?.salt);
+        break;
+
+      case 'lugar':
+        // Para retos de lugar: esta por definir lógica específica, ahora similar a texto
+        isCorrect = verifyAnswer(answer, level?.valor["lugar"]?.answerHash, level?.valor["lugar"]?.salt);
         break;
       
-      case 'photo':
+      case 'foto':
         // Para retos de foto: verificar el orden del puzzle
         if (!puzzleOrder || !Array.isArray(puzzleOrder)) {
           return res.status(400).json({
@@ -178,34 +179,24 @@ const verifyChallenge = async (req, res) => {
             message: 'Orden del puzzle inválido'
           });
         }
-        isCorrect = verifyPuzzleAnswer(puzzleOrder, challenge.answerHash, challenge.salt);
+        isCorrect = verifyPuzzleAnswer(puzzleOrder, level?.valor["foto"]?.answerHash, level?.valor["foto"]?.salt);
         break;
       
       default:
-        // Fallback a verificación estándar
-        isCorrect = verifyAnswer(answer, challenge.answerHash, challenge.salt);
+        isCorrect = false;
     }
 
     if (isCorrect) {
-      challenge.completed = true;
-      challenge.completedAt = new Date();
-      await challenge.save();
+      level.completed = true;
+      level.completedAt = new Date();
+      await level.save();
 
       // Agregar a completados del usuario
       await User.findByIdAndUpdate(userId, {
-        $addToSet: { completedChallenges: challenge._id }
+        $addToSet: { completedLevels: level._id }
       });
 
-      // Verificar si el nivel se completó
-      const levelCompleted = await checkLevelCompletion(challenge.levelId);
-
-      if (levelCompleted) {
-        // Agregar nivel a completados
-        await User.findByIdAndUpdate(userId, {
-          $addToSet: { completedLevels: challenge.levelId }
-        });
-
-        // Verificar si el set completo se terminó
+       // Verificar si el set completo se terminó
         const gameSetResult = await checkGameSetCompletion(userId);
 
         if (gameSetResult.completed) {
@@ -226,27 +217,19 @@ const verifyChallenge = async (req, res) => {
           levelCompleted: true,
           gameCompleted: false
         });
-      }
-
-      return res.json({
-        success: true,
-        correct: true,
-        message: '¡Respuesta correcta!',
-        levelCompleted: false
-      });
 
     } else {
-      await challenge.save();
+      await level.save();
 
-      const attemptsLeft = challenge.maxAttempts - challenge.currentAttempts;
+      const attemptsLeft = level.maxAttempts - level.currentAttempts;
 
       return res.json({
         success: true,
         correct: false,
         message: 'Respuesta incorrecta',
         attemptsLeft,
-        hint: attemptsLeft > 0 && challenge.hints.length > 0 
-          ? challenge.hints[Math.min(challenge.currentAttempts - 1, challenge.hints.length - 1)]
+        hint: attemptsLeft > 0 && level.pistas.length > 0 
+          ? level.pistas[Math.min(level.currentAttempts - 1, level.pistas.length - 1)]
           : null
       });
     }
@@ -337,15 +320,14 @@ const getProgress = async (req, res) => {
       });
     }
 
-    const totalChallenges = await Challenge.countDocuments({
-      userId,
+    const totalLevels = await Level.countDocuments({
       levelId: { $in: (await GameSet.findById(user.currentSetId)).levels }
     });
 
-    const completedChallenges = user.completedChallenges.length;
+    const completedLevels = user.completedLevels.length;
 
-    const progress = totalChallenges > 0 
-      ? Math.round((completedChallenges / totalChallenges) * 100)
+    const progress = totalLevels > 0 
+      ? Math.round((completedLevels / totalLevels) * 100)
       : 0;
 
     res.json({
@@ -353,8 +335,6 @@ const getProgress = async (req, res) => {
       data: {
         hasActiveGame: true,
         progress,
-        totalChallenges,
-        completedChallenges,
         completedLevels: user.completedLevels.length,
         totalSetsCompleted: user.totalSetsCompleted,
         currentPrize: user.currentPrizeId
@@ -373,8 +353,7 @@ const getProgress = async (req, res) => {
 module.exports = {
   generateGame,
   getLevels,
-  getChallenge,
-  verifyChallenge,
+  verifyLevel,
   getPrize,
   resetGame,
   getProgress

@@ -70,7 +70,6 @@ const userDataRoutes = require('./src/routes/userdata.routes');
 const prizeRoutes = require('./src/routes/prize.routes');
 const shareRoutes = require('./src/routes/share.routes');
 const categoryRoutes = require('./src/routes/category.routes');
-const levelTemplateRoutes = require('./src/routes/levelTemplate.routes');
 
 // Usar rutas
 app.use('/auth', authRoutes);
@@ -80,7 +79,6 @@ app.use('/api/userdata', userDataRoutes);
 app.use('/api/prizes', prizeRoutes);
 app.use('/api/share', shareRoutes);
 app.use('/admin/categories', categoryRoutes);
-app.use('/admin/level-templates', levelTemplateRoutes);
 
 // ========================================
 // MANEJO DE ERRORES

@@ -26,10 +26,10 @@ const getUserData = async (req, res) => {
 const createUserData = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { tipoDato, valor, pregunta, pistas, categorias, imagePath } = req.body;
+    const { tipoDato, valor, pregunta, pistas, categorias, imagePath, difficulty } = req.body;
 
     // Validar que el tipoDato existe en Variables
-    const variable = await Variable.findOne({ key: tipoDato, active: true });
+    const variable = await Variable.findOne({ _id: tipoDato, active: true });
     if (!variable) {
       return res.status(400).json({
         success: false,
@@ -152,7 +152,6 @@ const deleteUserData = async (req, res) => {
 const getAvailableTypes = async (req, res) => {
   try {
     const variables = await Variable.find({ active: true })
-      .select('key type description category')
       .sort({ key: 1 });
 
     res.json({

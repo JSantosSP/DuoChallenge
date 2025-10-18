@@ -1,8 +1,6 @@
 module.exports = {
   User: require('./User.model'),
-  ChallengeTemplate: require('./ChallengeTemplate.model'),
-  Challenge: require('./Challenge.model'),
-  Level: require('./Level.model'),
+  PrizeTemplate: require('./PrizeTemplate.model'),
   Prize: require('./Prize.model'),
   GameSet: require('./GameSet.model'),
   Variable: require('./Variable.model'),
@@ -10,5 +8,5 @@ module.exports = {
   GameShare: require('./GameShare.model'),
   GameInstance: require('./GameInstance.model'),
   Category: require('./Category.model'),
-  LevelTemplate: require('./LevelTemplate.model')
+  Level: require('./Level.model'),
 };
