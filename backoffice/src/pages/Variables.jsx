@@ -64,15 +64,6 @@ const Variables = () => {
 
   const columns = [
     { 
-      key: 'key', 
-      label: 'Clave',
-      render: (row) => (
-        <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-          {row.key}
-        </span>
-      )
-    },
-    { 
       key: 'type', 
       label: 'Tipo',
       render: (row) => (
@@ -81,21 +72,20 @@ const Variables = () => {
         </span>
       )
     },
-    { key: 'category', label: 'Categoría' },
-    { key: 'description', label: 'Descripción' },
-    {
-      key: 'isSystemVariable',
-      label: 'Sistema',
+    { 
+      key: 'active', 
+      label: 'Status',
       render: (row) => (
-        <span className={`px-2 py-1 rounded-full text-xs ${
-          row.isSystemVariable 
-            ? 'bg-blue-100 text-blue-800' 
-            : 'bg-green-100 text-green-800'
-        }`}>
-          {row.isSystemVariable ? 'Sistema' : 'Usuario'}
+        row.active ?
+        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+          Activa
+        </span>
+        :
+        <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
+          Inactiva
         </span>
       )
-    }
+    },
   ];
 
   return (
@@ -132,67 +122,17 @@ const Variables = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Clave (identificador único)
-              </label>
-              <input
-                {...register('key', { required: true })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 font-mono"
-                placeholder="primera_cita"
-                disabled={!!editingVariable}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Usa minúsculas y guiones bajos. No se puede cambiar después.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tipo de Dato
               </label>
               <select
                 {...register('type', { required: true })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
               >
-                <option value="date">Fecha</option>
-                <option value="text">Texto</option>
-                <option value="location">Lugar</option>
-                <option value="number">Número</option>
-                <option value="image">Imagen</option>
+                <option value="fecha">Fecha</option>
+                <option value="texto">Texto</option>
+                <option value="lugar">Lugar</option>
+                <option value="foto">Imagen</option>
               </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Categoría
-              </label>
-              <input
-                {...register('category')}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                placeholder="fechas, lugares, personal..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Descripción
-              </label>
-              <textarea
-                {...register('description')}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                rows="3"
-                placeholder="Descripción del tipo de dato"
-              />
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                {...register('isSystemVariable')}
-                className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-              />
-              <label className="ml-2 text-sm text-gray-700">
-                Variable de sistema (no editable por usuarios)
-              </label>
             </div>
 
             <div className="flex justify-end space-x-4 pt-4">

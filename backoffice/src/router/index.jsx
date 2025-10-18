@@ -5,15 +5,12 @@ import ProtectedRoute from '../components/ProtectedRoute';
 // Pages
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
-import Templates from '../pages/Templates';
 import Variables from '../pages/Variables';
 import Prizes from '../pages/Prizes';
 import Users from '../pages/Users';
 import Stats from '../pages/Stats';
 import UserDataPage from '../pages/UserData';
 import Categories from '../pages/Categories';
-import LevelTemplates from '../pages/LevelTemplates';
-import GeneratedLevels from '../pages/GeneratedLevels';
 
 const AppRouter = () => {
   return (
@@ -29,14 +26,6 @@ const AppRouter = () => {
             element={
               <ProtectedRoute>
                 <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/templates"
-            element={
-              <ProtectedRoute>
-                <Templates />
               </ProtectedRoute>
             }
           />
@@ -85,22 +74,6 @@ const AppRouter = () => {
             element={
               <ProtectedRoute>
                 <Categories />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/level-templates"
-            element={
-              <ProtectedRoute>
-                <LevelTemplates />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/generated-levels"
-            element={
-              <ProtectedRoute>
-                <GeneratedLevels />
               </ProtectedRoute>
             }
           />

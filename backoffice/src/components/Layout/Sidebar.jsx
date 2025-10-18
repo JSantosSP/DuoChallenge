@@ -8,13 +8,10 @@ const Sidebar = () => {
   const menuItems = [
     { path: '/dashboard', icon: '🏠', label: 'Dashboard', section: 'main' },
     { path: '/categories', icon: '📁', label: 'Categorías', section: 'config' },
-    { path: '/level-templates', icon: '📋', label: 'Plantillas Nivel', section: 'config' },
-    { path: '/generated-levels', icon: '🎯', label: 'Niveles Generados', section: 'view' },
-    { path: '/templates', icon: '🧩', label: 'Plantillas (Legacy)', section: 'legacy' },
-    { path: '/variables', icon: '📝', label: 'Variables (Legacy)', section: 'legacy' },
+    { path: '/variables', icon: '📝', label: 'Variables', section: 'config' },
     { path: '/users', icon: '👤', label: 'Usuarios', section: 'management' },
     { path: '/userdata', icon: '💾', label: 'Datos Usuarios', section: 'view' }, 
-    { path: '/prizes', icon: '🏆', label: 'Premios Base', section: 'config' },
+    { path: '/prizes', icon: '🏆', label: 'Premios del Sistema', section: 'config' },
     { path: '/stats', icon: '📊', label: 'Estadísticas', section: 'main' }
   ];
 
@@ -23,7 +20,6 @@ const Sidebar = () => {
     { key: 'config', label: 'Configuración' },
     { key: 'view', label: 'Consulta' },
     { key: 'management', label: 'Gestión' },
-    { key: 'legacy', label: 'Sistema Antiguo' }
   ];
 
   const isActive = (path) => location.pathname === path;

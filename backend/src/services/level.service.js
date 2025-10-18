@@ -49,7 +49,7 @@ const createLevelFromUserData = async (userData, gameSetId, order) => {
     // Obtener el tipo de variable para determinar el tipo de reto
     const variable = await Variable.findOne({ _id: userData.tipoDato });
     
-    let levelType = variable.key; //'foto', 'fecha', 'lugar', 'texto'
+    let levelType = variable.type; //'foto', 'fecha', 'lugar', 'texto'
 
     // Generar salt y hash de la respuesta)
     const salt = generateSalt();

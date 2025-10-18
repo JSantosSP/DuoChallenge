@@ -41,13 +41,11 @@ const Prizes = () => {
       setValue('description', prize.description);
       setValue('weight', prize.weight);
       setValue('category', prize.category);
-      setValue('isDefault', prize.isDefault);
       setImagePath(prize.imagePath);
     } else {
       setEditingPrize(null);
       reset();
       setImagePath(null);
-      setValue('isDefault', true); // Por defecto, los del admin son de sistema
     }
     setIsModalOpen(true);
   };
@@ -64,7 +62,6 @@ const Prizes = () => {
       ...data,
       imagePath,
       weight: parseInt(data.weight),
-      userId: data.isDefault ? null : undefined, // null = sistema
     };
 
     if (editingPrize) {
@@ -87,13 +84,6 @@ const Prizes = () => {
     }
   };
 
-  // Filtrar premios
-  const filteredPrizes = prizes?.filter(prize => {
-    if (filterType === 'system') return prize.isDefault;
-    if (filterType === 'users') return !prize.isDefault;
-    return true;
-  });
-
   if (isLoading) {
     return (
       <MainLayout>
@@ -109,8 +99,8 @@ const Prizes = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Premios</h1>
-            <p className="text-gray-600 mt-2">Gestiona los premios del sistema</p>
+            <h1 className="text-3xl font-bold text-gray-800">Premios del Sistema</h1>
+            <p className="text-gray-600 mt-2">Gestiona los premios disponibles para todos los usuarios</p>
           </div>
           <div className="flex space-x-4">
             <button
@@ -140,31 +130,11 @@ const Prizes = () => {
           >
             Todos ({prizes?.length || 0})
           </button>
-          <button
-            onClick={() => setFilterType('system')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filterType === 'system'
-                ? 'bg-yellow-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Sistema ({prizes?.filter(p => p.isDefault).length || 0})
-          </button>
-          <button
-            onClick={() => setFilterType('users')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filterType === 'users'
-                ? 'bg-yellow-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Usuarios ({prizes?.filter(p => !p.isDefault).length || 0})
-          </button>
         </div>
 
         {/* Grid de premios */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPrizes?.map((prize) => (
+          {prizes?.map((prize) => (
             <div
               key={prize._id}
               className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
@@ -179,16 +149,9 @@ const Prizes = () => {
                 ) : (
                   <span className="text-6xl">🏆</span>
                 )}
-                {prize.isDefault && (
-                  <span className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                    Sistema
-                  </span>
-                )}
-                {!prize.isDefault && (
-                  <span className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                    Usuario
-                  </span>
-                )}
+                <span className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                  Sistema
+                </span>
               </div>
               <div className="p-6">
                 <div className="flex items-start justify-between mb-2">
@@ -204,27 +167,20 @@ const Prizes = () => {
                   <span>Peso: {prize.weight}/10</span>
                   <span>{prize.category}</span>
                 </div>
-                {prize.isDefault && (
-                  <div className="flex space-x-2 mt-4">
-                    <button
-                      onClick={() => openModal(prize)}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors text-sm"
-                    >
-                      ✏️ Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(prize)}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition-colors text-sm"
-                    >
-                      🗑️ Eliminar
-                    </button>
-                  </div>
-                )}
-                {!prize.isDefault && (
-                  <div className="mt-4 text-center text-sm text-gray-500">
-                    <span>Creado por usuario</span>
-                  </div>
-                )}
+                <div className="flex space-x-2 mt-4">
+                  <button
+                    onClick={() => openModal(prize)}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors text-sm"
+                  >
+                    ✏️ Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(prize)}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition-colors text-sm"
+                  >
+                    🗑️ Eliminar
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -273,28 +229,6 @@ const Prizes = () => {
                   defaultValue={5}
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Categoría
-                </label>
-                <input
-                  {...register('category')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
-                  placeholder="comida, viaje..."
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                {...register('isDefault')}
-                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
-              />
-              <label className="ml-2 text-sm text-gray-700">
-                Premio del sistema (disponible para todos los usuarios)
-              </label>
             </div>
 
             <div>

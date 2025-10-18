@@ -14,9 +14,6 @@ const Users = () => {
     return res.data.data.users;
   });
 
-  const generateGameMutation = useCreate('users', async (userId) => {
-    await api.post(`/admin/users/${userId}/generate`);
-  });
 
   const resetProgressMutation = useCreate('users', async (userId) => {
     await api.post(`/admin/users/${userId}/reset`);
@@ -28,12 +25,6 @@ const Users = () => {
     setIsModalOpen(true);
   };
 
-  const handleGenerateGame = async (user) => {
-    if (window.confirm(`¿Generar nuevo juego para ${user.name}?`)) {
-      await generateGameMutation.mutateAsync(user._id);
-      refetch();
-    }
-  };
 
   const handleResetProgress = async (user) => {
     if (window.confirm(`¿Reiniciar progreso de ${user.name}? Esto eliminará su progreso actual.`)) {
@@ -82,12 +73,6 @@ const Users = () => {
         className="text-blue-600 hover:text-blue-900 text-sm"
       >
         👁️ Ver
-      </button>
-      <button
-        onClick={() => handleGenerateGame(row)}
-        className="text-green-600 hover:text-green-900 text-sm"
-      >
-        🎮 Generar
       </button>
       <button
         onClick={() => handleResetProgress(row)}
