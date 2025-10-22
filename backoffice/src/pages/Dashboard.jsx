@@ -41,9 +41,9 @@ const Dashboard = () => {
       color: 'bg-yellow-500'
     },
     {
-      title: 'Retos Completados',
-      value: stats?.challenges?.completed || 0,
-      subtitle: `${stats?.challenges?.completionRate || 0}% tasa de éxito`,
+      title: 'Juegos Completados',
+      value: stats?.gameSets?.completed || 0,
+      subtitle: `${stats?.gameSets?.active || 0} activos`,
       icon: '✅',
       color: 'bg-green-500'
     }

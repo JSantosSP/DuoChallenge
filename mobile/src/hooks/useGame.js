@@ -3,28 +3,69 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiService } from '../api/api';
 import { Alert } from 'react-native';
 
-export const useGame = () => {
+/**
+ * Hook principal para gestionar juegos (GameSets)
+ * Actualizado para soportar múltiples juegos activos
+ */
+export const useGame = (gameSetId = null) => {
   const queryClient = useQueryClient();
-  const [currentLevel, setCurrentLevel] = useState(null);
 
-  // Obtener niveles
+  // Obtener niveles de un GameSet específico
   const {
     data: levels,
     isLoading: levelsLoading,
     refetch: refetchLevels
   } = useQuery({
-    queryKey: ['levels'],
+    queryKey: ['levels', gameSetId],
     queryFn: async () => {
-      const response = await apiService.getLevels();
+      if (!gameSetId) return [];
+      const response = await apiService.getLevels(gameSetId);
       return response.data.data.levels;
+    },
+    enabled: !!gameSetId,
+  });
+
+  // Obtener progreso de un GameSet específico
+  const { 
+    data: progress, 
+    refetch: refetchProgress 
+  } = useQuery({
+    queryKey: ['progress', gameSetId],
+    queryFn: async () => {
+      if (!gameSetId) return null;
+      const response = await apiService.getProgress(gameSetId);
+      return response.data.data;
+    },
+    enabled: !!gameSetId,
+  });
+
+  // Obtener juegos activos del usuario
+  const {
+    data: activeGames,
+    isLoading: activeGamesLoading,
+    refetch: refetchActiveGames
+  } = useQuery({
+    queryKey: ['activeGames'],
+    queryFn: async () => {
+      const response = await apiService.getActiveGames();
+      return response.data.data.games;
     },
   });
 
-  // Obtener progreso
-  const { data: progress, refetch: refetchProgress } = useQuery({
-    queryKey: ['progress'],
+  // Obtener historial de juegos
+  const getHistory = async (status = null) => {
+    const response = await apiService.getGameHistory(status);
+    return response.data.data.games;
+  };
+
+  // Obtener estadísticas del usuario
+  const {
+    data: stats,
+    refetch: refetchStats
+  } = useQuery({
+    queryKey: ['gameStats'],
     queryFn: async () => {
-      const response = await apiService.getProgress();
+      const response = await apiService.getGameStats();
       return response.data.data;
     },
   });
@@ -34,32 +75,34 @@ export const useGame = () => {
     mutationFn: ({ levelId, payload }) => 
       apiService.verifyLevel(levelId, payload),
     onSuccess: (data) => {
-      queryClient.invalidateQueries(['levels']);
-      queryClient.invalidateQueries(['progress']);
+      queryClient.invalidateQueries(['levels', gameSetId]);
+      queryClient.invalidateQueries(['progress', gameSetId]);
+      queryClient.invalidateQueries(['activeGames']);
+      queryClient.invalidateQueries(['gameStats']);
       
       if (data.data.correct) {
         if (data.data.gameCompleted) {
           Alert.alert(
-            '¡Felicidades!',
+            '🎉 ¡Felicidades!',
             '¡Has completado todos los niveles! Tienes un premio esperándote',
             [{ text: 'Ver Premio', onPress: () => {} }]
           );
         } else if (data.data.levelCompleted) {
           Alert.alert(
-            '¡Nivel Completado!',
+            '✅ ¡Nivel Completado!',
             'Has desbloqueado el siguiente nivel',
             [{ text: 'Continuar' }]
           );
         } else {
-          Alert.alert('¡Correcto!', data.data.message);
+          Alert.alert('¡Correcto! ✨', data.data.message);
         }
       }
     },
   });
 
-  // Obtener premio
+  // Obtener premio de un juego completado
   const { data: prize, refetch: refetchPrize } = useQuery({
-    queryKey: ['prize'],
+    queryKey: ['prize', gameSetId],
     queryFn: async () => {
       const response = await apiService.getPrize();
       return response.data.data.prize;
@@ -67,182 +110,78 @@ export const useGame = () => {
     enabled: false,
   });
 
-  // Reiniciar juego
+  // Reiniciar juego (abandonar juegos activos y generar uno nuevo)
   const resetMutation = useMutation({
     mutationFn: () => apiService.resetGame(),
     onSuccess: () => {
       queryClient.invalidateQueries(['levels']);
       queryClient.invalidateQueries(['progress']);
       queryClient.invalidateQueries(['prize']);
-      queryClient.invalidateQueries(['userdata']); // Nuevo
-      Alert.alert('¡Nuevo Juego!', 'Se han generado nuevos retos para ti');
+      queryClient.invalidateQueries(['activeGames']);
+      queryClient.invalidateQueries(['gameStats']);
+      Alert.alert('🎮 ¡Nuevo Juego!', 'Se han generado nuevos retos para ti');
     },
   });
 
-  // Generar juego
+  // Generar nuevo juego
   const generateMutation = useMutation({
     mutationFn: () => apiService.generateGame(),
-    onSuccess: () => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries(['levels']);
       queryClient.invalidateQueries(['progress']);
-      Alert.alert('¡Juego Creado!', 'Tus retos están listos');
+      queryClient.invalidateQueries(['activeGames']);
+      queryClient.invalidateQueries(['gameStats']);
+      
+      const newGameSet = response.data.data.gameSet;
+      Alert.alert('✨ ¡Juego Creado!', `Tu juego está listo con ${newGameSet.totalLevels} niveles`);
+      return newGameSet;
     },
     onError: (error) => {
       Alert.alert(
         'Error',
-        error.response?.data?.message || 'Debes añadir datos personales primero'
+        error.response?.data?.message || 'Debes añadir datos personales y premios primero'
       );
     },
   });
 
   return {
+    // Datos de un GameSet específico
     levels,
     levelsLoading,
     progress,
-    currentLevel,
-    setCurrentLevel,
+    
+    // Juegos activos y estadísticas
+    activeGames,
+    activeGamesLoading,
+    stats,
+    
+    // Métodos
     verifyLevel: verifyMutation.mutate,
     verifyLoading: verifyMutation.isPending,
     prize,
     getPrize: refetchPrize,
     resetGame: resetMutation.mutate,
-    generateGame: generateMutation.mutate,
+    generateGame: generateMutation.mutateAsync,
+    getHistory,
     refetchLevels,
     refetchProgress,
+    refetchActiveGames,
+    refetchStats,
   };
 };
 
-// Hook para UserData
-export const useUserData = () => {
-  const queryClient = useQueryClient();
-
-  // Obtener datos del usuario
-  const { data: userData, isLoading, refetch } = useQuery({
-    queryKey: ['userdata'],
-    queryFn: async () => {
-      const response = await apiService.getUserData();
-      return response.data.data.userData;
-    },
-  });
-
-  // Obtener tipos disponibles
-  const { data: availableTypes } = useQuery({
-    queryKey: ['userdata-types'],
-    queryFn: async () => {
-      const response = await apiService.getAvailableTypes();
-      return response.data.data.variables;
-    },
-  });
-
-  // Crear dato
-  const createMutation = useMutation({
-    mutationFn: (data) => apiService.createUserData(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['userdata']);
-      Alert.alert('Éxito', 'Dato creado correctamente');
-    },
-    onError: (error) => {
-      Alert.alert('Error', error.response?.data?.message || 'Error al crear dato');
-    },
-  });
-
-  // Actualizar dato
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => apiService.updateUserData(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['userdata']);
-      Alert.alert('Éxito', 'Dato actualizado correctamente');
-    },
-    onError: (error) => {
-      Alert.alert('Error', error.response?.data?.message || 'Error al actualizar dato');
-    },
-  });
-
-  // Eliminar dato
-  const deleteMutation = useMutation({
-    mutationFn: (id) => apiService.deleteUserData(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['userdata']);
-      Alert.alert('Éxito', 'Dato eliminado correctamente');
-    },
-  });
-
-  return {
-    userData,
-    isLoading,
-    availableTypes,
-    refetch,
-    createData: createMutation.mutate,
-    updateData: updateMutation.mutate,
-    deleteData: deleteMutation.mutate,
-    isCreating: createMutation.isPending,
-    isUpdating: updateMutation.isPending,
-  };
-};
-
-// Hook para Premios del Usuario
-export const useUserPrizes = () => {
-  const queryClient = useQueryClient();
-
-  // Obtener premios del usuario
-  const { data: prizes, isLoading, refetch } = useQuery({
-    queryKey: ['userprizes'],
-    queryFn: async () => {
-      const response = await apiService.getUserPrizes();
-      return response.data.data;
-    },
-  });
-
-  // Crear premio
-  const createMutation = useMutation({
-    mutationFn: (data) => apiService.createPrize(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['userprizes']);
-      Alert.alert('Éxito', 'Premio creado correctamente');
-    },
-    onError: (error) => {
-      Alert.alert('Error', error.response?.data?.message || 'Error al crear premio');
-    },
-  });
-
-  // Actualizar premio
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => apiService.updatePrize(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['userprizes']);
-      Alert.alert('Éxito', 'Premio actualizado correctamente');
-    },
-    onError: (error) => {
-      Alert.alert('Error', error.response?.data?.message || 'Error al actualizar premio');
-    },
-  });
-
-  // Eliminar premio
-  const deleteMutation = useMutation({
-    mutationFn: (id) => apiService.deletePrize(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['userprizes']);
-      Alert.alert('Éxito', 'Premio eliminado correctamente');
-    },
-  });
-
-  return {
-    prizes,
-    isLoading,
-    refetch,
-    createPrize: createMutation.mutate,
-    updatePrize: updateMutation.mutate,
-    deletePrize: deleteMutation.mutate,
-    isCreating: createMutation.isPending,
-    isUpdating: updateMutation.isPending,
-  };
-};
-
+/**
+ * Hook para gestionar códigos compartidos y juegos compartidos
+ */
 export const useGameShare = () => {
   const queryClient = useQueryClient();
 
   // Obtener códigos del usuario
-  const { data: shareCodes, isLoading: codesLoading, refetch: refetchCodes } = useQuery({
+  const { 
+    data: shareCodes, 
+    isLoading: codesLoading, 
+    refetch: refetchCodes 
+  } = useQuery({
     queryKey: ['sharecodes'],
     queryFn: async () => {
       const response = await apiService.getUserShareCodes();
@@ -250,12 +189,16 @@ export const useGameShare = () => {
     },
   });
 
-  // Obtener instancias de juego
-  const { data: instances, isLoading: instancesLoading, refetch: refetchInstances } = useQuery({
-    queryKey: ['gameinstances'],
+  // Obtener juegos compartidos (GameSets de juegos unidos)
+  const { 
+    data: sharedGames, 
+    isLoading: sharedGamesLoading, 
+    refetch: refetchSharedGames 
+  } = useQuery({
+    queryKey: ['sharedGames'],
     queryFn: async () => {
-      const response = await apiService.getGameInstances();
-      return response.data.data.instances;
+      const response = await apiService.getSharedGames();
+      return response.data.data.games;
     },
   });
 
@@ -264,7 +207,7 @@ export const useGameShare = () => {
     mutationFn: () => apiService.createShareCode(),
     onSuccess: () => {
       queryClient.invalidateQueries(['sharecodes']);
-      Alert.alert('Éxito', 'Código generado correctamente');
+      Alert.alert('✅ Éxito', 'Código generado correctamente');
     },
     onError: (error) => {
       Alert.alert('Error', error.response?.data?.message || 'Error al generar código');
@@ -280,9 +223,10 @@ export const useGameShare = () => {
   const joinGameMutation = useMutation({
     mutationFn: (code) => apiService.joinGame(code),
     onSuccess: () => {
-      queryClient.invalidateQueries(['gameinstances']);
+      queryClient.invalidateQueries(['sharedGames']);
+      queryClient.invalidateQueries(['activeGames']);
       queryClient.invalidateQueries(['levels']);
-      Alert.alert('¡Genial!', 'Te has unido al juego exitosamente');
+      Alert.alert('🎉 ¡Genial!', 'Te has unido al juego exitosamente');
     },
     onError: (error) => {
       Alert.alert('Error', error.response?.data?.message || 'Error al unirse al juego');
@@ -294,22 +238,42 @@ export const useGameShare = () => {
     mutationFn: (id) => apiService.deactivateShareCode(id),
     onSuccess: () => {
       queryClient.invalidateQueries(['sharecodes']);
-      Alert.alert('Éxito', 'Código desactivado');
+      Alert.alert('✅ Éxito', 'Código desactivado');
     },
   });
 
   return {
     shareCodes,
     codesLoading,
-    instances,
-    instancesLoading,
+    sharedGames,
+    sharedGamesLoading,
     refetchCodes,
-    refetchInstances,
+    refetchSharedGames,
     createCode: createCodeMutation.mutate,
     verifyCode: verifyCodeMutation.mutateAsync,
     joinGame: joinGameMutation.mutate,
     deactivateCode: deactivateCodeMutation.mutate,
     isCreatingCode: createCodeMutation.isPending,
     isJoining: joinGameMutation.isPending,
+  };
+};
+
+/**
+ * Hook para premios ganados
+ */
+export const useWonPrizes = () => {
+  const { data: wonPrizes, isLoading, refetch } = useQuery({
+    queryKey: ['wonPrizes'],
+    queryFn: async () => {
+      const response = await apiService.getWonPrizes();
+      return response.data.data.prizes;
+    },
+  });
+
+  return {
+    wonPrizes: wonPrizes || [],
+    isLoading,
+    refetch,
+    total: wonPrizes?.length || 0,
   };
 };

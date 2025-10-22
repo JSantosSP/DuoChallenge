@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -17,43 +17,76 @@ import LoadingOverlay from '../components/LoadingOverlay';
 const HomeScreen = ({ navigation }) => {
   const { user } = useAuth();
   const { 
-    levels, 
-    levelsLoading, 
-    progress, 
-    refetchLevels,
-    refetchProgress,
+    activeGames, 
+    activeGamesLoading,
+    stats,
+    refetchActiveGames,
+    refetchStats,
     generateGame
   } = useGame();
 
   const [refreshing, setRefreshing] = React.useState(false);
+  const [selectedGame, setSelectedGame] = useState(null);
+
+  // Seleccionar automáticamente el primer juego activo
+  useEffect(() => {
+    if (activeGames && activeGames.length > 0 && !selectedGame) {
+      setSelectedGame(activeGames[0]);
+    }
+  }, [activeGames]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([refetchLevels(), refetchProgress()]);
+    await Promise.all([refetchActiveGames(), refetchStats()]);
     setRefreshing(false);
   };
 
-  // Encontrar el siguiente nivel pendiente
-  const nextLevel = levels?.find(level => !level.completed);
-  const hasActiveGame = progress?.hasActiveGame;
+  const handleSelectGame = (game) => {
+    setSelectedGame(game);
+  };
 
-  const handleContinue = () => {
-    if (nextLevel) {
-      navigation.navigate('Level', { level: nextLevel });
-    }
+  const handlePlayGame = (game) => {
+    navigation.navigate('GameDetail', { gameSet: game });
   };
 
   const handleUnirse = () => {
     navigation.navigate('JoinGame');
   };
 
-  const handleGenerateGame = () => {
-    generateGame();
+  const handleGenerateGame = async () => {
+    try {
+      const newGameSet = await generateGame();
+      if (newGameSet) {
+        setSelectedGame(newGameSet);
+        await refetchActiveGames();
+      }
+    } catch (error) {
+      // Error ya manejado en el hook
+    }
   };
 
-  if (levelsLoading) {
-    return <LoadingOverlay message="Cargando tu juego..." />;
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const getGameTypeLabel = (game) => {
+    if (game.shareCode) {
+      return `🔗 Juego compartido (${game.shareCode})`;
+    }
+    return '🎮 Mi juego';
+  };
+
+  if (activeGamesLoading) {
+    return <LoadingOverlay message="Cargando tus juegos..." />;
   }
+
+  const hasActiveGames = activeGames && activeGames.length > 0;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -67,91 +100,101 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.header}>
           <Text style={styles.greeting}>¡Hola, {user?.name}! 💕</Text>
           <Text style={styles.subtitle}>
-            {hasActiveGame 
-              ? 'Continúa con tu aventura' 
-              : 'Genera tu primer juego'}
+            {hasActiveGames 
+              ? `Tienes ${activeGames.length} juego${activeGames.length !== 1 ? 's' : ''} activo${activeGames.length !== 1 ? 's' : ''}` 
+              : 'Comienza tu primera aventura'}
           </Text>
         </View>
 
-        {hasActiveGame ? (
+        {hasActiveGames ? (
           <>
-            {/* Progress */}
-            <View style={styles.section}>
-              <ProgressBar
-                progress={progress?.completedChallenges || 0}
-                total={progress?.totalChallenges || 0}
-              />
-            </View>
-
-            {/* Stats */}
-            <View style={styles.statsContainer}>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>{progress?.completedLevels || 0}</Text>
-                <Text style={styles.statLabel}>Niveles Completados</Text>
+            {/* Stats Card */}
+            {stats && (
+              <View style={styles.statsContainer}>
+                <View style={styles.statCard}>
+                  <Text style={styles.statValue}>{stats.completedGames || 0}</Text>
+                  <Text style={styles.statLabel}>Completados</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Text style={styles.statValue}>{stats.prizesWon || 0}</Text>
+                  <Text style={styles.statLabel}>Premios Ganados</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Text style={styles.statValue}>{stats.activeGames || 0}</Text>
+                  <Text style={styles.statLabel}>Activos</Text>
+                </View>
               </View>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>{progress?.totalSetsCompleted || 0}</Text>
-                <Text style={styles.statLabel}>Sets Completados</Text>
-              </View>
-            </View>
+            )}
 
-            {/* Levels List */}
+            {/* Active Games List */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Tus Niveles</Text>
-              {levels?.map((level) => (
+              <Text style={styles.sectionTitle}>Tus Juegos Activos</Text>
+              {activeGames.map((game) => (
                 <TouchableOpacity
-                  key={level._id}
+                  key={game._id}
                   style={[
-                    styles.levelCard,
-                    level.completed && styles.levelCompleted,
+                    styles.gameCard,
+                    selectedGame?._id === game._id && styles.gameCardSelected,
                   ]}
-                  onPress={() => navigation.navigate('Level', { level })}
+                  onPress={() => handlePlayGame(game)}
                 >
-                  <View style={styles.levelIcon}>
-                    <Text style={styles.levelIconText}>
-                      {level.completed ? '✅' : '🔒'}
+                  <View style={styles.gameIcon}>
+                    <Text style={styles.gameIconText}>
+                      {game.shareCode ? '🔗' : '🎮'}
                     </Text>
                   </View>
-                  <View style={styles.levelInfo}>
-                    <Text style={styles.levelTitle}>{level.title}</Text>
-                    <Text style={styles.levelDescription}>
-                      {level.challenges?.length} retos
+                  <View style={styles.gameInfo}>
+                    <Text style={styles.gameType}>
+                      {getGameTypeLabel(game)}
+                    </Text>
+                    <Text style={styles.gameProgress}>
+                      Progreso: {game.progress || 0}%
+                    </Text>
+                    <Text style={styles.gameLevels}>
+                      {game.completedLevels?.length || 0} / {game.totalLevels || 0} niveles
+                    </Text>
+                    <Text style={styles.gameDate}>
+                      Iniciado: {formatDate(game.startedAt)}
                     </Text>
                   </View>
-                  <Text style={styles.levelArrow}>→</Text>
+                  <View style={styles.gameArrow}>
+                    <Text style={styles.arrowText}>→</Text>
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>
 
-            {/* Continue Button */}
-            {nextLevel && (
-              <View style={styles.section}>
-                <AppButton
-                  title="Continuar Jugando"
-                  onPress={handleContinue}
-                  icon="🎮"
-                />
-              </View>
-            )}
-
-            {/* Prize Button */}
-            {progress?.currentPrize && (
-              <View style={styles.section}>
-                <AppButton
-                  title="Ver Tu Premio"
-                  onPress={() => navigation.navigate('Prize')}
-                  variant="secondary"
-                  icon="🏆"
-                />
-              </View>
-            )}
+            {/* Quick Actions */}
+            <View style={styles.section}>
+              <AppButton
+                title="Ver Premios Ganados"
+                onPress={() => navigation.navigate('WonPrizes')}
+                variant="secondary"
+                icon="🏆"
+                style={styles.actionButton}
+              />
+              <AppButton
+                title="Ver Historial"
+                onPress={() => navigation.navigate('GameHistory')}
+                variant="outline"
+                icon="📊"
+                style={styles.actionButton}
+              />
+              <AppButton
+                title="Unirse a un Juego"
+                onPress={handleUnirse}
+                variant="outline"
+                icon="🔗"
+                style={styles.actionButton}
+              />
+            </View>
           </>
         ) : (
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>🎮</Text>
             <Text style={styles.emptyTitle}>¡Comienza tu Aventura!</Text>
             <Text style={styles.emptyText}>
-              Unete a un juego existente con un código de invitación o genera tu propio juego para empezar a jugar.
+              Únete a un juego existente con un código de invitación o genera tu propio juego para empezar a jugar.
             </Text>
             <AppButton
               title="Unirse a un Juego"
@@ -159,11 +202,16 @@ const HomeScreen = ({ navigation }) => {
               icon="🔗"
               style={styles.generateButton}
             />
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>o</Text>
+              <View style={styles.dividerLine} />
+            </View>
             <Text style={styles.emptyText}>
               Genera tu propio juego para empezar a jugar.
             </Text>
             <AppButton
-              title="Generar Juego"
+              title="Generar Mi Juego"
               onPress={handleGenerateGame}
               icon="✨"
               style={styles.generateButton}
@@ -186,7 +234,6 @@ const styles = StyleSheet.create({
   header: {
     padding: 24,
     paddingTop: 0,
-
   },
   greeting: {
     fontSize: 28,
@@ -212,13 +259,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 24,
     paddingTop: 0,
-    gap: 16,
+    gap: 12,
   },
   statCard: {
     flex: 1,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
+    padding: 16,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -227,17 +274,17 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   statValue: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#FF6B9D',
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#666666',
     textAlign: 'center',
   },
-  levelCard: {
+  gameCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
@@ -250,10 +297,11 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  levelCompleted: {
-    backgroundColor: '#E8F5E9',
+  gameCardSelected: {
+    borderWidth: 2,
+    borderColor: '#FF6B9D',
   },
-  levelIcon: {
+  gameIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
@@ -262,30 +310,47 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 16,
   },
-  levelIconText: {
+  gameIconText: {
     fontSize: 24,
   },
-  levelInfo: {
+  gameInfo: {
     flex: 1,
   },
-  levelTitle: {
-    fontSize: 16,
+  gameType: {
+    fontSize: 14,
     fontWeight: '600',
     color: '#333333',
     marginBottom: 4,
   },
-  levelDescription: {
-    fontSize: 14,
-    color: '#666666',
-  },
-  levelArrow: {
-    fontSize: 20,
+  gameProgress: {
+    fontSize: 16,
+    fontWeight: 'bold',
     color: '#FF6B9D',
+    marginBottom: 2,
+  },
+  gameLevels: {
+    fontSize: 13,
+    color: '#666666',
+    marginBottom: 2,
+  },
+  gameDate: {
+    fontSize: 12,
+    color: '#999999',
+  },
+  gameArrow: {
+    marginLeft: 12,
+  },
+  arrowText: {
+    fontSize: 24,
+    color: '#FF6B9D',
+  },
+  actionButton: {
+    marginBottom: 12,
   },
   emptyState: {
     alignItems: 'center',
     padding: 48,
-    marginTop: 48,
+    marginTop: 24,
   },
   emptyEmoji: {
     fontSize: 64,
@@ -301,10 +366,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666666',
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
+    paddingHorizontal: 16,
   },
   generateButton: {
     minWidth: 200,
+    marginBottom: 16,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+    paddingHorizontal: 48,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E0E0E0',
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    fontSize: 14,
+    color: '#999999',
   },
 });
 

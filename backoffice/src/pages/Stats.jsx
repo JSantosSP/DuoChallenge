@@ -86,23 +86,23 @@ const Stats = () => {
             </div>
           </div>
 
-          {/* Retos */}
+          {/* Juegos Compartidos */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-lg font-bold mb-4 flex items-center">
-              <span className="text-2xl mr-2">🎯</span> Retos
+              <span className="text-2xl mr-2">🔗</span> Compartidos
             </h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Total:</span>
-                <span className="font-bold">{stats?.challenges?.total || 0}</span>
+                <span className="text-gray-600">Códigos Activos:</span>
+                <span className="font-bold text-green-600">{stats?.shares?.active || 0}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Completados:</span>
-                <span className="font-bold">{stats?.challenges?.completed || 0}</span>
+                <span className="text-gray-600">Total Generados:</span>
+                <span className="font-bold">{stats?.shares?.total || 0}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Tasa de éxito:</span>
-                <span className="font-bold text-blue-600">{stats?.challenges?.completionRate || 0}%</span>
+                <span className="text-gray-600">Usados:</span>
+                <span className="font-bold text-blue-600">{stats?.shares?.used || 0}</span>
               </div>
             </div>
           </div>
