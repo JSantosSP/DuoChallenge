@@ -414,6 +414,13 @@ const getStats = async (req, res) => {
       ]
     });
 
+    // Contar premios ganados
+    const prizesWon = await GameSet.countDocuments({ 
+      userId, 
+      status: 'completed', 
+      prizeId: { $ne: null } 
+    });
+
     res.json({
       success: true,
       data: {
@@ -426,6 +433,7 @@ const getStats = async (req, res) => {
         totalLevelsAvailable,
         gamesFromShares,
         ownGames,
+        prizesWon,
         completionRate: totalGames > 0 ? Math.round((completedGames / totalGames) * 100) : 0
       }
     });
