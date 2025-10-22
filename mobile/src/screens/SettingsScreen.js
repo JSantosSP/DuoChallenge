@@ -14,7 +14,7 @@ import AppButton from '../components/AppButton';
 
 const SettingsScreen = ({ navigation }) => {
   const { user, logout } = useAuth();
-  const { resetGame, progress } = useGame();
+  const { resetGame, stats } = useGame();
 
   const handleResetGame = () => {
     Alert.alert(
@@ -80,21 +80,27 @@ const SettingsScreen = ({ navigation }) => {
           <Text style={styles.sectionTitle}>Estadísticas</Text>
           <View style={styles.card}>
             <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Sets Completados</Text>
+              <Text style={styles.statLabel}>Juegos Completados</Text>
               <Text style={styles.statValue}>
-                {progress?.totalSetsCompleted || 0}
+                {stats?.completedGames || 0}
               </Text>
             </View>
             <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Retos Completados</Text>
+              <Text style={styles.statLabel}>Juegos Activos</Text>
               <Text style={styles.statValue}>
-                {progress?.completedChallenges || 0}
+                {stats?.activeGames || 0}
               </Text>
             </View>
             <View style={styles.statRow}>
               <Text style={styles.statLabel}>Niveles Completados</Text>
               <Text style={styles.statValue}>
-                {progress?.completedLevels || 0}
+                {stats?.totalLevelsCompleted || 0}
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Premios Ganados</Text>
+              <Text style={styles.statValue}>
+                {stats?.prizesWon || 0}
               </Text>
             </View>
           </View>

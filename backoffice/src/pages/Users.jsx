@@ -50,19 +50,18 @@ const Users = () => {
       )
     },
     {
-      key: 'completedChallenges',
-      label: 'Retos Completados',
-      render: (row) => row.completedChallenges?.length || 0
-    },
-    {
-      key: 'completedLevels',
-      label: 'Niveles Completados',
-      render: (row) => row.completedLevels?.length || 0
-    },
-    {
       key: 'totalSetsCompleted',
-      label: 'Sets Completados',
+      label: 'Juegos Completados',
       render: (row) => row.totalSetsCompleted || 0
+    },
+    {
+      key: 'createdAt',
+      label: 'Registro',
+      render: (row) => new Date(row.createdAt).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
     }
   ];
 
@@ -134,28 +133,18 @@ const Users = () => {
                 </div>
               </div>
 
-              {/* Progreso actual */}
+              {/* Estadísticas */}
               <div className="bg-blue-50 rounded-lg p-4">
-                <h3 className="font-bold mb-3">Progreso Actual</h3>
+                <h3 className="font-bold mb-3">Estadísticas</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Retos Completados:</span>
-                    <span className="font-medium">{selectedUser.completedChallenges?.length || 0}</span>
+                    <span className="text-gray-600">Juegos Completados:</span>
+                    <span className="font-medium">{selectedUser.totalSetsCompleted || 0}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Niveles Completados:</span>
-                    <span className="font-medium">{selectedUser.completedLevels?.length || 0}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Tiene juego activo:</span>
+                    <span className="text-gray-600">Última actualización:</span>
                     <span className="font-medium">
-                      {selectedUser.currentSetId ? '✅ Sí' : '❌ No'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Premio actual:</span>
-                    <span className="font-medium">
-                      {selectedUser.currentPrizeId ? '🏆 Asignado' : 'Sin premio'}
+                      {new Date(selectedUser.updatedAt).toLocaleDateString('es-ES')}
                     </span>
                   </div>
                 </div>
@@ -163,15 +152,6 @@ const Users = () => {
 
               {/* Acciones */}
               <div className="flex space-x-4">
-                <button
-                  onClick={() => {
-                    handleGenerateGame(selectedUser);
-                    setIsModalOpen(false);
-                  }}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition-colors"
-                >
-                  🎮 Generar Nuevo Juego
-                </button>
                 <button
                   onClick={() => {
                     handleResetProgress(selectedUser);
