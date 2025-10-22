@@ -51,14 +51,17 @@ export const apiService = {
   getProfile: () => api.get('/auth/profile'),
 
   // Game
-  generateGame: () => api.post('/api/generate'),
-  getLevels: () => api.get('/api/levels'),
-  getLevel: (levelId) => api.get(`/api/level/${levelId}`),
+  generateGame: () => api.post('/api/game/generate'),
+  getLevels: (gameSetId) => api.get(`/api/game/${gameSetId}/levels`),
+  getLevel: (levelId) => api.get(`/api/game/level/${levelId}`),
   verifyLevel: (levelId, payload) => 
-    api.post(`/api/level/${levelId}/verify`, payload),
-  getProgress: () => api.get('/api/progress'),
-  getPrize: () => api.get('/api/prize'),
-  resetGame: () => api.post('/api/reset'),
+    api.post(`/api/game/level/${levelId}/verify`, payload),
+  getProgress: (gameSetId) => api.get(`/api/game/${gameSetId}/progress`),
+  getPrize: () => api.get('/api/game/prize'),
+  resetGame: () => api.post('/api/game/reset'),
+  getGameHistory: (status) => api.get(`/api/game/history${status ? `?status=${status}` : ''}`),
+  getGameStats: () => api.get('/api/game/stats'),
+  getActiveGames: () => api.get('/api/game/active'),
 
   // UserData (NUEVO)
   getUserData: () => api.get('/api/userdata'),
@@ -82,6 +85,7 @@ export const apiService = {
 
   // Prizes
   getUserPrizes: () => api.get('/api/prizes'),
+  getWonPrizes: () => api.get('/api/prizes/won'),
   createPrize: (data) => api.post('/api/prizes', data),
   updatePrize: (id, data) => api.put(`/api/prizes/${id}`, data),
   deletePrize: (id) => api.delete(`/api/prizes/${id}`),
@@ -90,10 +94,10 @@ export const apiService = {
   getCategories: () => api.get('/api/categories'),
 
   // Share
-  createShareCode: () => api.post('/api/share/create'),
+  createShareCode: () => api.post('/api/share/generate'),
   getUserShareCodes: () => api.get('/api/share/codes'),
   verifyShareCode: (code) => api.get(`/api/share/verify/${code}`),
   joinGame: (code) => api.post('/api/share/join', { code }),
-  getGameInstances: () => api.get('/api/share/instances'),
+  getSharedGames: () => api.get('/api/share/instances'),
   deactivateShareCode: (id) => api.delete(`/api/share/${id}`),
 };

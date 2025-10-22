@@ -7,9 +7,12 @@ import { useAuth } from '../context/AuthContext';
 // Screens
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
+import GameDetailScreen from '../screens/GameDetailScreen';
 import LevelScreen from '../screens/LevelScreen';
 import ChallengeScreen from '../screens/ChallengeScreen';
 import PrizeScreen from '../screens/PrizeScreen';
+import WonPrizesScreen from '../screens/WonPrizesScreen';
+import GameHistoryScreen from '../screens/GameHistoryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import MyDataScreen from '../screens/MyDataScreen';
 import AddEdidtDataScreen from '../screens/AddEditDataScreen';
@@ -52,6 +55,14 @@ const MainStack = () => {
         })}
       />
       <Stack.Screen
+        name="GameDetail"
+        component={GameDetailScreen}
+        options={{
+          title: 'Detalles del Juego',
+          headerBackTitle: 'Atrás',
+        }}
+      />
+      <Stack.Screen
         name="Level"
         component={LevelScreen}
         options={({ route }) => ({
@@ -74,6 +85,22 @@ const MainStack = () => {
           title: 'Tu Premio',
           headerBackTitle: 'Atrás',
           gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="WonPrizes"
+        component={WonPrizesScreen}
+        options={{
+          title: 'Premios Ganados',
+          headerBackTitle: 'Atrás',
+        }}
+      />
+      <Stack.Screen
+        name="GameHistory"
+        component={GameHistoryScreen}
+        options={{
+          title: 'Historial',
+          headerBackTitle: 'Atrás',
         }}
       />
       <Stack.Screen
