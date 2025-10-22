@@ -1,4 +1,4 @@
-const { Prize } = require('../models');
+const { Prize, GameSet } = require('../models');
 
 // Obtener premios del usuario (propios + sistema)
 const getUserPrizes = async (req, res) => {
@@ -146,9 +146,57 @@ const deletePrize = async (req, res) => {
   }
 };
 
+// Obtener premios ganados por el usuario
+const getUserWonPrizes = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Buscar todos los GameSets completados con premio
+    const completedSets = await GameSet.find({ 
+      userId, 
+      status: 'completed',
+      prizeId: { $ne: null }
+    })
+      .populate('prizeId')
+      .sort({ completedAt: -1 });
+
+    // Mapear los premios con información del juego
+    const wonPrizes = completedSets
+      .filter(set => set.prizeId)
+      .map(set => ({
+        prizeId: set.prizeId._id,
+        title: set.prizeId.title,
+        description: set.prizeId.description,
+        imagePath: set.prizeId.imagePath,
+        weight: set.prizeId.weight,
+        completedAt: set.completedAt,
+        gameSetId: set._id,
+        used: set.prizeId.used,
+        usedAt: set.prizeId.usedAt
+      }));
+
+    res.json({
+      success: true,
+      data: {
+        prizes: wonPrizes,
+        total: wonPrizes.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo premios ganados:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener premios ganados',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getUserPrizes,
   createPrize,
   updatePrize,
-  deletePrize
+  deletePrize,
+  getUserWonPrizes
 };

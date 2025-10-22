@@ -7,6 +7,7 @@ const { verifyToken } = require('../middlewares/auth.middleware');
 router.use(verifyToken);
 
 router.get('/', prizeController.getUserPrizes);
+router.get('/won', prizeController.getUserWonPrizes);
 router.post('/', prizeController.createPrize);
 router.put('/:id', prizeController.updatePrize);
 router.delete('/:id', prizeController.deletePrize);
