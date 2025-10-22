@@ -4,128 +4,160 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  KeyboardAvoidingView,
-  Platform,
+  Alert,
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useGameShare } from '../hooks/useGame';
+import { useShare } from '../hooks/useShare';
 import AppButton from '../components/AppButton';
+import LoadingOverlay from '../components/LoadingOverlay';
 
 const JoinGameScreen = ({ navigation }) => {
-  const { verifyCode, joinGame, isJoining } = useGameShare();
+  const { joinGame, verifyShareCode, loading } = useShare();
   const [code, setCode] = useState('');
-  const [creatorInfo, setCreatorInfo] = useState(null);
   const [verifying, setVerifying] = useState(false);
-  const [error, setError] = useState('');
+  const [gameInfo, setGameInfo] = useState(null);
 
   const handleVerifyCode = async () => {
-    if (code.length !== 6) {
-      setError('El código debe tener 6 caracteres');
+    if (!code.trim()) {
+      Alert.alert('Error', 'Ingresa un código');
       return;
     }
 
-    setVerifying(true);
-    setError('');
-
     try {
-      const response = await verifyCode(code.toUpperCase());
-      setCreatorInfo(response.data.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Código no válido');
-      setCreatorInfo(null);
+      setVerifying(true);
+      const result = await verifyShareCode(code.trim().toUpperCase());
+      
+      if (result.success) {
+        setGameInfo(result.data);
+      } else {
+        Alert.alert('Código inválido', result.message);
+        setGameInfo(null);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo verificar el código');
+      setGameInfo(null);
     } finally {
       setVerifying(false);
     }
   };
 
-  const handleJoinGame = () => {
-    joinGame(code.toUpperCase(), {
-      onSuccess: () => {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Home' }],
-        });
-      },
-    });
+  const handleJoinGame = async () => {
+    if (!gameInfo) return;
+
+    try {
+      const result = await joinGame(code.trim().toUpperCase());
+      
+      if (result.success) {
+        Alert.alert(
+          '¡Te has unido al juego!',
+          `Ahora puedes jugar con los datos de ${gameInfo.creator.name}`,
+          [
+            {
+              text: 'Comenzar a jugar',
+              onPress: () => {
+                // Navegar al juego
+                navigation.navigate('Home');
+              }
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo unir al juego');
+    }
   };
+
+  const formatCode = (text) => {
+    // Formatear código en mayúsculas y limitar a 6 caracteres
+    const formatted = text.replace(/[^A-Z0-9]/gi, '').toUpperCase().slice(0, 6);
+    setCode(formatted);
+  };
+
+  if (loading) {
+    return <LoadingOverlay message="Uniéndose al juego..." />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.content}
-      >
+      <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.emoji}>🎮</Text>
           <Text style={styles.title}>Unirse a un Juego</Text>
           <Text style={styles.subtitle}>
-            Ingresa el código que te compartieron para jugar
+            Ingresa el código de invitación para jugar
           </Text>
         </View>
 
         {/* Code Input */}
-        <View style={styles.form}>
-          <Text style={styles.label}>Código de Invitación</Text>
+        <View style={styles.section}>
+          <Text style={styles.label}>Código de invitación</Text>
           <TextInput
-            style={styles.input}
-            placeholder="Ej: A1B2C3"
+            style={styles.codeInput}
+            placeholder="ABC123"
             value={code}
-            onChangeText={(text) => {
-              setCode(text.toUpperCase());
-              setError('');
-              setCreatorInfo(null);
-            }}
+            onChangeText={formatCode}
             maxLength={6}
             autoCapitalize="characters"
             autoCorrect={false}
+            textAlign="center"
+            fontSize={24}
+            fontFamily="monospace"
           />
+          <Text style={styles.codeHint}>
+            Ingresa el código de 6 caracteres que te compartieron
+          </Text>
+        </View>
 
-          {error && (
-            <Text style={styles.errorText}>{error}</Text>
-          )}
-
+        {/* Verify Button */}
+        <View style={styles.section}>
           <AppButton
-            title="Verificar Código"
+            title={verifying ? "Verificando..." : "Verificar Código"}
             onPress={handleVerifyCode}
-            loading={verifying}
-            disabled={code.length !== 6}
-            style={styles.verifyButton}
+            icon="🔍"
+            disabled={!code || code.length !== 6 || verifying}
           />
         </View>
 
-        {/* Creator Info */}
-        {creatorInfo && (
-          <View style={styles.creatorCard}>
-            <Text style={styles.creatorEmoji}>✅</Text>
-            <Text style={styles.creatorTitle}>Código Válido</Text>
-            <Text style={styles.creatorInfo}>
-              Creado por: {creatorInfo.creator.name}
-            </Text>
-            <Text style={styles.creatorDescription}>
-              Al unirte, podrás jugar con los retos personalizados de {creatorInfo.creator.name}
+        {/* Game Info */}
+        {gameInfo && (
+          <View style={styles.gameInfoCard}>
+            <Text style={styles.gameInfoTitle}>Información del Juego</Text>
+            
+            <View style={styles.creatorInfo}>
+              <Text style={styles.creatorLabel}>Creado por:</Text>
+              <Text style={styles.creatorName}>{gameInfo.creator.name}</Text>
+            </View>
+
+            <View style={styles.codeInfo}>
+              <Text style={styles.codeLabel}>Código:</Text>
+              <Text style={styles.codeDisplay}>{code}</Text>
+            </View>
+
+            <Text style={styles.gameDescription}>
+              Te unirás a un juego personalizado con datos creados por {gameInfo.creator.name}.
+              ¡Prepárate para los desafíos!
             </Text>
 
             <AppButton
               title="Unirse al Juego"
               onPress={handleJoinGame}
-              loading={isJoining}
-              icon="🚀"
+              icon="🎮"
               style={styles.joinButton}
             />
           </View>
         )}
 
         {/* Help */}
-        <View style={styles.helpCard}>
-          <Text style={styles.helpEmoji}>💡</Text>
-          <Text style={styles.helpTitle}>¿Cómo funciona?</Text>
+        <View style={styles.section}>
+          <Text style={styles.helpTitle}>¿Cómo obtener un código?</Text>
           <Text style={styles.helpText}>
-            Pídele a la persona que creó los retos que te comparta su código único. Ingrésalo aquí para comenzar a jugar.
+            • Pide a un amigo que genere un código desde su app{'\n'}
+            • El código debe tener exactamente 6 caracteres{'\n'}
+            • Los códigos pueden expirar o ser desactivados
           </Text>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -142,11 +174,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
-  },
-  emoji: {
-    fontSize: 64,
-    marginBottom: 16,
+    marginBottom: 48,
   },
   title: {
     fontSize: 28,
@@ -159,88 +187,97 @@ const styles = StyleSheet.create({
     color: '#666666',
     textAlign: 'center',
   },
-  form: {
-    marginBottom: 32,
+  section: {
+    marginBottom: 24,
   },
   label: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333333',
-    marginBottom: 8,
+    marginBottom: 12,
   },
-  input: {
+  codeInput: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 20,
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    letterSpacing: 8,
+    fontFamily: 'monospace',
     borderWidth: 2,
     borderColor: '#E0E0E0',
-    marginBottom: 12,
-  },
-  errorText: {
-    color: '#D32F2F',
-    fontSize: 14,
-    marginBottom: 12,
     textAlign: 'center',
+    letterSpacing: 4,
   },
-  verifyButton: {
+  codeHint: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
     marginTop: 8,
   },
-  creatorCard: {
-    backgroundColor: '#E8F5E9',
+  gameInfoCard: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
+    padding: 20,
     marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  creatorEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  creatorTitle: {
+  gameInfoTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2E7D32',
-    marginBottom: 8,
+    color: '#333333',
+    marginBottom: 16,
+    textAlign: 'center',
   },
   creatorInfo: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333333',
-    marginBottom: 8,
+    marginBottom: 12,
   },
-  creatorDescription: {
+  creatorLabel: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 4,
+  },
+  creatorName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FF6B9D',
+  },
+  codeInfo: {
+    marginBottom: 16,
+  },
+  codeLabel: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 4,
+  },
+  codeDisplay: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333333',
+    fontFamily: 'monospace',
+    letterSpacing: 2,
+  },
+  gameDescription: {
     fontSize: 14,
     color: '#666666',
     textAlign: 'center',
     marginBottom: 20,
+    lineHeight: 20,
   },
   joinButton: {
-    minWidth: 200,
-  },
-  helpCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-  },
-  helpEmoji: {
-    fontSize: 32,
-    marginBottom: 8,
+    marginTop: 0,
   },
   helpTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#333333',
     marginBottom: 8,
   },
   helpText: {
     fontSize: 14,
     color: '#666666',
-    textAlign: 'center',
     lineHeight: 20,
   },
 });

@@ -3,7 +3,7 @@ const router = express.Router();
 const prizeTemplateController = require('../controllers/prizeTemplate.controller');
 const { verifyToken } = require('../middlewares/auth.middleware');
 
-// Todas las rutas requieren autenticación y rol de admin
+// Todas las rutas requieren autenticación 
 router.use(verifyToken);
 
 // CRUD de plantillas de nivel

@@ -28,11 +28,6 @@ const gameInstanceSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  // Progreso específico de esta instancia
-  completedChallenges: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Challenge'
-  }],
   completedLevels: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Level'

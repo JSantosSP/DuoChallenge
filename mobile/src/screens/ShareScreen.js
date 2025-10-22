@@ -5,73 +5,129 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Share as RNShare,
   RefreshControl,
-  Clipboard,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useGameShare } from '../hooks/useGame';
+import { useShare, useShareValidation } from '../hooks/useShare';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 
 const ShareScreen = ({ navigation }) => {
   const { 
     shareCodes, 
-    codesLoading, 
-    createCode, 
-    deactivateCode,
-    isCreatingCode,
-    refetchCodes 
-  } = useGameShare();
+    gameInstances, 
+    loading, 
+    createShareCode, 
+    deactivateShareCode, 
+    shareCode, 
+    copyCodeToClipboard,
+    refetch 
+  } = useShare();
+  
+  const { canGenerate, validationMessage, checkCanGenerate } = useShareValidation();
+  
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await refetchCodes();
+    await refetch();
+    await checkCanGenerate();
     setRefreshing(false);
   };
 
-  const handleCreateCode = () => {
-    createCode();
-  };
+  const handleGenerateCode = async () => {
+    if (!canGenerate) {
+      Alert.alert('No puedes generar códigos', validationMessage);
+      return;
+    }
 
-  const handleShareCode = async (code) => {
     try {
-      await RNShare.share({
-        message: `¡Juega mi escape room personalizado! 🎮\n\nUsa este código: ${code}\n\n¡Completa todos los retos y descubre tu premio!`,
-      });
+      const result = await createShareCode();
+      if (result.success) {
+        Alert.alert(
+          '¡Código generado!',
+          `Tu código es: ${result.data.code}`,
+          [
+            { text: 'Copiar', onPress: () => copyCodeToClipboard(result.data.code) },
+            { text: 'Compartir', onPress: () => shareCode(result.data.code) },
+            { text: 'OK' }
+          ]
+        );
+      }
     } catch (error) {
-      console.error('Error compartiendo:', error);
+      Alert.alert('Error', 'No se pudo generar el código');
     }
   };
 
-  const handleCopyCode = (code) => {
-    Clipboard.setString(code);
-    Alert.alert('Copiado', 'Código copiado al portapapeles');
-  };
-
-  const handleDeactivate = (codeObj) => {
+  const handleDeactivateCode = (codeId) => {
     Alert.alert(
-      'Desactivar Código',
-      '¿Estás seguro? Nadie más podrá usar este código.',
+      'Desactivar código',
+      '¿Estás seguro de que quieres desactivar este código?',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Desactivar',
           style: 'destructive',
-          onPress: () => deactivateCode(codeObj._id),
+          onPress: () => deactivateCode(codeId),
         },
       ]
     );
   };
 
-  if (codesLoading) {
-    return <LoadingOverlay message="Cargando..." />;
-  }
+  const deactivateCode = async (codeId) => {
+    try {
+      const result = await deactivateShareCode(codeId);
+      if (result.success) {
+        Alert.alert('Éxito', 'Código desactivado correctamente');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo desactivar el código');
+    }
+  };
 
-  const activeCodes = shareCodes?.filter(c => c.active) || [];
-  const inactiveCodes = shareCodes?.filter(c => !c.active) || [];
+  const handleShareCode = async (code) => {
+    try {
+      await shareCode(code);
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo compartir el código');
+    }
+  };
+
+  const handleCopyCode = async (code) => {
+    try {
+      await copyCodeToClipboard(code);
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo copiar el código');
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const getStatusColor = (active, expiresAt) => {
+    if (!active) return '#F44336'; // Rojo - inactivo
+    if (expiresAt && new Date() > new Date(expiresAt)) return '#F44336'; // Rojo - expirado
+    return '#4CAF50'; // Verde - activo
+  };
+
+  const getStatusText = (active, expiresAt) => {
+    if (!active) return 'Inactivo';
+    if (expiresAt && new Date() > new Date(expiresAt)) return 'Expirado';
+    return 'Activo';
+  };
+
+  if (loading && !refreshing) {
+    return <LoadingOverlay message="Cargando códigos..." />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -83,110 +139,136 @@ const ShareScreen = ({ navigation }) => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Compartir mis Datos</Text>
+          <Text style={styles.title}>Compartir Juego</Text>
           <Text style={styles.subtitle}>
-            Genera un código para que otra persona juegue con tus datos personalizados
-          </Text>
-        </View>
-
-        {/* Info Card */}
-        <View style={styles.infoCard}>
-          <Text style={styles.infoEmoji}>💡</Text>
-          <Text style={styles.infoTitle}>¿Cómo funciona?</Text>
-          <Text style={styles.infoText}>
-            1. Genera un código único{'\n'}
-            2. Compártelo con tu pareja{'\n'}
-            3. Ella/él lo usa para crear un juego con tus datos{'\n'}
-            4. ¡Disfruten juntos del escape room personalizado!
+            Genera códigos para que otros jueguen con tus datos
           </Text>
         </View>
 
         {/* Generate Button */}
-        <View style={styles.generateSection}>
+        <View style={styles.section}>
           <AppButton
-            title="Generar Código Nuevo"
-            onPress={handleCreateCode}
-            loading={isCreatingCode}
-            icon="🎲"
+            title={canGenerate ? "Generar Nuevo Código" : "Generar Código"}
+            onPress={handleGenerateCode}
+            icon="🔗"
+            disabled={!canGenerate}
           />
+          {!canGenerate && (
+            <Text style={styles.validationMessage}>{validationMessage}</Text>
+          )}
         </View>
 
         {/* Active Codes */}
-        {activeCodes.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Código Activo</Text>
-            {activeCodes.map((codeObj) => (
-              <View key={codeObj._id} style={styles.codeCard}>
-                <View style={styles.codeHeader}>
-                  <Text style={styles.codeLabel}>Código:</Text>
-                  <Text style={styles.code}>{codeObj.code}</Text>
-                </View>
-
-                <View style={styles.codeStats}>
-                  <Text style={styles.codeStat}>
-                    📅 Creado: {new Date(codeObj.createdAt).toLocaleDateString()}
-                  </Text>
-                  <Text style={styles.codeStat}>
-                    👥 Usado por: {codeObj.usedBy?.length || 0} persona(s)
-                  </Text>
-                </View>
-
-                {codeObj.usedBy && codeObj.usedBy.length > 0 && (
-                  <View style={styles.usersContainer}>
-                    <Text style={styles.usersLabel}>Jugadores:</Text>
-                    {codeObj.usedBy.map((user, idx) => (
-                      <Text key={idx} style={styles.userName}>
-                        • {user.userId?.name || 'Usuario'}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Códigos Activos</Text>
+          {shareCodes.filter(code => code.active).length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyEmoji}>🔗</Text>
+              <Text style={styles.emptyTitle}>No tienes códigos activos</Text>
+              <Text style={styles.emptyText}>
+                Genera un código para empezar a compartir tu juego
+              </Text>
+            </View>
+          ) : (
+            shareCodes
+              .filter(code => code.active)
+              .map((code) => (
+                <View key={code._id} style={styles.codeCard}>
+                  <View style={styles.codeHeader}>
+                    <Text style={styles.codeText}>{code.code}</Text>
+                    <View style={[
+                      styles.statusBadge,
+                      { backgroundColor: getStatusColor(code.active, code.expiresAt) }
+                    ]}>
+                      <Text style={styles.statusText}>
+                        {getStatusText(code.active, code.expiresAt)}
                       </Text>
-                    ))}
+                    </View>
                   </View>
-                )}
+                  
+                  <Text style={styles.codeMeta}>
+                    Creado: {formatDate(code.createdAt)}
+                  </Text>
+                  
+                  {code.usedBy && code.usedBy.length > 0 && (
+                    <Text style={styles.codeMeta}>
+                      Usado por {code.usedBy.length} persona{code.usedBy.length > 1 ? 's' : ''}
+                    </Text>
+                  )}
 
-                <View style={styles.codeActions}>
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() => handleCopyCode(codeObj.code)}
-                  >
-                    <Text style={styles.actionButtonText}>📋 Copiar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() => handleShareCode(codeObj.code)}
-                  >
-                    <Text style={styles.actionButtonText}>📤 Compartir</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.actionButton, styles.deactivateButton]}
-                    onPress={() => handleDeactivate(codeObj)}
-                  >
-                    <Text style={styles.deactivateButtonText}>🚫 Desactivar</Text>
-                  </TouchableOpacity>
+                  <View style={styles.codeActions}>
+                    <TouchableOpacity
+                      style={styles.actionButton}
+                      onPress={() => handleCopyCode(code.code)}
+                    >
+                      <Text style={styles.actionButtonText}>📋 Copiar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.actionButton}
+                      onPress={() => handleShareCode(code.code)}
+                    >
+                      <Text style={styles.actionButtonText}>📤 Compartir</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.actionButton, styles.deactivateButton]}
+                      onPress={() => handleDeactivateCode(code._id)}
+                    >
+                      <Text style={styles.actionButtonText}>❌ Desactivar</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
-            ))}
-          </View>
-        )}
+              ))
+          )}
+        </View>
 
         {/* Inactive Codes */}
-        {inactiveCodes.length > 0 && (
+        {shareCodes.filter(code => !code.active).length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Códigos Anteriores</Text>
-            {inactiveCodes.map((codeObj) => (
-              <View key={codeObj._id} style={[styles.codeCard, styles.inactiveCodeCard]}>
-                <Text style={styles.inactiveCode}>{codeObj.code}</Text>
-                <Text style={styles.inactiveLabel}>Desactivado</Text>
-              </View>
-            ))}
+            <Text style={styles.sectionTitle}>Códigos Inactivos</Text>
+            {shareCodes
+              .filter(code => !code.active)
+              .map((code) => (
+                <View key={code._id} style={[styles.codeCard, styles.inactiveCard]}>
+                  <View style={styles.codeHeader}>
+                    <Text style={[styles.codeText, styles.inactiveText]}>{code.code}</Text>
+                    <View style={[styles.statusBadge, { backgroundColor: '#F44336' }]}>
+                      <Text style={styles.statusText}>Inactivo</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.codeMeta}>
+                    Desactivado: {formatDate(code.updatedAt)}
+                  </Text>
+                </View>
+              ))
+            }
           </View>
         )}
 
-        {activeCodes.length === 0 && inactiveCodes.length === 0 && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>🔗</Text>
-            <Text style={styles.emptyTitle}>No tienes códigos aún</Text>
-            <Text style={styles.emptyText}>
-              Genera un código para compartir tus datos con otra persona
+        {/* Game Instances */}
+        {gameInstances.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Juegos Activos</Text>
+            <Text style={styles.sectionSubtitle}>
+              Juegos en los que estás participando
             </Text>
+            {gameInstances.map((instance) => (
+              <View key={instance._id} style={styles.instanceCard}>
+                <View style={styles.instanceHeader}>
+                  <Text style={styles.instanceTitle}>
+                    Creado por: {instance.creatorId?.name || 'Usuario'}
+                  </Text>
+                  <Text style={styles.instanceCode}>
+                    Código: {instance.shareCode}
+                  </Text>
+                </View>
+                <Text style={styles.instanceMeta}>
+                  Unido: {formatDate(instance.createdAt)}
+                </Text>
+                <Text style={styles.instanceMeta}>
+                  Sets completados: {instance.completedSets}
+                </Text>
+              </View>
+            ))}
           </View>
         )}
       </ScrollView>
@@ -204,52 +286,17 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 24,
-    backgroundColor: '#FFFFFF',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    paddingTop: 0,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#333333',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666666',
-    lineHeight: 20,
-  },
-  infoCard: {
-    margin: 24,
-    backgroundColor: '#E3F2FD',
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-  },
-  infoEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  infoTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1976D2',
-    marginBottom: 12,
-  },
-  infoText: {
-    fontSize: 14,
-    color: '#424242',
-    lineHeight: 22,
-    textAlign: 'center',
-  },
-  generateSection: {
-    padding: 24,
-    paddingTop: 0,
   },
   section: {
     padding: 24,
@@ -261,112 +308,126 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 16,
   },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 16,
+  },
+  validationMessage: {
+    fontSize: 14,
+    color: '#F44336',
+    textAlign: 'center',
+    marginTop: 8,
+    paddingHorizontal: 16,
+  },
   codeCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    padding: 16,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
   },
+  inactiveCard: {
+    opacity: 0.6,
+  },
   codeHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  codeLabel: {
-    fontSize: 14,
-    color: '#666666',
-  },
-  code: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FF6B9D',
-    letterSpacing: 4,
-  },
-  codeStats: {
-    marginBottom: 16,
-  },
-  codeStat: {
-    fontSize: 14,
-    color: '#666666',
-    marginBottom: 4,
-  },
-  usersContainer: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  usersLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#666666',
+    alignItems: 'center',
     marginBottom: 8,
   },
-  userName: {
+  codeText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FF6B9D',
+    fontFamily: 'monospace',
+  },
+  inactiveText: {
+    color: '#999999',
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    fontWeight: '500',
+  },
+  codeMeta: {
     fontSize: 14,
-    color: '#333333',
+    color: '#666666',
     marginBottom: 4,
   },
   codeActions: {
     flexDirection: 'row',
+    marginTop: 12,
     gap: 8,
   },
   actionButton: {
-    flex: 1,
-    backgroundColor: '#F0F0F0',
-    paddingVertical: 12,
+    backgroundColor: '#FF6B9D',
     borderRadius: 8,
-    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    flex: 1,
   },
   actionButtonText: {
-    fontSize: 14,
+    color: '#FFFFFF',
+    fontSize: 12,
     fontWeight: '500',
-    color: '#333333',
+    textAlign: 'center',
   },
   deactivateButton: {
-    backgroundColor: '#FFE0E0',
+    backgroundColor: '#F44336',
   },
-  deactivateButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#D32F2F',
+  instanceCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  inactiveCodeCard: {
-    opacity: 0.5,
+  instanceHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
   },
-  inactiveCode: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#999999',
-    letterSpacing: 2,
+  instanceTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333333',
+    flex: 1,
   },
-  inactiveLabel: {
-    fontSize: 12,
-    color: '#999999',
+  instanceCode: {
+    fontSize: 14,
+    color: '#FF6B9D',
+    fontFamily: 'monospace',
+  },
+  instanceMeta: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 4,
   },
   emptyState: {
     alignItems: 'center',
     padding: 48,
-    marginTop: 48,
   },
   emptyEmoji: {
     fontSize: 64,
     marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333333',
     marginBottom: 8,

@@ -13,9 +13,10 @@ import { useGame } from '../hooks/useGame';
 
 const getChallengeTypeLabel = (type) => {
   const labels = {
-    text: '✏️ Reto de Texto',
-    date: '📅 Adivina la Fecha',
-    photo: '🖼️ Reto Visual',
+    texto: '✏️ Reto de Texto',
+    fecha: '📅 Adivina la Fecha',
+    foto: '🖼️ Reto Visual',
+    lugar: '📍 Adivina el Lugar',
   };
   return labels[type] || '🎯 Reto';
 };
@@ -59,53 +60,48 @@ const LevelScreen = ({ route, navigation }) => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>{currentLevel.title}</Text>
-          <Text style={styles.subtitle}>{currentLevel.description}</Text>
+          <Text style={styles.title}>Nivel {currentLevel.order || 1}</Text>
+          <Text style={styles.subtitle}>{currentLevel.pregunta}</Text>
           <View style={styles.progressIndicator}>
             <Text style={styles.progressText}>
-              {currentLevel.challenges?.filter(c => c.completed).length} /{' '}
-              {currentLevel.challenges?.length} retos completados
+              {currentLevel.completed ? '✅ Completado' : '⏳ En progreso'}
+            </Text>
+            <Text style={styles.progressText}>
+              Intentos: {currentLevel.currentAttempts || 0} / {currentLevel.maxAttempts || 5}
             </Text>
           </View>
         </View>
 
-        {/* Challenges */}
+        {/* Level Info */}
         <View style={styles.challengesContainer}>
-          {currentLevel.challenges?.map((challenge, index) => (
-            <TouchableOpacity
-              key={challenge._id}
-              style={[
-                styles.challengeCard,
-                challenge.completed && styles.challengeCompleted,
-              ]}
-              onPress={() => handleChallengePress(challenge)}
-              disabled={challenge.completed}
-            >
-              <View style={styles.challengeNumber}>
-                <Text style={styles.challengeNumberText}>
-                  {challenge.completed ? '✅' : index + 1}
-                </Text>
-              </View>
-              
-              <View style={styles.challengeInfo}>
-                <Text style={styles.challengeType}>
-                  {getChallengeTypeLabel(challenge.type)}
-                </Text>
-                <Text style={styles.challengeQuestion} numberOfLines={2}>
-                  {challenge.question}
-                </Text>
-                {challenge.completed && (
-                  <Text style={styles.completedText}>¡Completado!</Text>
-                )}
-              </View>
+          <View style={styles.levelInfoCard}>
+            <Text style={styles.levelInfoTitle}>Información del Nivel</Text>
+            <Text style={styles.levelInfoText}>
+              Tipo: {getChallengeTypeLabel(currentLevel.tipoDato?.type)}
+            </Text>
+            <Text style={styles.levelInfoText}>
+              Dificultad: {currentLevel.difficulty || 'medium'}
+            </Text>
+            {currentLevel.pistas && currentLevel.pistas.length > 0 && (
+              <Text style={styles.levelInfoText}>
+                Pistas disponibles: {currentLevel.pistas.length}
+              </Text>
+            )}
+          </View>
 
-              <View style={styles.challengeArrow}>
-                <Text style={styles.arrowText}>
-                  {challenge.completed ? '✓' : '→'}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+          {/* Play Button */}
+          <TouchableOpacity
+            style={[
+              styles.playButton,
+              currentLevel.completed && styles.playButtonCompleted
+            ]}
+            onPress={() => handleChallengePress(currentLevel)}
+            disabled={currentLevel.completed}
+          >
+            <Text style={styles.playButtonText}>
+              {currentLevel.completed ? '✅ Completado' : '🎮 Jugar Nivel'}
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -212,6 +208,47 @@ const styles = StyleSheet.create({
   arrowText: {
     fontSize: 24,
     color: '#FF6B9D',
+  },
+  levelInfoCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  levelInfoTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 12,
+  },
+  levelInfoText: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 4,
+  },
+  playButton: {
+    backgroundColor: '#FF6B9D',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  playButtonCompleted: {
+    backgroundColor: '#4CAF50',
+  },
+  playButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
 });
 

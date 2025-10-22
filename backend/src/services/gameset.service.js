@@ -1,5 +1,5 @@
 const { GameSet, User, Challenge, Level, GameInstance } = require('../models');
-const { generateGameSeed } = require('../utils/seed.util');
+const { generateGameSeed, seededRandom } = require('../utils/seed.util');
 const { generateLevels } = require('../services/level.service');
 const { assignPrize } = require('../services/prize.service');
 

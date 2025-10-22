@@ -47,14 +47,15 @@ export default api;
 export const apiService = {
   // Auth
   login: (email, password) => api.post('/auth/login', { email, password }),
+  refreshToken: (refreshToken) => api.post('/auth/refresh', { refreshToken }),
   getProfile: () => api.get('/auth/profile'),
 
   // Game
   generateGame: () => api.post('/api/generate'),
   getLevels: () => api.get('/api/levels'),
-  getChallenge: (challengeId) => api.get(`/api/challenge/${challengeId}`),
-  verifyChallenge: (challengeId, payload) => 
-    api.post(`/api/challenge/${challengeId}/verify`, payload),
+  getLevel: (levelId) => api.get(`/api/level/${levelId}`),
+  verifyLevel: (levelId, payload) => 
+    api.post(`/api/level/${levelId}/verify`, payload),
   getProgress: () => api.get('/api/progress'),
   getPrize: () => api.get('/api/prize'),
   resetGame: () => api.post('/api/reset'),
@@ -75,11 +76,18 @@ export const apiService = {
     });
   },
 
+  // Prize Templates
+  getPrizeTemplates: () => api.get('/api/prize-templates'),
+  getPrizeTemplateById: (id) => api.get(`/api/prize-templates/${id}`),
+
   // Prizes
   getUserPrizes: () => api.get('/api/prizes'),
   createPrize: (data) => api.post('/api/prizes', data),
   updatePrize: (id, data) => api.put(`/api/prizes/${id}`, data),
   deletePrize: (id) => api.delete(`/api/prizes/${id}`),
+
+  // Categories (for UserData)
+  getCategories: () => api.get('/api/categories'),
 
   // Share
   createShareCode: () => api.post('/api/share/create'),

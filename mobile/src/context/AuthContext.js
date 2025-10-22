@@ -7,6 +7,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [refreshToken, setRefreshToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,10 +17,12 @@ export const AuthProvider = ({ children }) => {
   const loadStoredAuth = async () => {
     try {
       const storedToken = await SecureStore.getItemAsync('token');
+      const storedRefreshToken = await SecureStore.getItemAsync('refreshToken');
       const storedUser = await SecureStore.getItemAsync('user');
 
-      if (storedToken && storedUser) {
+      if (storedToken && storedRefreshToken && storedUser) {
         setToken(storedToken);
+        setRefreshToken(storedRefreshToken);
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
@@ -32,12 +35,14 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await apiService.login(email, password);
-      const { token: newToken, user: newUser } = response.data.data;
+      const { token: newToken, refreshToken: newRefreshToken, user: newUser } = response.data.data;
 
       await SecureStore.setItemAsync('token', newToken);
+      await SecureStore.setItemAsync('refreshToken', newRefreshToken);
       await SecureStore.setItemAsync('user', JSON.stringify(newUser));
 
       setToken(newToken);
+      setRefreshToken(newRefreshToken);
       setUser(newUser);
 
       return { success: true };
@@ -50,11 +55,36 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshAuthToken = async () => {
+    try {
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const response = await apiService.refreshToken(refreshToken);
+      const { token: newToken, refreshToken: newRefreshToken } = response.data.data;
+
+      await SecureStore.setItemAsync('token', newToken);
+      await SecureStore.setItemAsync('refreshToken', newRefreshToken);
+
+      setToken(newToken);
+      setRefreshToken(newRefreshToken);
+
+      return { success: true };
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      await logout();
+      return { success: false };
+    }
+  };
+
   const logout = async () => {
     try {
       await SecureStore.deleteItemAsync('token');
+      await SecureStore.deleteItemAsync('refreshToken');
       await SecureStore.deleteItemAsync('user');
       setToken(null);
+      setRefreshToken(null);
       setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
@@ -64,8 +94,10 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     token,
+    refreshToken,
     login,
     logout,
+    refreshAuthToken,
     isAuthenticated: !!token,
     loading
   };

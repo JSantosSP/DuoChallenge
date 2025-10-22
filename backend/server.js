@@ -71,6 +71,7 @@ const prizeRoutes = require('./src/routes/prize.routes');
 const prizeTemplateRoutes = require('./src/routes/prizeTemplate.routes');
 const shareRoutes = require('./src/routes/share.routes');
 const categoryRoutes = require('./src/routes/category.routes');
+const categoryGetRoutes = require('./src/routes/category.get.routes');
 
 // Usar rutas
 app.use('/auth', authRoutes);
@@ -81,6 +82,7 @@ app.use('/api/prizes', prizeRoutes);
 app.use('/api/prize-templates', prizeTemplateRoutes);
 app.use('/api/share', shareRoutes);
 app.use('/admin/categories', categoryRoutes);
+app.use('/api/categories', categoryGetRoutes);
 
 // ========================================
 // MANEJO DE ERRORES

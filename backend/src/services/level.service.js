@@ -1,5 +1,6 @@
 const { Level, Variable, UserData } = require('../models');
-const { hashAnswer, hashPuzzleAnswer, hashDateAnswer } = require('../utils/hash.util');
+const { hashAnswer, hashPuzzleAnswer, hashDateAnswer, generateSalt } = require('../utils/hash.util');
+const { seededRandom } = require('../utils/seed.util');
 
 /**
  * Genera niveles con sus niveles

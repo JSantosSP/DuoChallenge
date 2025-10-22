@@ -11,18 +11,10 @@ const getUserPrizes = async (req, res) => {
       active: true 
     }).sort({ createdAt: -1 });
 
-    // Premios del sistema (default)
-    const systemPrizes = await Prize.find({ 
-      isDefault: true, 
-      active: true 
-    }).sort({ createdAt: -1 });
-
     res.json({
       success: true,
       data: {
-        userPrizes,
-        systemPrizes,
-        allPrizes: [...userPrizes, ...systemPrizes]
+        userPrizes
       }
     });
   } catch (error) {
@@ -55,7 +47,6 @@ const createPrize = async (req, res) => {
       imagePath: imagePath || null,
       weight: weight || 1,
       category: category || 'personal',
-      isDefault: false,
       active: true
     });
 
@@ -86,7 +77,6 @@ const updatePrize = async (req, res) => {
     const prize = await Prize.findOne({ 
       _id: id, 
       userId, 
-      isDefault: false // Solo puede editar sus propios premios
     });
 
     if (!prize) {
@@ -129,8 +119,7 @@ const deletePrize = async (req, res) => {
 
     const prize = await Prize.findOne({ 
       _id: id, 
-      userId,
-      isDefault: false 
+      userId
     });
 
     if (!prize) {

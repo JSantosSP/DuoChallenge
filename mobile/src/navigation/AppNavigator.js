@@ -11,12 +11,13 @@ import LevelScreen from '../screens/LevelScreen';
 import ChallengeScreen from '../screens/ChallengeScreen';
 import PrizeScreen from '../screens/PrizeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import MyDataScreen from '../screens/MyDataScreen'; // NUEVO
-import EditDataScreen from '../screens/EditDataScreen'; // NUEVO
+import MyDataScreen from '../screens/MyDataScreen';
+import AddEdidtDataScreen from '../screens/AddEditDataScreen';
 import EditPrizeScreen from '../screens/EditPrizeScreen';
 import MyPrizesScreen from '../screens/MyPrizesScreen';
 import JoinGameScreen from '../screens/JoinGameScreen';
 import ShareScreen from '../screens/ShareScreen';
+import PrizeTemplatesScreen from '../screens/PrizeTemplatesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -76,6 +77,15 @@ const MainStack = () => {
         }}
       />
       <Stack.Screen
+        name="PrizeTemplates"
+        component={PrizeTemplatesScreen}
+        options={{
+          title: 'Crea tu Premio',
+          headerBackTitle: 'Atrás',
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
         name="Settings"
         component={SettingsScreen}
         options={{
@@ -93,10 +103,18 @@ const MainStack = () => {
         }}
       />
       <Stack.Screen
+        name="AddData"
+        component={AddEdidtDataScreen}
+        options={{
+          title: 'Añade Datos Personales',
+          headerBackTitle: 'Atrás',
+        }}
+      />
+      <Stack.Screen
         name="EditData"
-        component={EditDataScreen}
+        component={AddEdidtDataScreen}
         options={({ route }) => ({
-          title: route.params?.mode === 'edit' ? 'Editar Dato' : 'Nuevo Dato',
+          title: route.params?.mode === 'edit' ? 'Editar Dato' : 'Añade Datos Personales',
           headerBackTitle: 'Atrás',
         })}
       />

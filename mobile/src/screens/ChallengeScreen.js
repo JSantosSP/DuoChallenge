@@ -14,16 +14,17 @@ import ChallengeInput from '../components/ChallengeInput';
 
 const getChallengeTypeLabel = (type) => {
   const labels = {
-    text: '✏️ Reto de Texto',
-    date: '📅 Adivina la Fecha',
-    photo: '🖼️ Reto Visual',
+    texto: '✏️ Reto de Texto',
+    fecha: '📅 Adivina la Fecha',
+    foto: '🖼️ Reto Visual',
+    lugar: '📍 Adivina el Lugar',
   };
   return labels[type] || '🎯 Reto';
 };
 
 const ChallengeScreen = ({ route, navigation }) => {
   const { challenge } = route.params;
-  const { verifyChallenge, verifyLoading } = useGame();
+  const { verifyLevel, verifyLoading } = useGame();
   
   const [answer, setAnswer] = useState('');
   const [puzzleOrder, setPuzzleOrder] = useState(null);
@@ -32,7 +33,7 @@ const ChallengeScreen = ({ route, navigation }) => {
 
   const handleSubmit = async () => {
     // Validar según el tipo de reto
-    if (challenge.type === 'photo') {
+    if (challenge.tipoDato?.type === 'foto') {
       if (!puzzleOrder) {
         Alert.alert('Error', 'Por favor completa el puzzle');
         return;
@@ -45,24 +46,24 @@ const ChallengeScreen = ({ route, navigation }) => {
     }
 
     // Preparar payload según tipo de reto
-    const payload = challenge.type === 'photo' 
+    const payload = challenge.tipoDato?.type === 'foto' 
       ? { puzzleOrder }
       : { answer: answer.trim() };
 
-    verifyChallenge(
-      { challengeId: challenge._id, payload },
+    verifyLevel(
+      { levelId: challenge._id, payload },
       {
         onSuccess: (data) => {
           if (data.data.correct) {
             navigation.goBack();
           } else {
             setAttempts(attempts + 1);
-            if (challenge.type !== 'photo') {
+            if (challenge.tipoDato?.type !== 'foto') {
               setAnswer('');
             }
             
             // Mostrar siguiente pista si hay intentos fallidos
-            if (data.data.hint && currentHintIndex < challenge.hints?.length - 1) {
+            if (data.data.hint && currentHintIndex < challenge.pistas?.length - 1) {
               setCurrentHintIndex(currentHintIndex + 1);
             }
             
@@ -84,8 +85,8 @@ const ChallengeScreen = ({ route, navigation }) => {
     // Enviar verificación automáticamente
     setTimeout(() => {
       const payload = { puzzleOrder: order };
-      verifyChallenge(
-        { challengeId: challenge._id, payload },
+      verifyLevel(
+        { levelId: challenge._id, payload },
         {
           onSuccess: (data) => {
             if (data.data.correct) {
@@ -105,7 +106,7 @@ const ChallengeScreen = ({ route, navigation }) => {
   };
 
   const showNextHint = () => {
-    if (currentHintIndex < challenge.hints?.length - 1) {
+    if (currentHintIndex < challenge.pistas?.length - 1) {
       setCurrentHintIndex(currentHintIndex + 1);
     }
   };
@@ -117,12 +118,12 @@ const ChallengeScreen = ({ route, navigation }) => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.typeLabel}>
-            {getChallengeTypeLabel(challenge.type)}
+            {getChallengeTypeLabel(challenge.tipoDato?.type)}
           </Text>
         </View>
 
         {/* Image if exists (only for non-puzzle challenges) */}
-        {challenge.imagePath && challenge.type !== 'photo' && (
+        {challenge.imagePath && challenge.tipoDato?.type !== 'foto' && (
           <View style={styles.imageContainer}>
             <Image
               source={{ uri: `http://localhost:4000${challenge.imagePath}` }}
@@ -134,21 +135,21 @@ const ChallengeScreen = ({ route, navigation }) => {
 
         {/* Question */}
         <View style={styles.questionContainer}>
-          <Text style={styles.question}>{challenge.question}</Text>
+          <Text style={styles.question}>{challenge.pregunta}</Text>
         </View>
 
         {/* Hints */}
-        {challenge.hints && challenge.hints.length > 0 && (
+        {challenge.pistas && challenge.pistas.length > 0 && (
           <View style={styles.hintsContainer}>
             <Text style={styles.hintsTitle}>💡 Pistas</Text>
-            {challenge.hints.slice(0, currentHintIndex + 1).map((hint, index) => (
+            {challenge.pistas.slice(0, currentHintIndex + 1).map((hint, index) => (
               <View key={index} style={styles.hintCard}>
                 <Text style={styles.hintNumber}>Pista {index + 1}</Text>
                 <Text style={styles.hintText}>{hint}</Text>
               </View>
             ))}
             
-            {currentHintIndex < challenge.hints.length - 1 && (
+            {currentHintIndex < challenge.pistas.length - 1 && (
               <AppButton
                 title="Ver siguiente pista"
                 onPress={showNextHint}
@@ -161,11 +162,11 @@ const ChallengeScreen = ({ route, navigation }) => {
 
         {/* Answer Input */}
         <View style={styles.answerContainer}>
-          {challenge.type !== 'photo' && (
+          {challenge.tipoDato?.type !== 'foto' && (
             <Text style={styles.answerLabel}>Tu respuesta:</Text>
           )}
           <ChallengeInput
-            type={challenge.type}
+            type={challenge.tipoDato?.type}
             value={answer}
             onChangeText={setAnswer}
             challenge={challenge}
@@ -173,7 +174,7 @@ const ChallengeScreen = ({ route, navigation }) => {
             style={styles.input}
           />
           
-          {challenge.type !== 'photo' && (
+          {challenge.tipoDato?.type !== 'foto' && (
             <AppButton
               title="Verificar Respuesta"
               onPress={handleSubmit}
@@ -185,7 +186,7 @@ const ChallengeScreen = ({ route, navigation }) => {
           
           {attempts > 0 && (
             <Text style={styles.attemptsText}>
-              Intentos realizados: {attempts} / {challenge.maxAttempts}
+              Intentos realizados: {attempts} / {challenge.maxAttempts || 5}
             </Text>
           )}
         </View>

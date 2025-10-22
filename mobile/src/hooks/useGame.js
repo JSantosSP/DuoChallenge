@@ -29,10 +29,10 @@ export const useGame = () => {
     },
   });
 
-  // Verificar reto
+  // Verificar nivel
   const verifyMutation = useMutation({
-    mutationFn: ({ challengeId, payload }) => 
-      apiService.verifyChallenge(challengeId, payload),
+    mutationFn: ({ levelId, payload }) => 
+      apiService.verifyLevel(levelId, payload),
     onSuccess: (data) => {
       queryClient.invalidateQueries(['levels']);
       queryClient.invalidateQueries(['progress']);
@@ -101,7 +101,7 @@ export const useGame = () => {
     progress,
     currentLevel,
     setCurrentLevel,
-    verifyChallenge: verifyMutation.mutate,
+    verifyLevel: verifyMutation.mutate,
     verifyLoading: verifyMutation.isPending,
     prize,
     getPrize: refetchPrize,

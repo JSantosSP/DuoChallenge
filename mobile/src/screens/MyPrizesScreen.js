@@ -5,17 +5,17 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  RefreshControl,
   Alert,
   Image,
-  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useUserPrizes } from '../hooks/useGame';
+import { usePrize } from '../hooks/usePrize';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 
 const MyPrizesScreen = ({ navigation }) => {
-  const { prizes, isLoading, deletePrize, refetch } = useUserPrizes();
+  const { userPrizes, loading, refetch, deletePrize } = usePrize();
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
@@ -24,35 +24,82 @@ const MyPrizesScreen = ({ navigation }) => {
     setRefreshing(false);
   };
 
-  const handleEdit = (prize) => {
-    navigation.navigate('EditPrize', { prize, mode: 'edit' });
-  };
-
   const handleDelete = (prize) => {
     Alert.alert(
       'Eliminar Premio',
-      '¿Estás seguro de eliminar este premio?',
+      '¿Estás seguro de que quieres eliminar este premio?',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: () => deletePrize(prize._id),
+          onPress: () => deletePrizeItem(prize._id),
         },
       ]
     );
   };
 
-  const handleAddNew = () => {
-    navigation.navigate('EditPrize', { mode: 'create' });
+  const deletePrizeItem = async (id) => {
+    try {
+      const result = await deletePrize(id);
+      if (result.success) {
+        Alert.alert('Éxito', 'Premio eliminado correctamente');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo eliminar el premio');
+    }
   };
 
-  if (isLoading) {
+  const getWeightColor = (weight) => {
+    if (weight <= 3) return '#4CAF50'; // Verde
+    if (weight <= 6) return '#FF9800'; // Naranja
+    return '#F44336'; // Rojo
+  };
+
+  const renderPrizeCard = (prize) => (
+    <TouchableOpacity
+      key={prize._id}
+      style={styles.prizeCard}
+      onPress={() => navigation.navigate('EditPrize', { prize })}
+    >
+      {prize.imagePath && (
+        <Image
+          source={{ uri: prize.imagePath }}
+          style={styles.prizeImage}
+        />
+      )}
+      <View style={styles.prizeInfo}>
+        <View style={styles.prizeHeader}>
+          <Text style={styles.prizeTitle}>{prize.title}</Text>
+        </View>
+        <Text style={styles.prizeDescription} numberOfLines={2}>
+          {prize.description}
+        </Text>
+        <View style={styles.prizeMeta}>
+          <View style={[styles.weightBadge, { backgroundColor: getWeightColor(prize.weight) }]}>
+            <Text style={styles.weightText}>Peso: {prize.weight}</Text>
+          </View>
+          {prize.used && (
+            <View style={styles.usedBadge}>
+              <Text style={styles.usedText}>Usado</Text>
+            </View>
+          )}
+        </View>
+      </View>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => handleDelete(prize)}
+      >
+        <Text style={styles.deleteButtonText}>🗑️</Text>
+      </TouchableOpacity>
+    </TouchableOpacity>
+  );
+
+  if (loading && !refreshing) {
     return <LoadingOverlay message="Cargando premios..." />;
   }
 
-  const userPrizes = prizes?.userPrizes || [];
-  const systemPrizes = prizes?.systemPrizes || [];
+  const allPrizes = userPrizes;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -66,126 +113,50 @@ const MyPrizesScreen = ({ navigation }) => {
         <View style={styles.header}>
           <Text style={styles.title}>Mis Premios</Text>
           <Text style={styles.subtitle}>
-            Crea tus propios premios o usa los del sistema
+            Gestiona tus premios para los juegos
           </Text>
         </View>
 
-        {/* Add Button */}
-        <View style={styles.addButtonContainer}>
-          <AppButton
-            title="Crear Nuevo Premio"
-            onPress={handleAddNew}
-            icon="🎁"
-          />
+        {/* Filter Buttons */}
+        <View style={styles.filterContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <TouchableOpacity
+              style={[styles.filterButton, styles.filterActive]}
+            >
+              <Text style={[styles.filterText, styles.filterTextActive]}>
+                Todos
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
         </View>
 
-        {/* Mis Premios */}
-        {userPrizes.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Mis Premios Personalizados</Text>
-            <View style={styles.prizesGrid}>
-              {userPrizes.map((prize) => (
-                <PrizeCard
-                  key={prize._id}
-                  prize={prize}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  canEdit={true}
-                />
-              ))}
+        {/* Prizes List */}
+        <View style={styles.section}>
+          {allPrizes.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyEmoji}>🎁</Text>
+              <Text style={styles.emptyTitle}>
+                {'No tienes premios aún'}
+              </Text>
+              <Text style={styles.emptyText}>
+                {'Crea tu primer premio para empezar a jugar'}
+              </Text>
             </View>
-          </View>
-        )}
-
-        {/* Premios del Sistema */}
-        {systemPrizes.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Premios del Sistema</Text>
-            <Text style={styles.sectionSubtitle}>
-              Estos premios también pueden salirte al completar el juego
-            </Text>
-            <View style={styles.prizesGrid}>
-              {systemPrizes.map((prize) => (
-                <PrizeCard
-                  key={prize._id}
-                  prize={prize}
-                  canEdit={false}
-                />
-              ))}
-            </View>
-          </View>
-        )}
-
-        {userPrizes.length === 0 && systemPrizes.length === 0 && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>🎁</Text>
-            <Text style={styles.emptyTitle}>No hay premios aún</Text>
-            <Text style={styles.emptyText}>
-              Crea premios personalizados para que aparezcan al completar el juego
-            </Text>
-          </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
-
-// Componente de tarjeta de premio
-const PrizeCard = ({ prize, onEdit, onDelete, canEdit }) => {
-  return (
-    <View style={styles.prizeCard}>
-      <View style={styles.prizeImageContainer}>
-        {prize.imagePath ? (
-          <Image
-            source={{ uri: `${process.env.EXPO_PUBLIC_API_URL}${prize.imagePath}` }}
-            style={styles.prizeImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={styles.prizeImagePlaceholder}>
-            <Text style={styles.prizeImageEmoji}>🏆</Text>
-          </View>
-        )}
-        {prize.used && (
-          <View style={styles.usedBadge}>
-            <Text style={styles.usedBadgeText}>Usado</Text>
-          </View>
-        )}
-      </View>
-
-      <View style={styles.prizeContent}>
-        <Text style={styles.prizeTitle} numberOfLines={2}>{prize.title}</Text>
-        <Text style={styles.prizeDescription} numberOfLines={3}>
-          {prize.description}
-        </Text>
-
-        <View style={styles.prizeFooter}>
-          <View style={styles.prizeMetadata}>
-            <Text style={styles.prizeWeight}>Peso: {prize.weight}/10</Text>
-            {prize.category && (
-              <Text style={styles.prizeCategory}>{prize.category}</Text>
-            )}
-          </View>
-
-          {canEdit && (
-            <View style={styles.prizeActions}>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => onEdit(prize)}
-              >
-                <Text style={styles.actionButtonText}>✏️</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionButton, styles.deleteActionButton]}
-                onPress={() => onDelete(prize)}
-              >
-                <Text style={styles.actionButtonText}>🗑️</Text>
-              </TouchableOpacity>
-            </View>
+          ) : (
+            allPrizes.map((prize) => renderPrizeCard(prize))
           )}
         </View>
-      </View>
-    </View>
+
+        {/* Add Button */}
+        <View style={styles.section}>
+          <AppButton
+            title="Agregar Nuevo Premio"
+            onPress={() => navigation.navigate('PrizeTemplates')}
+            icon="➕"
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -199,152 +170,139 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 24,
-    backgroundColor: '#FFFFFF',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    paddingTop: 0,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#333333',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   subtitle: {
+    fontSize: 16,
+    color: '#666666',
+  },
+  filterContainer: {
+    paddingHorizontal: 24,
+    marginBottom: 16,
+  },
+  filterButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  filterActive: {
+    backgroundColor: '#FF6B9D',
+    borderColor: '#FF6B9D',
+  },
+  filterText: {
     fontSize: 14,
     color: '#666666',
-    lineHeight: 20,
+    fontWeight: '500',
   },
-  addButtonContainer: {
-    padding: 24,
+  filterTextActive: {
+    color: '#FFFFFF',
   },
   section: {
     padding: 24,
     paddingTop: 0,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 8,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: '#666666',
-    marginBottom: 16,
-  },
-  prizesGrid: {
-    gap: 16,
-  },
   prizeCard: {
+    flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    overflow: 'hidden',
+    padding: 16,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
-    marginBottom: 16,
-  },
-  prizeImageContainer: {
-    position: 'relative',
-    height: 150,
   },
   prizeImage: {
-    width: '100%',
-    height: '100%',
-  },
-  prizeImagePlaceholder: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#FFD700',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  prizeImageEmoji: {
-    fontSize: 48,
-  },
-  usedBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    width: 60,
+    height: 60,
     borderRadius: 8,
+    marginRight: 16,
   },
-  usedBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '600',
+  prizeInfo: {
+    flex: 1,
   },
-  prizeContent: {
-    padding: 16,
+  prizeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
   },
   prizeTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#333333',
-    marginBottom: 8,
+    flex: 1,
+    marginRight: 8,
+  },
+  prizeCategory: {
+    fontSize: 12,
+    color: '#666666',
   },
   prizeDescription: {
     fontSize: 14,
     color: '#666666',
-    lineHeight: 20,
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  prizeFooter: {
+  prizeMeta: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  prizeMetadata: {
-    flex: 1,
-  },
-  prizeWeight: {
-    fontSize: 12,
-    color: '#FF6B9D',
-    fontWeight: '600',
-  },
-  prizeCategory: {
-    fontSize: 10,
-    color: '#999999',
-    marginTop: 2,
-  },
-  prizeActions: {
-    flexDirection: 'row',
     gap: 8,
   },
-  actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#F0F0F0',
-    alignItems: 'center',
-    justifyContent: 'center',
+  weightBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
-  deleteActionButton: {
-    backgroundColor: '#FFE0E0',
+  weightText: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    fontWeight: '500',
   },
-  actionButtonText: {
-    fontSize: 18,
+  usedBadge: {
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  usedText: {
+    fontSize: 12,
+    color: '#4CAF50',
+    fontWeight: '500',
+  },
+  systemText: {
+    fontSize: 12,
+    color: '#FF6B9D',
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+  deleteButton: {
+    padding: 8,
+    alignSelf: 'flex-start',
+  },
+  deleteButtonText: {
+    fontSize: 20,
   },
   emptyState: {
     alignItems: 'center',
     padding: 48,
-    marginTop: 48,
   },
   emptyEmoji: {
     fontSize: 64,
     marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333333',
     marginBottom: 8,

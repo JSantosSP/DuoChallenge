@@ -10,215 +10,229 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useUserPrizes } from '../hooks/useGame';
-import AppButton from '../components/AppButton';
 import * as ImagePicker from 'expo-image-picker';
-import { apiService } from '../api/api';
+import { usePrize } from '../hooks/usePrize';
+import AppButton from '../components/AppButton';
+import LoadingOverlay from '../components/LoadingOverlay';
 
-const EditPrizeScreen = ({ route, navigation }) => {
-  const { mode, prize } = route.params;
-  const { createPrize, updatePrize, isCreating, isUpdating } = useUserPrizes();
+const EditPrizeScreen = ({ navigation, route }) => {
+  const { template, prize } = route.params || {};
+  const isEditing = !!prize;
+  const isFromTemplate = !!template;
+  
+  const { 
+    createPrizeFromTemplate, 
+    createPrize, 
+    updatePrize, 
+    uploadImage,
+    loading 
+  } = usePrize();
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     imagePath: null,
-    weight: 5,
-    category: 'personal',
+    weight: 1,
   });
 
-  const [uploading, setUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
-    if (mode === 'edit' && prize) {
+    if (isEditing && prize) {
       setFormData({
-        title: prize.title,
-        description: prize.description,
-        imagePath: prize.imagePath,
-        weight: prize.weight,
-        category: prize.category || 'personal',
+        title: prize.title || '',
+        description: prize.description || '',
+        imagePath: prize.imagePath || null,
+        weight: prize.weight || 1,
       });
-    }
-  }, [mode, prize]);
-
-  const handleSubmit = () => {
-    // Validaciones
-    if (!formData.title) {
-      Alert.alert('Error', 'Ingresa un título para el premio');
-      return;
-    }
-    if (!formData.description) {
-      Alert.alert('Error', 'Ingresa una descripción');
-      return;
-    }
-
-    const data = { ...formData };
-
-    if (mode === 'edit') {
-      updatePrize({ id: prize._id, data }, {
-        onSuccess: () => navigation.goBack(),
+      if (prize.imagePath) {
+        setSelectedImage({ uri: prize.imagePath });
+      }
+    } else if (isFromTemplate && template) {
+      setFormData({
+        title: template.title || '',
+        description: template.description || '',
+        imagePath: template.imagePath || null,
+        weight: template.weight || 1,
       });
-    } else {
-      createPrize(data, {
-        onSuccess: () => navigation.goBack(),
-      });
+      if (template.imagePath) {
+        setSelectedImage({ uri: template.imagePath });
+      }
     }
-  };
+  }, [isEditing, prize, isFromTemplate, template]);
 
-  const handlePickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permissionResult.granted) {
-      Alert.alert('Permiso requerido', 'Necesitamos acceso a tu galería');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.7,
-    });
-
-    if (!result.canceled) {
-      await uploadImage(result.assets[0]);
-    }
-  };
-
-  const uploadImage = async (asset) => {
-    setUploading(true);
+  const handleImagePicker = async () => {
     try {
-      const formData = new FormData();
-      formData.append('image', {
-        uri: asset.uri,
-        type: 'image/jpeg',
-        name: 'prize.jpg',
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
       });
 
-      const response = await apiService.uploadImage(formData);
-      setFormData(prev => ({ ...prev, imagePath: response.data.data.path }));
-      Alert.alert('Éxito', 'Imagen subida correctamente');
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        setSelectedImage({ uri: asset.uri });
+        
+        // Upload image
+        const uploadResult = await uploadImage(asset.uri);
+        if (uploadResult.success) {
+          setFormData({ ...formData, imagePath: uploadResult.path });
+        }
+      }
     } catch (error) {
-      Alert.alert('Error', 'No se pudo subir la imagen');
-    } finally {
-      setUploading(false);
+      Alert.alert('Error', 'No se pudo seleccionar la imagen');
     }
   };
+
+  const validateForm = () => {
+    if (!formData.title.trim()) {
+      Alert.alert('Error', 'El título es requerido');
+      return false;
+    }
+    if (!formData.description.trim()) {
+      Alert.alert('Error', 'La descripción es requerida');
+      return false;
+    }
+    if (formData.weight < 1 || formData.weight > 10) {
+      Alert.alert('Error', 'El peso debe estar entre 1 y 10');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSave = async () => {
+    if (!validateForm()) return;
+
+    try {
+      let result;
+      if (isEditing) {
+        result = await updatePrize(prize._id, formData);
+      } else if (isFromTemplate) {
+        result = await createPrizeFromTemplate(template._id, formData);
+      } else {
+        result = await createPrize(formData);
+      }
+
+      if (result.success) {
+        Alert.alert(
+          'Éxito',
+          isEditing ? 'Premio actualizado correctamente' : 'Premio creado correctamente',
+          [{ text: 'OK', onPress: () => navigation.goBack() }]
+        );
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo guardar el premio');
+    }
+  };
+
+  const getWeightColor = (weight) => {
+    if (weight <= 3) return '#4CAF50'; // Verde
+    if (weight <= 6) return '#FF9800'; // Naranja
+    return '#F44336'; // Rojo
+  };
+
+  if (loading) {
+    return <LoadingOverlay message="Guardando..." />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scroll}>
-        <View style={styles.form}>
-          {/* Título */}
-          <View style={styles.section}>
-            <Text style={styles.label}>Título del Premio *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ej: Cena Romántica 🍝"
-              value={formData.title}
-              onChangeText={(text) => setFormData({ ...formData, title: text })}
-            />
-          </View>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>
+            {isEditing ? 'Editar Premio' : isFromTemplate ? 'Personalizar Plantilla' : 'Nuevo Premio'}
+          </Text>
+          {isFromTemplate && (
+            <Text style={styles.subtitle}>
+              Basado en: {template.title}
+            </Text>
+          )}
+        </View>
 
-          {/* Descripción */}
-          <View style={styles.section}>
-            <Text style={styles.label}>Descripción *</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Describe el premio en detalle..."
-              value={formData.description}
-              onChangeText={(text) => setFormData({ ...formData, description: text })}
-              multiline
-              numberOfLines={4}
-            />
-          </View>
+        {/* Title */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Título *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nombre del premio"
+            value={formData.title}
+            onChangeText={(value) => setFormData({ ...formData, title: value })}
+          />
+        </View>
 
-          {/* Imagen */}
-          <View style={styles.section}>
-            <Text style={styles.label}>Imagen (opcional)</Text>
-            {formData.imagePath ? (
-              <View style={styles.imagePreview}>
-                <Image
-                  source={{ uri: `${process.env.EXPO_PUBLIC_API_URL}${formData.imagePath}` }}
-                  style={styles.image}
-                  resizeMode="cover"
-                />
-                <TouchableOpacity
-                  style={styles.removeImageButton}
-                  onPress={() => setFormData({ ...formData, imagePath: null })}
-                >
-                  <Text style={styles.removeImageText}>✕</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
+        {/* Description */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Descripción *</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Describe tu premio..."
+            value={formData.description}
+            onChangeText={(value) => setFormData({ ...formData, description: value })}
+            multiline
+            numberOfLines={4}
+          />
+        </View>
+
+        {/* Image */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Imagen</Text>
+          {selectedImage ? (
+            <View style={styles.imagePreview}>
+              <Image source={selectedImage} style={styles.previewImage} />
               <TouchableOpacity
-                style={styles.uploadButton}
-                onPress={handlePickImage}
-                disabled={uploading}
+                style={styles.changeImageButton}
+                onPress={handleImagePicker}
               >
-                <Text style={styles.uploadEmoji}>📷</Text>
-                <Text style={styles.uploadButtonText}>
-                  {uploading ? 'Subiendo...' : 'Seleccionar Imagen'}
+                <Text style={styles.changeImageText}>Cambiar imagen</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.imageButton} onPress={handleImagePicker}>
+              <Text style={styles.imageButtonText}>📸 Seleccionar imagen</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Weight */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Peso (1-10)</Text>
+          <Text style={styles.weightDescription}>
+            Un peso mayor significa que este premio tiene más probabilidad de ser seleccionado
+          </Text>
+          <View style={styles.weightContainer}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((weight) => (
+              <TouchableOpacity
+                key={weight}
+                style={[
+                  styles.weightButton,
+                  { backgroundColor: getWeightColor(weight) },
+                  formData.weight === weight && styles.weightActive
+                ]}
+                onPress={() => setFormData({ ...formData, weight })}
+              >
+                <Text style={[
+                  styles.weightText,
+                  formData.weight === weight && styles.weightTextActive
+                ]}>
+                  {weight}
                 </Text>
               </TouchableOpacity>
-            )}
+            ))}
           </View>
+          <Text style={styles.weightIndicator}>
+            Peso seleccionado: {formData.weight}
+          </Text>
+        </View>
 
-          {/* Peso */}
-          <View style={styles.section}>
-            <Text style={styles.label}>Peso (Probabilidad 1-10)</Text>
-            <Text style={styles.hint}>
-              Mayor peso = mayor probabilidad de salir
-            </Text>
-            <View style={styles.weightContainer}>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
-                <TouchableOpacity
-                  key={value}
-                  style={[
-                    styles.weightButton,
-                    formData.weight === value && styles.weightButtonActive,
-                  ]}
-                  onPress={() => setFormData({ ...formData, weight: value })}
-                >
-                  <Text
-                    style={[
-                      styles.weightButtonText,
-                      formData.weight === value && styles.weightButtonTextActive,
-                    ]}
-                  >
-                    {value}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          {/* Categoría */}
-          <View style={styles.section}>
-            <Text style={styles.label}>Categoría</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ej: comida, relax, viaje..."
-              value={formData.category}
-              onChangeText={(text) => setFormData({ ...formData, category: text })}
-            />
-          </View>
-
-          {/* Botones */}
-          <View style={styles.actions}>
-            <AppButton
-              title={mode === 'edit' ? 'Actualizar Premio' : 'Crear Premio'}
-              onPress={handleSubmit}
-              loading={isCreating || isUpdating}
-              icon="🎁"
-            />
-            <AppButton
-              title="Cancelar"
-              onPress={() => navigation.goBack()}
-              variant="outline"
-              style={styles.cancelButton}
-            />
-          </View>
+        {/* Save Button */}
+        <View style={styles.section}>
+          <AppButton
+            title={isEditing ? 'Actualizar Premio' : 'Crear Premio'}
+            onPress={handleSave}
+            icon={isEditing ? '💾' : '🎁'}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -233,22 +247,29 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
-  form: {
+  header: {
     padding: 24,
+    paddingTop: 0,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666666',
   },
   section: {
-    marginBottom: 24,
+    padding: 24,
+    paddingTop: 0,
   },
   label: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333333',
-    marginBottom: 8,
-  },
-  hint: {
-    fontSize: 12,
-    color: '#999999',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   input: {
     backgroundColor: '#FFFFFF',
@@ -257,87 +278,81 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: '#E0E0E0',
+    minHeight: 50,
   },
   textArea: {
     minHeight: 100,
     textAlignVertical: 'top',
   },
-  uploadButton: {
+  imageButton: {
     backgroundColor: '#FFFFFF',
-    padding: 32,
     borderRadius: 12,
+    padding: 24,
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#E0E0E0',
     borderStyle: 'dashed',
   },
-  uploadEmoji: {
-    fontSize: 48,
-    marginBottom: 8,
-  },
-  uploadButtonText: {
+  imageButtonText: {
     fontSize: 16,
     color: '#666666',
-    fontWeight: '500',
   },
   imagePreview: {
-    position: 'relative',
-    borderRadius: 12,
-    overflow: 'hidden',
+    alignItems: 'center',
   },
-  image: {
-    width: '100%',
+  previewImage: {
+    width: 200,
     height: 200,
     borderRadius: 12,
+    marginBottom: 12,
   },
-  removeImageButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
+  changeImageButton: {
+    backgroundColor: '#FF6B9D',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
-  removeImageText: {
+  changeImageText: {
     color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '500',
+  },
+  weightDescription: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 16,
   },
   weightContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    marginBottom: 16,
   },
   weightButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F0F0F0',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#E0E0E0',
+    borderColor: 'transparent',
   },
-  weightButtonActive: {
-    backgroundColor: '#FF6B9D',
-    borderColor: '#FF6B9D',
+  weightActive: {
+    borderColor: '#333333',
+    transform: [{ scale: 1.1 }],
   },
-  weightButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#666666',
-  },
-  weightButtonTextActive: {
+  weightText: {
+    fontSize: 16,
+    fontWeight: 'bold',
     color: '#FFFFFF',
   },
-  actions: {
-    marginTop: 16,
+  weightTextActive: {
+    color: '#FFFFFF',
   },
-  cancelButton: {
-    marginTop: 12,
+  weightIndicator: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    fontWeight: '500',
   },
 });
 
