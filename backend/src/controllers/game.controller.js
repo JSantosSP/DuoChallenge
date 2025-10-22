@@ -10,9 +10,8 @@ const generateGame = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const gameSet = await generateNewGameSet(userId);
+    const gameSet = await generateNewGameSet(userId, userId, null, null);
 
-    // Poblar para devolver al cliente
     await gameSet.populate('levels');
 
     res.json({
@@ -32,30 +31,39 @@ const generateGame = async (req, res) => {
 };
 
 /**
- * Obtener niveles del usuario
+ * Obtener niveles de un GameSet específico
  */
 const getLevels = async (req, res) => {
   try {
+    const { gameSetId } = req.params;
     const userId = req.user._id;
 
-    const user = await User.findById(userId);
-    
-    if (!user.currentSetId) {
+    const gameSet = await GameSet.findOne({
+      _id: gameSetId,
+      userId: userId
+    }).populate({
+      path: 'levels',
+      options: { sort: { order: 1 } }
+    });
+
+    if (!gameSet) {
       return res.status(404).json({
         success: false,
-        message: 'No hay juego activo. Genera uno nuevo.'
+        message: 'Juego no encontrado'
       });
     }
 
-    const gameSet = await GameSet.find({
-      _id: user.currentSetId
-    })
-      .populate('levels')
-      .sort({ order: 1 });
-
     res.json({
       success: true,
-      data: { levels: gameSet.levels }
+      data: { 
+        levels: gameSet.levels,
+        gameSet: {
+          _id: gameSet._id,
+          status: gameSet.status,
+          progress: gameSet.progress,
+          totalLevels: gameSet.totalLevels
+        }
+      }
     });
 
   } catch (error) {
@@ -132,7 +140,6 @@ const verifyLevel = async (req, res) => {
       });
     }
 
-    // Verificar si ya está completado
     if (level.completed) {
       return res.status(400).json({
         success: false,
@@ -140,7 +147,6 @@ const verifyLevel = async (req, res) => {
       });
     }
 
-    // Verificar intentos
     if (level.currentAttempts >= level.maxAttempts) {
       return res.status(400).json({
         success: false,
@@ -149,30 +155,24 @@ const verifyLevel = async (req, res) => {
       });
     }
 
-    // Incrementar intentos
     level.currentAttempts += 1;
 
-    // Verificar respuesta según el tipo de reto
     let isCorrect = false;
     
     switch (level?.tipoDato?.type) {
       case 'texto':
-        // Para retos de texto: comparar texto normalizado (insensible a mayúsculas y espacios)
         isCorrect = verifyAnswer(answer, level?.valor["texto"]?.answerHash, level?.valor["texto"]?.salt);
         break;
       
       case 'fecha':
-        // Para retos de fecha: normalizar a formato YYYY-MM-DD y comparar
         isCorrect = verifyDateAnswer(answer, level?.valor["fecha"]?.answerHash, level?.valor["fecha"]?.salt);
         break;
 
       case 'lugar':
-        // Para retos de lugar: esta por definir lógica específica, ahora similar a texto
         isCorrect = verifyAnswer(answer, level?.valor["lugar"]?.answerHash, level?.valor["lugar"]?.salt);
         break;
       
       case 'foto':
-        // Para retos de foto: verificar el orden del puzzle
         if (!puzzleOrder || !Array.isArray(puzzleOrder)) {
           return res.status(400).json({
             success: false,
@@ -191,13 +191,13 @@ const verifyLevel = async (req, res) => {
       level.completedAt = new Date();
       await level.save();
 
-      // Agregar a completados del usuario
-      await User.findByIdAndUpdate(userId, {
-        $addToSet: { completedLevels: level._id }
-      });
+      const gameSet = await GameSet.findById(level.gameSetId);
+      if (gameSet) {
+        gameSet.completedLevels.push(level._id);
+        gameSet.progress = Math.round((gameSet.completedLevels.length / gameSet.totalLevels) * 100);
+        await gameSet.save();
 
-       // Verificar si el set completo se terminó
-        const gameSetResult = await checkGameSetCompletion(userId);
+        const gameSetResult = await checkGameSetCompletion(gameSet._id);
 
         if (gameSetResult.completed) {
           return res.json({
@@ -206,7 +206,8 @@ const verifyLevel = async (req, res) => {
             message: '¡Respuesta correcta!',
             levelCompleted: true,
             gameCompleted: true,
-            prize: gameSetResult.prize
+            prize: gameSetResult.prize,
+            progress: 100
           });
         }
 
@@ -215,8 +216,10 @@ const verifyLevel = async (req, res) => {
           correct: true,
           message: '¡Respuesta correcta! Nivel completado',
           levelCompleted: true,
-          gameCompleted: false
+          gameCompleted: false,
+          progress: gameSet.progress
         });
+      }
 
     } else {
       await level.save();
@@ -300,44 +303,36 @@ const resetGame = async (req, res) => {
 };
 
 /**
- * Obtener progreso del usuario
+ * Obtener progreso de un GameSet específico
  */
 const getProgress = async (req, res) => {
   try {
+    const { gameSetId } = req.params;
     const userId = req.user._id;
 
-    const user = await User.findById(userId)
-      .populate('currentSetId')
-      .populate('currentPrizeId');
+    const gameSet = await GameSet.findOne({
+      _id: gameSetId,
+      userId: userId
+    }).populate('prizeId');
 
-    if (!user.currentSetId) {
-      return res.json({
-        success: true,
-        data: {
-          hasActiveGame: false,
-          progress: 0
-        }
+    if (!gameSet) {
+      return res.status(404).json({
+        success: false,
+        message: 'Juego no encontrado'
       });
     }
-
-    const totalLevels = await Level.countDocuments({
-      levelId: { $in: (await GameSet.findById(user.currentSetId)).levels }
-    });
-
-    const completedLevels = user.completedLevels.length;
-
-    const progress = totalLevels > 0 
-      ? Math.round((completedLevels / totalLevels) * 100)
-      : 0;
 
     res.json({
       success: true,
       data: {
-        hasActiveGame: true,
-        progress,
-        completedLevels: user.completedLevels.length,
-        totalSetsCompleted: user.totalSetsCompleted,
-        currentPrize: user.currentPrizeId
+        gameSetId: gameSet._id,
+        status: gameSet.status,
+        progress: gameSet.progress,
+        completedLevels: gameSet.completedLevels.length,
+        totalLevels: gameSet.totalLevels,
+        prize: gameSet.prizeId,
+        startedAt: gameSet.startedAt,
+        completedAt: gameSet.completedAt
       }
     });
 
@@ -350,11 +345,143 @@ const getProgress = async (req, res) => {
   }
 };
 
+/**
+ * Obtener historial de juegos del usuario
+ */
+const getHistory = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { status } = req.query;
+
+    const filter = { userId };
+    if (status) {
+      filter.status = status;
+    }
+
+    const gameSets = await GameSet.find(filter)
+      .populate('creatorId', 'name email')
+      .populate('shareId')
+      .populate('prizeId')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: { 
+        gameSets,
+        total: gameSets.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo historial:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener historial',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Obtener estadísticas del usuario
+ */
+const getStats = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const totalGames = await GameSet.countDocuments({ userId });
+    const completedGames = await GameSet.countDocuments({ userId, status: 'completed' });
+    const activeGames = await GameSet.countDocuments({ userId, status: 'active' });
+    const abandonedGames = await GameSet.countDocuments({ userId, status: 'abandoned' });
+
+    const allGames = await GameSet.find({ userId });
+    const totalProgress = allGames.reduce((sum, game) => sum + (game.progress || 0), 0);
+    const averageProgress = totalGames > 0 ? Math.round(totalProgress / totalGames) : 0;
+
+    const totalLevelsCompleted = allGames.reduce((sum, game) => sum + game.completedLevels.length, 0);
+    const totalLevelsAvailable = allGames.reduce((sum, game) => sum + game.totalLevels, 0);
+
+    const gamesFromShares = await GameSet.countDocuments({ 
+      userId, 
+      shareId: { $ne: null } 
+    });
+    
+    const ownGames = await GameSet.countDocuments({ 
+      userId,
+      $or: [
+        { shareId: null },
+        { userId: { $eq: '$creatorId' } }
+      ]
+    });
+
+    res.json({
+      success: true,
+      data: {
+        totalGames,
+        completedGames,
+        activeGames,
+        abandonedGames,
+        averageProgress,
+        totalLevelsCompleted,
+        totalLevelsAvailable,
+        gamesFromShares,
+        ownGames,
+        completionRate: totalGames > 0 ? Math.round((completedGames / totalGames) * 100) : 0
+      }
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo estadísticas:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener estadísticas',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Obtener todos los juegos activos
+ */
+const getActiveGames = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const activeGames = await GameSet.find({
+      userId,
+      status: 'active'
+    })
+      .populate('creatorId', 'name email')
+      .populate('shareId')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: { 
+        activeGames,
+        total: activeGames.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo juegos activos:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener juegos activos',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   generateGame,
   getLevels,
+  getLevel,
   verifyLevel,
   getPrize,
   resetGame,
-  getProgress
+  getProgress,
+  getHistory,
+  getStats,
+  getActiveGames
 };

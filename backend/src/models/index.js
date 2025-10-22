@@ -6,7 +6,6 @@ module.exports = {
   Variable: require('./Variable.model'),
   UserData: require('./UserData.model'),
   GameShare: require('./GameShare.model'),
-  GameInstance: require('./GameInstance.model'),
   Category: require('./Category.model'),
   Level: require('./Level.model'),
 };
