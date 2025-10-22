@@ -8,14 +8,13 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useIsFocused } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useGame } from '../hooks/useGame';
 import ProgressBar from '../components/ProgressBar';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 
 const GameDetailScreen = ({ route, navigation }) => {
-  const isFocused = useIsFocused();
   const { gameSet } = route.params;
   
   const { 
@@ -28,12 +27,13 @@ const GameDetailScreen = ({ route, navigation }) => {
 
   const [refreshing, setRefreshing] = React.useState(false);
 
-  useEffect(() => {
-    if (isFocused) {
+  // Refresh data when screen becomes visible
+  useFocusEffect(
+    React.useCallback(() => {
       refetchLevels();
       refetchProgress();
-    }
-  }, [isFocused]);
+    }, [])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);

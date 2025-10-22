@@ -5,8 +5,14 @@ const {
   ChallengeTemplate, 
   Variable, 
   Prize, 
-  PrizeTemplate
+  PrizeTemplate,
+  Category,
+  GameSet,
+  GameShare,
+  Level,
+  UserData
 } = require('../models');
+const {seed: seedCategories} = require('./seedCategories');
 
 const connectDB = async () => {
   try {
@@ -27,6 +33,12 @@ const seedDatabase = async () => {
     await User.deleteMany({});
     await Variable.deleteMany({});
     await Prize.deleteMany({});
+    await Category.deleteMany({});
+    await GameSet.deleteMany({});
+    await GameShare.deleteMany({});
+    await Level.deleteMany({});
+    await UserData.deleteMany({});
+    await PrizeTemplate.deleteMany({});
     console.log('✅ Colecciones limpiadas\n');
 
     // ========================================
@@ -45,14 +57,22 @@ const seedDatabase = async () => {
     const player = new User({
       name: 'Mi Amor',
       email: 'player@demo.com',
-      passwordHash: 'player123',
+      passwordHash: 'Player123',
       role: 'player'
     });
     await player.save();
+    const player2 = new User({
+      name: 'Mi Amor2',
+      email: 'player2@demo.com',
+      passwordHash: 'Player123',
+      role: 'player'
+    });
+    await player2.save();
 
     console.log('✅ Usuarios creados:');
     console.log(`   - Admin: admin@demo.com / admin123`);
-    console.log(`   - Player: player@demo.com / player123\n`);
+    console.log(`   - Player: player@demo.com / player123`);
+    console.log(`   - Player: player2@demo.com / player123\n`);
 
     // ========================================
     // 2. CREAR VARIABLES
@@ -163,6 +183,79 @@ const seedDatabase = async () => {
     await PrizeTemplate.insertMany(prizes);
     console.log(`✅ ${prizes.length} premios creados\n`);
 
+    await seedCategories();
+
+    // ========================================
+    // 5. CREAR USERDATA DE PRUEBA
+    // ========================================
+    console.log('📊 Creando UserData de prueba...');
+    
+    // Obtener IDs necesarios
+    const fechaVar = await Variable.findOne({ type: 'fecha' });
+    const textoVar = await Variable.findOne({ type: 'texto' });
+    const fotoVar = await Variable.findOne({ type: 'foto' });
+    const lugarVar = await Variable.findOne({ type: 'lugar' });
+    
+    const categoriaPersonal = await Category.findOne({ name: 'Datos Personales' });
+    const categoriaComida = await Category.findOne({ name: 'Comida y Bebidas' });
+    const categoriaLugares = await Category.findOne({ name: 'Lugares Memorables' });
+
+    const userDataItems = [
+      {
+        userId: player._id,
+        categorias: categoriaPersonal._id,
+        tipoDato: fechaVar._id,
+        pregunta: '¿Cuál es mi fecha de nacimiento?',
+        valor: '1990-05-15',
+        pistas: ['Es en mayo', 'Año 1990'],
+        difficulty: 'easy',
+        active: true
+      },
+      {
+        userId: player._id,
+        categorias: categoriaComida._id,
+        tipoDato: textoVar._id,
+        pregunta: '¿Cuál es mi comida favorita?',
+        valor: 'Pizza',
+        pistas: ['Es italiana', 'Tiene queso'],
+        difficulty: 'medium',
+        active: true
+      },
+      {
+        userId: player._id,
+        categorias: categoriaLugares._id,
+        tipoDato: lugarVar._id,
+        pregunta: '¿Cuál es mi lugar favorito para vacacionar?',
+        valor: 'Playa',
+        pistas: ['Tiene arena', 'Tiene mar'],
+        difficulty: 'easy',
+        active: true
+      },
+      {
+        userId: player._id,
+        categorias: categoriaPersonal._id,
+        tipoDato: textoVar._id,
+        pregunta: '¿Cuál es mi color favorito?',
+        valor: 'Azul',
+        pistas: ['Es un color frío', 'Como el cielo'],
+        difficulty: 'easy',
+        active: true
+      },
+      {
+        userId: player._id,
+        categorias: categoriaComida._id,
+        tipoDato: textoVar._id,
+        pregunta: '¿Cuál es mi postre favorito?',
+        valor: 'Helado',
+        pistas: ['Es frío', 'Viene en sabores'],
+        difficulty: 'medium',
+        active: true
+      }
+    ];
+
+    await UserData.insertMany(userDataItems);
+    console.log(`✅ ${userDataItems.length} UserData creados para player@demo.com\n`);
+
     // ========================================
     // RESUMEN FINAL
     // ========================================
@@ -173,6 +266,7 @@ const seedDatabase = async () => {
     console.log(`   - ${await User.countDocuments()} usuarios`);
     console.log(`   - ${await Variable.countDocuments()} variables`);
     console.log(`   - ${await PrizeTemplate.countDocuments()} premios`);
+    console.log(`   - ${await UserData.countDocuments()} UserData`);
     console.log('============================================\n');
     console.log('🎮 Credenciales de acceso:');
     console.log('   Admin:  admin@demo.com / admin123');

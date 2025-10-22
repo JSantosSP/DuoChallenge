@@ -8,7 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useFocusEffect } from '@react-navigation/native';
 import { useGame } from '../hooks/useGame';
 
 const getChallengeTypeLabel = (type) => {
@@ -22,7 +22,6 @@ const getChallengeTypeLabel = (type) => {
 };
 
 const LevelScreen = ({ route, navigation }) => {
-  const isFocused = useIsFocused();
   const { refetchLevels, levels } = useGame();
   const [refreshing, setRefreshing] = React.useState(false);
 
@@ -30,12 +29,12 @@ const LevelScreen = ({ route, navigation }) => {
   const levelId = route.params?.level?._id;
   const currentLevel = levels?.find(l => l._id === levelId) || route.params?.level;
 
-  // Refrescar cuando la pantalla vuelve a estar en foco
-  useEffect(() => {
-    if (isFocused) {
+  // Refresh data when screen becomes visible
+  useFocusEffect(
+    React.useCallback(() => {
       refetchLevels();
-    }
-  }, [isFocused]);
+    }, [])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -47,7 +46,11 @@ const LevelScreen = ({ route, navigation }) => {
     if (challenge.completed) {
       return;
     }
-    navigation.navigate('Challenge', { challenge, levelId: currentLevel._id });
+    navigation.navigate('Challenge', { 
+      challenge, 
+      levelId: currentLevel._id, 
+      gameSetId: route.params?.gameSetId
+    });
   };
 
   return (

@@ -9,15 +9,23 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useUserData } from '../hooks/useUserData';
 import { apiService } from '../api/api';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 
-const MyDataScreen = ({ navigation }) => {
+const MyDataScreen = ({ navigation, route }) => {
   const { userData, availableTypes, categories, loading, refetch } = useUserData();
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('all'); // all, text, date, photo, location
+
+  // Refresh data when screen becomes visible
+  useFocusEffect(
+    React.useCallback(() => {
+      refetch();
+    }, [])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);

@@ -15,12 +15,22 @@ const generateLevels = async (userId, gameSetId, seed, levelCount = 5) => {
     }
 
     const listaUserDataIds = [];
-    while (listaUserDataIds.length < levelCount) {
+    const maxAttempts = Math.min(levelCount * 2, userDataItems.length * 2); // Prevenir bucle infinito
+    let attempts = 0;
+    
+    while (listaUserDataIds.length < levelCount && attempts < maxAttempts) {
       const randomIndex = Math.floor(seededRandom(seed, listaUserDataIds.length) * userDataItems.length);
       const selectedUserData = userDataItems[randomIndex];
       if (!listaUserDataIds.includes(selectedUserData._id.toString())) {
         listaUserDataIds.push(selectedUserData._id.toString());
       }
+      attempts++;
+    }
+    
+    // Si no tenemos suficientes únicos, repetir algunos
+    while (listaUserDataIds.length < levelCount) {
+      const randomIndex = Math.floor(seededRandom(seed, listaUserDataIds.length) * userDataItems.length);
+      listaUserDataIds.push(userDataItems[randomIndex]._id.toString());
     }
 
     for (let i = 0; i < levelCount; i++) {
@@ -72,7 +82,7 @@ const createLevelFromUserData = async (userData, gameSetId, order) => {
       pregunta: userData.pregunta,
       pistas: userData.pistas || [],
       gameSetId,
-      categoryId: userData.categoryId,
+      categoryId: userData.categorias,
       difficulty: userData.difficulty || 'medium',
       valor: {
         [levelType]: {

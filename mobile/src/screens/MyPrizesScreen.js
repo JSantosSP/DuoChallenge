@@ -10,13 +10,21 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { usePrize } from '../hooks/usePrize';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 
-const MyPrizesScreen = ({ navigation }) => {
+const MyPrizesScreen = ({ navigation, route }) => {
   const { userPrizes, loading, refetch, deletePrize } = usePrize();
   const [refreshing, setRefreshing] = useState(false);
+
+  // Refresh data when screen becomes visible
+  useFocusEffect(
+    React.useCallback(() => {
+      refetch();
+    }, [])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);

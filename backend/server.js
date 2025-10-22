@@ -76,6 +76,7 @@ const categoryGetRoutes = require('./src/routes/category.get.routes');
 // Usar rutas
 app.use('/auth', authRoutes);
 app.use('/api', gameRoutes);
+app.use('/api/game', gameRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api/userdata', userDataRoutes);
 app.use('/api/prizes', prizeRoutes);

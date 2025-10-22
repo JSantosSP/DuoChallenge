@@ -29,7 +29,7 @@ const generateNewGameSet = async (creatorId, playerId = null, shareId = null, sh
 
     await gameSet.save();
 
-    const nlevels = seededRandom(seed, 0) * 5;
+    const nlevels = Math.max(1, Math.floor(seededRandom(seed, 0) * 5) + 1);
     const levels = await generateLevels(creatorId, gameSet._id, seed, nlevels);
 
     gameSet.levels = levels.map(l => l._id);

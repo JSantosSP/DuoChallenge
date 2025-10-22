@@ -410,7 +410,8 @@ const getStats = async (req, res) => {
       userId,
       $or: [
         { shareId: null },
-        { userId: { $eq: '$creatorId' } }
+        { shareId: { $exists: false } },
+        { $expr: { $eq: ['$userId', '$creatorId'] } }
       ]
     });
 
@@ -460,14 +461,23 @@ const getActiveGames = async (req, res) => {
       status: 'active'
     })
       .populate('creatorId', 'name email')
-      .populate('shareId')
+      .populate('shareId', 'code')
       .sort({ createdAt: -1 });
+
+    // Agregar shareCode a cada juego si tiene shareId
+    const gamesWithShareCode = activeGames.map(game => {
+      const gameObj = game.toObject();
+      if (gameObj.shareId && gameObj.shareId.code) {
+        gameObj.shareCode = gameObj.shareId.code;
+      }
+      return gameObj;
+    });
 
     res.json({
       success: true,
       data: { 
-        activeGames,
-        total: activeGames.length
+        games: gamesWithShareCode,
+        total: gamesWithShareCode.length
       }
     });
 

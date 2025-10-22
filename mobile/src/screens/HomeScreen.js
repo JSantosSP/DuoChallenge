@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { useGame } from '../hooks/useGame';
 import ProgressBar from '../components/ProgressBar';
@@ -27,6 +28,14 @@ const HomeScreen = ({ navigation }) => {
 
   const [refreshing, setRefreshing] = React.useState(false);
   const [selectedGame, setSelectedGame] = useState(null);
+
+  // Refresh data when screen becomes visible
+  useFocusEffect(
+    React.useCallback(() => {
+      refetchActiveGames();
+      refetchStats();
+    }, [])
+  );
 
   // Seleccionar automáticamente el primer juego activo
   useEffect(() => {
