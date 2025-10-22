@@ -3,18 +3,19 @@ const router = express.Router();
 const gameController = require('../controllers/game.controller');
 const { verifyToken } = require('../middlewares/auth.middleware');
 
-// Todas las rutas requieren autenticación
 router.use(verifyToken);
 
-// Gestión del juego
 router.post('/generate', gameController.generateGame);
 router.post('/reset', gameController.resetGame);
-router.get('/progress', gameController.getProgress);
+router.get('/active', gameController.getActiveGames);
+router.get('/history', gameController.getHistory);
+router.get('/stats', gameController.getStats);
 
-// Niveles y retos
-router.get('/levels', gameController.getLevels);
+router.get('/:gameSetId/levels', gameController.getLevels);
+router.get('/:gameSetId/progress', gameController.getProgress);
+router.get('/level/:LevelId', gameController.getLevel);
+router.post('/level/:levelId/verify', gameController.verifyLevel);
 
-// Premios
 router.get('/prize', gameController.getPrize);
 
 module.exports = router;

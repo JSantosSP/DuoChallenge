@@ -1,4 +1,4 @@
-const { GameShare, GameInstance, User, UserData } = require('../models');
+const { GameShare, User, UserData } = require('../models');
 const { generateNewGameSet } = require('../services/gameset.service');
 
 // Generar código único de 6 caracteres
@@ -140,7 +140,6 @@ const joinGame = async (req, res) => {
     const playerId = req.user._id;
     const { code } = req.body;
 
-    // Verificar código
     const gameShare = await GameShare.findOne({ code, active: true });
     
     if (!gameShare) {
@@ -150,7 +149,6 @@ const joinGame = async (req, res) => {
       });
     }
 
-    // No permitir que el creador use su propio código
     if (gameShare.creatorId.toString() === playerId.toString()) {
       return res.status(400).json({
         success: false,
@@ -158,54 +156,31 @@ const joinGame = async (req, res) => {
       });
     }
 
-    // Verificar si ya ha usado este código
     const alreadyUsed = gameShare.usedBy.some(
       u => u.userId.toString() === playerId.toString()
     );
 
-    // Crear instancia de juego
-    let gameInstance = await GameInstance.findOne({
+    if (!alreadyUsed) {
+      gameShare.usedBy.push({
+        userId: playerId,
+        joinedAt: new Date()
+      });
+      await gameShare.save();
+    }
+
+    const gameSet = await generateNewGameSet(
+      gameShare.creatorId,
       playerId,
-      creatorId: gameShare.creatorId,
-      shareCode: code,
-      active: true
-    });
+      gameShare._id,
+      code
+    );
 
-    if (!gameInstance) {
-      gameInstance = new GameInstance({
-        playerId,
-        creatorId: gameShare.creatorId,
-        shareCode: code,
-        active: true
-      });
-      await gameInstance.save();
-
-      // Añadir a la lista de usuarios que han usado el código
-      if (!alreadyUsed) {
-        gameShare.usedBy.push({
-          userId: playerId,
-          joinedAt: new Date()
-        });
-        await gameShare.save();
-      }
-
-      // Añadir instancia a las activas del usuario
-      await User.findByIdAndUpdate(playerId, {
-        $addToSet: { activeGameInstances: gameInstance._id }
-      });
-    }
-
-    // Generar primer set de juego
-    if (!gameInstance.currentSetId) {
-      const gameSet = await generateNewGameSet(gameShare.creatorId, gameInstance._id);
-      gameInstance.currentSetId = gameSet._id;
-      await gameInstance.save();
-    }
+    await gameSet.populate('levels');
 
     res.json({
       success: true,
       message: 'Te has unido al juego exitosamente',
-      data: { gameInstance }
+      data: { gameSet }
     });
   } catch (error) {
     console.error('Error uniéndose al juego:', error);
@@ -217,28 +192,29 @@ const joinGame = async (req, res) => {
   }
 };
 
-// Obtener instancias de juego activas del usuario
+// Obtener juegos activos del usuario (de códigos compartidos)
 const getGameInstances = async (req, res) => {
   try {
     const userId = req.user._id;
+    const { GameSet } = require('../models');
 
-    const instances = await GameInstance.find({
-      playerId: userId,
-      active: true
+    const gameSets = await GameSet.find({
+      userId: userId,
+      shareId: { $ne: null }
     })
       .populate('creatorId', 'name email')
-      .populate('currentSetId')
+      .populate('shareId')
       .sort({ createdAt: -1 });
 
     res.json({
       success: true,
-      data: { instances }
+      data: { gameSets }
     });
   } catch (error) {
-    console.error('Error obteniendo instancias:', error);
+    console.error('Error obteniendo juegos compartidos:', error);
     res.status(500).json({
       success: false,
-      message: 'Error al obtener instancias',
+      message: 'Error al obtener juegos',
       error: error.message
     });
   }

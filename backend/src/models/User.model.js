@@ -23,27 +23,10 @@ const userSchema = new mongoose.Schema({
     enum: ['admin', 'player'],
     default: 'player'
   },
-  currentSetId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'GameSet',
-    default: null
-  },
-  completedLevels: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Level'
-  }],
-  currentPrizeId: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Prize'
-  }],
   totalSetsCompleted: {
     type: Number,
     default: 0
-  },
-  activeGameInstances: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'GameInstance'
-  }]
+  }
 }, {
   timestamps: true
 });
