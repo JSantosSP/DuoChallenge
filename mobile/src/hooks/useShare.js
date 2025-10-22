@@ -27,8 +27,8 @@ export const useShare = () => {
   const fetchGameInstances = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getGameInstances();
-      setGameInstances(response.data.data.instances || []);
+      const response = await apiService.getSharedGames();
+      setGameInstances(response.data.data.games || []);
       setError(null);
     } catch (error) {
       console.error('Error fetching game instances:', error);
@@ -73,7 +73,7 @@ export const useShare = () => {
       setLoading(true);
       const response = await apiService.joinGame(code);
       await fetchGameInstances(); // Recargar lista de instancias
-      return { success: true, data: response.data.data.gameInstance };
+      return { success: true, data: response.data.data.gameSet };
     } catch (error) {
       console.error('Error joining game:', error);
       const message = error.response?.data?.message || 'Error al unirse al juego';
