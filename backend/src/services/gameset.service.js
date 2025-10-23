@@ -11,6 +11,8 @@ const generateNewGameSet = async (creatorId, playerId = null, shareId = null, sh
     const seed = generateGameSeed();
     const targetUserId = playerId || creatorId;
 
+    const prize = await assignPrize(targetUserId, seed);
+
     const gameSet = new GameSet({
       userId: targetUserId,
       creatorId: creatorId,
@@ -63,7 +65,7 @@ const checkGameSetCompletion = async (gameSetId) => {
       gameSet.progress = 100;
       gameSet.active = false;
       
-      const prize = await assignPrize(gameSet.userId, gameSet.seed);
+      const prize = await assignPrize(gameSet.creatorId, gameSet.seed);
       gameSet.prizeId = prize._id;
       
       await gameSet.save();
