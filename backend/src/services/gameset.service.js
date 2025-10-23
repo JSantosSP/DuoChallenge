@@ -11,8 +11,6 @@ const generateNewGameSet = async (creatorId, playerId = null, shareId = null, sh
     const seed = generateGameSeed();
     const targetUserId = playerId || creatorId;
 
-    const prize = await assignPrize(targetUserId, seed);
-
     const gameSet = new GameSet({
       userId: targetUserId,
       creatorId: creatorId,
