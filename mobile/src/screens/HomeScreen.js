@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
-import { useGame } from '../hooks/useGame';
+import { useGame, useWonPrizes } from '../hooks/useGame';
 import ProgressBar from '../components/ProgressBar';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
@@ -23,17 +23,33 @@ const HomeScreen = ({ navigation }) => {
     stats,
     refetchActiveGames,
     refetchStats,
-    generateGame
+    generateGame,
+    getHistory
   } = useGame();
 
+  const { wonPrizes, refetch: refetchWonPrizes } = useWonPrizes();
+  const [gameHistory, setGameHistory] = useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
   const [selectedGame, setSelectedGame] = useState(null);
+
+  // Fetch game history
+  const fetchGameHistory = async () => {
+    try {
+      const history = await getHistory('completed');
+      setGameHistory(history || []);
+    } catch (error) {
+      console.error('Error fetching game history:', error);
+      setGameHistory([]);
+    }
+  };
 
   // Refresh data when screen becomes visible
   useFocusEffect(
     React.useCallback(() => {
       refetchActiveGames();
       refetchStats();
+      refetchWonPrizes();
+      fetchGameHistory();
     }, [])
   );
 
@@ -46,7 +62,12 @@ const HomeScreen = ({ navigation }) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([refetchActiveGames(), refetchStats()]);
+    await Promise.all([
+      refetchActiveGames(), 
+      refetchStats(), 
+      refetchWonPrizes(),
+      fetchGameHistory()
+    ]);
     setRefreshing(false);
   };
 
@@ -92,10 +113,12 @@ const HomeScreen = ({ navigation }) => {
   };
 
   if (activeGamesLoading) {
-    return <LoadingOverlay message="Cargando tus juegos..." />;
+    return <LoadingOverlay message="Cargando dashboard..." />;
   }
 
   const hasActiveGames = activeGames && activeGames.length > 0;
+  const hasWonPrizes = wonPrizes && wonPrizes.length > 0;
+  const hasHistory = gameHistory && gameHistory.length > 0;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -109,42 +132,76 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.header}>
           <Text style={styles.greeting}>¡Hola, {user?.name}! 💕</Text>
           <Text style={styles.subtitle}>
-            {hasActiveGames 
-              ? `Tienes ${activeGames.length} juego${activeGames.length !== 1 ? 's' : ''} activo${activeGames.length !== 1 ? 's' : ''}` 
-              : 'Comienza tu primera aventura'}
+            Tu dashboard de juegos y premios
           </Text>
         </View>
 
-        {hasActiveGames ? (
-          <>
-            {/* Stats Card */}
-            {stats && (
-              <View style={styles.statsContainer}>
-                <View style={styles.statCard}>
-                  <Text style={styles.statValue}>{stats.completedGames || 0}</Text>
-                  <Text style={styles.statLabel}>Completados</Text>
-                </View>
-                <View style={styles.statCard}>
-                  <Text style={styles.statValue}>{stats.prizesWon || 0}</Text>
-                  <Text style={styles.statLabel}>Premios Ganados</Text>
-                </View>
-                <View style={styles.statCard}>
-                  <Text style={styles.statValue}>{stats.activeGames || 0}</Text>
-                  <Text style={styles.statLabel}>Activos</Text>
-                </View>
-              </View>
-            )}
+        {/* Stats Card - Always visible */}
+        {stats && (
+          <View style={styles.statsContainer}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{stats.completedGames || 0}</Text>
+              <Text style={styles.statLabel}>Completados</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{stats.prizesWon || 0}</Text>
+              <Text style={styles.statLabel}>Premios</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{stats.activeGames || 0}</Text>
+              <Text style={styles.statLabel}>Activos</Text>
+            </View>
+          </View>
+        )}
 
-            {/* Active Games List */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Tus Juegos Activos</Text>
+        {/* My Prizes Section - Always visible */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>🎁 Mis Premios</Text>
+            {hasWonPrizes && (
+              <TouchableOpacity onPress={() => navigation.navigate('WonPrizes')}>
+                <Text style={styles.seeAllText}>Ver todos →</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          {hasWonPrizes ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {wonPrizes.slice(0, 3).map((prize, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.prizeCard}
+                  onPress={() => navigation.navigate('WonPrizes')}
+                >
+                  <Text style={styles.prizeEmoji}>🏆</Text>
+                  <Text style={styles.prizeTitle} numberOfLines={1}>
+                    {prize.title}
+                  </Text>
+                  {prize.used && (
+                    <Text style={styles.prizeUsed}>✓ Canjeado</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={styles.emptySection}>
+              <Text style={styles.emptySectionText}>
+                Aún no tienes premios ganados. ¡Completa juegos para ganar premios!
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Active Games Section - Always visible */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>🕹️ Juegos Activos</Text>
+          </View>
+          {hasActiveGames ? (
+            <>
               {activeGames.map((game) => (
                 <TouchableOpacity
                   key={game._id}
-                  style={[
-                    styles.gameCard,
-                    selectedGame?._id === game._id && styles.gameCardSelected,
-                  ]}
+                  style={styles.gameCard}
                   onPress={() => handlePlayGame(game)}
                 >
                   <View style={styles.gameIcon}>
@@ -171,62 +228,92 @@ const HomeScreen = ({ navigation }) => {
                   </View>
                 </TouchableOpacity>
               ))}
+            </>
+          ) : (
+            <View style={styles.emptySection}>
+              <Text style={styles.emptySectionText}>
+                No tienes juegos activos. ¡Únete a uno o genera uno nuevo!
+              </Text>
             </View>
+          )}
+        </View>
 
-            {/* Quick Actions */}
-            <View style={styles.section}>
-              <AppButton
-                title="Ver Premios Ganados"
-                onPress={() => navigation.navigate('WonPrizes')}
-                variant="secondary"
-                icon="🏆"
-                style={styles.actionButton}
-              />
-              <AppButton
-                title="Ver Historial"
-                onPress={() => navigation.navigate('GameHistory')}
-                variant="outline"
-                icon="📊"
-                style={styles.actionButton}
-              />
-              <AppButton
-                title="Unirse a un Juego"
-                onPress={handleUnirse}
-                variant="outline"
-                icon="🔗"
-                style={styles.actionButton}
-              />
-            </View>
-          </>
-        ) : (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>🎮</Text>
-            <Text style={styles.emptyTitle}>¡Comienza tu Aventura!</Text>
-            <Text style={styles.emptyText}>
-              Únete a un juego existente con un código de invitación o genera tu propio juego para empezar a jugar.
-            </Text>
-            <AppButton
-              title="Unirse a un Juego"
-              onPress={handleUnirse}
-              icon="🔗"
-              style={styles.generateButton}
-            />
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>o</Text>
-              <View style={styles.dividerLine} />
-            </View>
-            <Text style={styles.emptyText}>
-              Genera tu propio juego para empezar a jugar.
-            </Text>
-            <AppButton
-              title="Generar Mi Juego"
-              onPress={handleGenerateGame}
-              icon="✨"
-              style={styles.generateButton}
-            />
+        {/* Game History Section - Always visible */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>🧾 Historial de Juegos</Text>
+            {hasHistory && (
+              <TouchableOpacity onPress={() => navigation.navigate('GameHistory')}>
+                <Text style={styles.seeAllText}>Ver todos →</Text>
+              </TouchableOpacity>
+            )}
           </View>
-        )}
+          {hasHistory ? (
+            <>
+              {gameHistory.slice(0, 3).map((game) => (
+                <View key={game._id} style={styles.historyCard}>
+                  <Text style={styles.historyIcon}>
+                    {game.shareCode ? '🔗' : '🎮'}
+                  </Text>
+                  <View style={styles.historyInfo}>
+                    <Text style={styles.historyType}>
+                      {getGameTypeLabel(game)}
+                    </Text>
+                    <Text style={styles.historyDate}>
+                      Finalizado: {formatDate(game.completedAt || game.startedAt)}
+                    </Text>
+                  </View>
+                  <View style={styles.historyStatus}>
+                    <Text style={styles.historyProgress}>{game.progress || 0}%</Text>
+                  </View>
+                </View>
+              ))}
+            </>
+          ) : (
+            <View style={styles.emptySection}>
+              <Text style={styles.emptySectionText}>
+                No has completado juegos aún. ¡Empieza uno para ver tu historial!
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Game Actions Section - Always visible */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🔗 Acciones de Juego</Text>
+          <AppButton
+            title="Unirse a un Juego"
+            onPress={handleUnirse}
+            icon="🔗"
+            style={styles.actionButton}
+          />
+          <AppButton
+            title="Generar Mi Juego"
+            onPress={handleGenerateGame}
+            variant="secondary"
+            icon="✨"
+            style={styles.actionButton}
+          />
+        </View>
+
+        {/* Additional Navigation */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>📊 Más Opciones</Text>
+          <AppButton
+            title="Mis Datos Personales"
+            onPress={() => navigation.navigate('MyData')}
+            variant="outline"
+            icon="📝"
+            style={styles.actionButton}
+          />
+          <AppButton
+            title="Mis Premios (Creados)"
+            onPress={() => navigation.navigate('MyPrizes')}
+            variant="outline"
+            icon="🎁"
+            style={styles.actionButton}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -258,11 +345,33 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingTop: 0,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333333',
-    marginBottom: 16,
+  },
+  seeAllText: {
+    fontSize: 14,
+    color: '#FF6B9D',
+    fontWeight: '600',
+  },
+  emptySection: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptySectionText: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -355,6 +464,73 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginBottom: 12,
+  },
+  prizeCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginRight: 12,
+    width: 120,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  prizeEmoji: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  prizeTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333333',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  prizeUsed: {
+    fontSize: 11,
+    color: '#4CAF50',
+    fontWeight: '600',
+  },
+  historyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  historyIcon: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  historyInfo: {
+    flex: 1,
+  },
+  historyType: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333333',
+    marginBottom: 2,
+  },
+  historyDate: {
+    fontSize: 11,
+    color: '#999999',
+  },
+  historyStatus: {
+    marginLeft: 8,
+  },
+  historyProgress: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FF6B9D',
   },
   emptyState: {
     alignItems: 'center',
