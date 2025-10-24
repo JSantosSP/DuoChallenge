@@ -33,8 +33,10 @@ const ChallengeScreen = ({ route, navigation }) => {
   const [attempts, setAttempts] = useState(0);
 
   const handleSubmit = async () => {
+    const challengeType = challenge.tipoDato?.type;
+    
     // Validar según el tipo de reto
-    if (challenge.tipoDato?.type === 'foto') {
+    if (challengeType === 'foto') {
       if (!puzzleOrder) {
         Alert.alert('Error', 'Por favor completa el puzzle');
         return;
@@ -47,9 +49,9 @@ const ChallengeScreen = ({ route, navigation }) => {
     }
 
     // Preparar payload según tipo de reto
-    const payload = challenge.tipoDato?.type === 'foto' 
+    const payload = challengeType === 'foto' 
       ? { puzzleOrder }
-      : { answer: answer.trim() };
+      : { answer: answer.trim().toLowerCase() }; // Normalizar respuesta
 
     verifyLevel(
       { levelId: challenge._id, payload },
@@ -59,7 +61,7 @@ const ChallengeScreen = ({ route, navigation }) => {
             navigation.goBack();
           } else {
             setAttempts(attempts + 1);
-            if (challenge.tipoDato?.type !== 'foto') {
+            if (challengeType !== 'foto') {
               setAnswer('');
             }
             
@@ -164,7 +166,11 @@ const ChallengeScreen = ({ route, navigation }) => {
         {/* Answer Input */}
         <View style={styles.answerContainer}>
           {challenge.tipoDato?.type !== 'foto' && (
-            <Text style={styles.answerLabel}>Tu respuesta:</Text>
+            <Text style={styles.answerLabel}>
+              {challenge.tipoDato?.type === 'lugar' ? 'Lugar:' : 
+               challenge.tipoDato?.type === 'fecha' ? 'Fecha:' : 
+               'Tu respuesta:'}
+            </Text>
           )}
           <ChallengeInput
             type={challenge.tipoDato?.type}
