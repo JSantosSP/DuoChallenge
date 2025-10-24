@@ -27,6 +27,10 @@ const userDataSchema = new mongoose.Schema({
     ref: 'Category',
     required: true
   },
+  imagePath: {
+    type: String,
+    default: null
+  },
   puzzleGrid: {
     type: Number,
     default: 3, // 3x3 por defecto para retos de foto

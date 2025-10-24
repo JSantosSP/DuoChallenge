@@ -43,6 +43,23 @@ api.interceptors.response.use(
 
 export default api;
 
+// Helper para convertir rutas de imagen relativas a URLs completas
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  
+  // Si ya es una URL completa, retornarla tal cual
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // Si es una ruta relativa, agregar el base URL
+  const baseURL = __DEV__ 
+    ? process.env.EXPO_PUBLIC_API_URL_DEV 
+    : process.env.EXPO_PUBLIC_API_URL_PRO;
+  
+  return `${baseURL}${imagePath}`;
+};
+
 // Funciones API
 export const apiService = {
   // Auth
@@ -70,11 +87,9 @@ export const apiService = {
   updateUserData: (id, data) => api.put(`/api/userdata/${id}`, data),
   deleteUserData: (id) => api.delete(`/api/userdata/${id}`),
   
-  // Upload
-  uploadImage: (file) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    return api.post('/admin/upload', formData, {
+  // Upload (formData already created by caller)
+  uploadImage: (formData) => {
+    return api.post('/api/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },

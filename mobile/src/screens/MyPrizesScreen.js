@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { usePrize } from '../hooks/usePrize';
+import { getImageUrl } from '../api/api';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 
@@ -72,7 +73,7 @@ const MyPrizesScreen = ({ navigation, route }) => {
     >
       {prize.imagePath && (
         <Image
-          source={{ uri: prize.imagePath }}
+          source={{ uri: getImageUrl(prize.imagePath) }}
           style={styles.prizeImage}
         />
       )}

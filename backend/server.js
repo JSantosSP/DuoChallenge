@@ -73,6 +73,40 @@ const shareRoutes = require('./src/routes/share.routes');
 const categoryRoutes = require('./src/routes/category.routes');
 const categoryGetRoutes = require('./src/routes/category.get.routes');
 
+// Upload route (public para usuarios autenticados)
+const { verifyToken } = require('./src/middlewares/auth.middleware');
+const upload = require('./src/middlewares/upload.middleware');
+app.post('/api/upload', verifyToken, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No se proporcionó ningún archivo' 
+      });
+    }
+
+    const imagePath = `/uploads/${req.file.filename}`;
+    
+    // Generar URL completa para el cliente
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const fullUrl = `${protocol}://${host}${imagePath}`;
+
+    res.json({
+      success: true,
+      message: 'Imagen subida exitosamente',
+      data: {
+        path: imagePath,
+        fullUrl: fullUrl,
+        filename: req.file.filename,
+        size: req.file.size
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Usar rutas
 app.use('/auth', authRoutes);
 app.use('/api', gameRoutes);
