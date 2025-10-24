@@ -55,7 +55,7 @@ export const useGame = (gameSetId = null) => {
   // Obtener historial de juegos
   const getHistory = async (status = null) => {
     const response = await apiService.getGameHistory(status);
-    return response.data.data.games;
+    return response.data.data.gameSets;
   };
 
   // Obtener estadísticas del usuario
