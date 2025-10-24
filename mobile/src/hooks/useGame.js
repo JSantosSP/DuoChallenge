@@ -110,16 +110,41 @@ export const useGame = (gameSetId = null) => {
     enabled: false,
   });
 
-  // Reiniciar juego (abandonar juegos activos y generar uno nuevo)
-  const resetMutation = useMutation({
-    mutationFn: () => apiService.resetGame(),
-    onSuccess: () => {
+  // Reiniciar juego usando el código compartido original
+  const restartGameMutation = useMutation({
+    mutationFn: async ({ shareCode }) => {
+      if (!shareCode) {
+        throw new Error('Este juego no tiene un código de compartición válido');
+      }
+      return apiService.joinGame(shareCode);
+    },
+    onSuccess: (response) => {
       queryClient.invalidateQueries(['levels']);
       queryClient.invalidateQueries(['progress']);
       queryClient.invalidateQueries(['prize']);
       queryClient.invalidateQueries(['activeGames']);
       queryClient.invalidateQueries(['gameStats']);
-      Alert.alert('🎮 ¡Nuevo Juego!', 'Se han generado nuevos retos para ti');
+      const newGameSet = response.data.data.gameSet;
+      Alert.alert('🎮 ¡Juego Reiniciado!', `Se ha creado un nuevo juego con ${newGameSet.totalLevels} niveles`);
+      return newGameSet;
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || error.message;
+      if (message.includes('no válido') || message.includes('expirado')) {
+        Alert.alert(
+          'Código Inactivo',
+          'El código de este juego ya no está activo. Pide a tu pareja que genere uno nuevo.',
+          [{ text: 'Entendido' }]
+        );
+      } else if (message.includes('tu propio código')) {
+        Alert.alert(
+          'Acción No Permitida',
+          'No puedes reiniciar un juego creado con tus propios datos. Únete a un juego compartido por otra persona.',
+          [{ text: 'Entendido' }]
+        );
+      } else {
+        Alert.alert('Error', message);
+      }
     },
   });
 
@@ -160,7 +185,7 @@ export const useGame = (gameSetId = null) => {
     verifyLoading: verifyMutation.isPending,
     prize,
     getPrize: refetchPrize,
-    resetGame: resetMutation.mutate,
+    restartGame: restartGameMutation.mutateAsync,
     generateGame: generateMutation.mutateAsync,
     getHistory,
     refetchLevels,

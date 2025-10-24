@@ -161,7 +161,10 @@ const GameDetailScreen = ({ route, navigation }) => {
           <View style={styles.section}>
             <AppButton
               title="Ver Tu Premio"
-              onPress={() => navigation.navigate('Prize', { gameSetId: gameSet._id })}
+              onPress={() => navigation.navigate('Prize', { 
+                gameSetId: gameSet._id,
+                shareCode: gameSet.shareCode
+              })}
               icon="🏆"
             />
           </View>

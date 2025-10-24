@@ -14,22 +14,7 @@ import AppButton from '../components/AppButton';
 
 const SettingsScreen = ({ navigation }) => {
   const { user, logout } = useAuth();
-  const { resetGame, stats } = useGame();
-
-  const handleResetGame = () => {
-    Alert.alert(
-      'Reiniciar Juego',
-      '¿Estás seguro? Se perderá todo el progreso actual y se generarán nuevos retos.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Reiniciar',
-          style: 'destructive',
-          onPress: () => resetGame(),
-        },
-      ]
-    );
-  };
+  const { stats } = useGame();
 
   const handleLogout = () => {
     Alert.alert(
@@ -145,16 +130,6 @@ const SettingsScreen = ({ navigation }) => {
               <Text style={styles.actionTitle}>Mis Premios</Text>
               <Text style={styles.actionDescription}>
                 Gestiona tus premios personalizados
-              </Text>
-            </View>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.actionCard} onPress={handleResetGame}>
-            <Text style={styles.actionIcon}>🔄</Text>
-            <View style={styles.actionInfo}>
-              <Text style={styles.actionTitle}>Reiniciar Juego</Text>
-              <Text style={styles.actionDescription}>
-                Genera nuevos retos y empieza de cero
               </Text>
             </View>
           </TouchableOpacity>

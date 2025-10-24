@@ -89,6 +89,8 @@ export const apiService = {
   createPrize: (data) => api.post('/api/prizes', data),
   updatePrize: (id, data) => api.put(`/api/prizes/${id}`, data),
   deletePrize: (id) => api.delete(`/api/prizes/${id}`),
+  reactivatePrize: (id) => api.put(`/api/prizes/${id}/reactivate`),
+  reactivateAllPrizes: () => api.put('/api/prizes/reactivate-all'),
 
   // Categories (for UserData)
   getCategories: () => api.get('/api/categories'),
