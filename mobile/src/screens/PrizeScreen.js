@@ -115,11 +115,24 @@ const PrizeScreen = ({ route, navigation }) => {
 
           {/* Actions */}
           <View style={styles.actionsContainer}>
-            <AppButton
-              title="Iniciar Nuevo Juego"
-              onPress={handleNewGame}
-              icon="🎮"
-            />
+            {shareCode ? (
+              <>
+                <AppButton
+                  title="Reiniciar este Juego"
+                  onPress={handleNewGame}
+                  icon="🔄"
+                />
+                <Text style={styles.infoText}>
+                  Se creará un nuevo juego usando el código {shareCode}
+                </Text>
+              </>
+            ) : (
+              <View style={styles.noCodeInfo}>
+                <Text style={styles.noCodeText}>
+                  Este juego no tiene un código de compartición. Para crear un nuevo juego, ve a Configuración → Reiniciar Juego.
+                </Text>
+              </View>
+            )}
             
             <AppButton
               title="Volver al Inicio"
@@ -228,6 +241,25 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     marginTop: 12,
+  },
+  infoText: {
+    fontSize: 13,
+    color: '#666666',
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 12,
+  },
+  noCodeInfo: {
+    backgroundColor: '#FFF9E6',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  noCodeText: {
+    fontSize: 14,
+    color: '#FF9800',
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
 

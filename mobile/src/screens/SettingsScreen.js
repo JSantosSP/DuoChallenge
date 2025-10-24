@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,15 +6,66 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
-import { useGame } from '../hooks/useGame';
+import { useGame, useGameShare } from '../hooks/useGame';
 import AppButton from '../components/AppButton';
 
 const SettingsScreen = ({ navigation }) => {
   const { user, logout } = useAuth();
-  const { stats } = useGame();
+  const { stats, restartGame } = useGame();
+  const { shareCodes, codesLoading, refetchCodes } = useGameShare();
+  const [showShareCodeModal, setShowShareCodeModal] = useState(false);
+  const [isRestarting, setIsRestarting] = useState(false);
+
+  const handleRestartGame = async () => {
+    await refetchCodes();
+    const activeCodes = shareCodes?.filter(s => s.active) || [];
+    
+    if (activeCodes.length === 0) {
+      Alert.alert(
+        'No hay códigos disponibles',
+        'No tienes códigos activos disponibles para reiniciar un juego. Pide a tu pareja que genere un código nuevo.',
+        [{ text: 'Entendido' }]
+      );
+      return;
+    }
+
+    setShowShareCodeModal(true);
+  };
+
+  const handleSelectShareCode = async (code) => {
+    setShowShareCodeModal(false);
+    
+    Alert.alert(
+      'Confirmar reinicio',
+      `¿Quieres crear un nuevo juego usando el código ${code}?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Crear juego',
+          onPress: async () => {
+            try {
+              setIsRestarting(true);
+              await restartGame({ shareCode: code });
+              Alert.alert(
+                '✅ ¡Juego creado!',
+                'Se ha generado un nuevo juego. Puedes empezar a jugar.',
+                [{ text: 'Ir al inicio', onPress: () => navigation.navigate('Home') }]
+              );
+            } catch (error) {
+              console.error('Error creating game:', error);
+            } finally {
+              setIsRestarting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -134,6 +185,20 @@ const SettingsScreen = ({ navigation }) => {
             </View>
           </TouchableOpacity>
 
+          <TouchableOpacity 
+            style={styles.actionCard} 
+            onPress={handleRestartGame}
+            disabled={isRestarting}
+          >
+            <Text style={styles.actionIcon}>🔄</Text>
+            <View style={styles.actionInfo}>
+              <Text style={styles.actionTitle}>Reiniciar Juego</Text>
+              <Text style={styles.actionDescription}>
+                Elige un código compartido y crea un nuevo juego
+              </Text>
+            </View>
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.actionCard} onPress={handleLogout}>
             <Text style={styles.actionIcon}>🚪</Text>
             <View style={styles.actionInfo}>
@@ -156,6 +221,63 @@ const SettingsScreen = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Share Code Selection Modal */}
+      <Modal
+        visible={showShareCodeModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowShareCodeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Selecciona un código</Text>
+              <TouchableOpacity 
+                onPress={() => setShowShareCodeModal(false)}
+                style={styles.modalCloseButton}
+              >
+                <Text style={styles.modalCloseText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {codesLoading ? (
+              <View style={styles.modalLoading}>
+                <ActivityIndicator size="large" color="#FF6B9D" />
+                <Text style={styles.modalLoadingText}>Cargando códigos...</Text>
+              </View>
+            ) : (
+              <ScrollView style={styles.modalScroll}>
+                {shareCodes?.filter(s => s.active).map((shareCode) => (
+                  <TouchableOpacity
+                    key={shareCode._id}
+                    style={styles.shareCodeCard}
+                    onPress={() => handleSelectShareCode(shareCode.code)}
+                  >
+                    <View style={styles.shareCodeInfo}>
+                      <Text style={styles.shareCodeCode}>{shareCode.code}</Text>
+                      <Text style={styles.shareCodeMeta}>
+                        Usado por {shareCode.usedBy?.length || 0} personas
+                      </Text>
+                      <Text style={styles.shareCodeDate}>
+                        Creado: {new Date(shareCode.createdAt).toLocaleDateString('es-ES')}
+                      </Text>
+                    </View>
+                    <Text style={styles.shareCodeArrow}>→</Text>
+                  </TouchableOpacity>
+                ))}
+                {(!shareCodes || shareCodes.filter(s => s.active).length === 0) && (
+                  <View style={styles.modalEmpty}>
+                    <Text style={styles.modalEmptyText}>
+                      No tienes códigos activos disponibles
+                    </Text>
+                  </View>
+                )}
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -285,6 +407,93 @@ const styles = StyleSheet.create({
   aboutVersion: {
     fontSize: 12,
     color: '#999999',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '70%',
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333333',
+  },
+  modalCloseButton: {
+    padding: 8,
+  },
+  modalCloseText: {
+    fontSize: 24,
+    color: '#666666',
+  },
+  modalScroll: {
+    padding: 20,
+  },
+  modalLoading: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  modalLoadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666666',
+  },
+  shareCodeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF5F8',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#FFE4ED',
+  },
+  shareCodeInfo: {
+    flex: 1,
+  },
+  shareCodeCode: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FF6B9D',
+    marginBottom: 4,
+    letterSpacing: 2,
+  },
+  shareCodeMeta: {
+    fontSize: 13,
+    color: '#666666',
+    marginBottom: 2,
+  },
+  shareCodeDate: {
+    fontSize: 12,
+    color: '#999999',
+  },
+  shareCodeArrow: {
+    fontSize: 24,
+    color: '#FF6B9D',
+    marginLeft: 12,
+  },
+  modalEmpty: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  modalEmptyText: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
   },
 });
 

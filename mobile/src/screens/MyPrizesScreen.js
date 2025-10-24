@@ -12,12 +12,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { usePrize } from '../hooks/usePrize';
+import { apiService } from '../api/api';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 
 const MyPrizesScreen = ({ navigation, route }) => {
   const { userPrizes, loading, refetch, deletePrize } = usePrize();
   const [refreshing, setRefreshing] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
 
   // Refresh data when screen becomes visible
   useFocusEffect(
@@ -64,43 +66,115 @@ const MyPrizesScreen = ({ navigation, route }) => {
     return '#F44336'; // Rojo
   };
 
+  const handleReactivatePrize = async (prizeId) => {
+    Alert.alert(
+      'Reactivar Premio',
+      '¿Quieres reactivar este premio para poder usarlo nuevamente en futuros juegos?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Reactivar',
+          onPress: async () => {
+            try {
+              setReactivating(true);
+              await apiService.reactivatePrize(prizeId);
+              Alert.alert('✅ Éxito', 'Premio reactivado correctamente');
+              await refetch();
+            } catch (error) {
+              const message = error.response?.data?.message || 'Error al reactivar premio. Este endpoint aún no está implementado en el backend.';
+              Alert.alert('Error', message);
+            } finally {
+              setReactivating(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleReactivateAll = () => {
+    const usedPrizes = userPrizes.filter(p => p.used);
+    if (usedPrizes.length === 0) {
+      Alert.alert('Info', 'No tienes premios usados para reactivar');
+      return;
+    }
+
+    Alert.alert(
+      'Reactivar Todos',
+      `¿Quieres reactivar todos los ${usedPrizes.length} premios usados?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Reactivar Todos',
+          onPress: async () => {
+            try {
+              setReactivating(true);
+              await apiService.reactivateAllPrizes();
+              Alert.alert('✅ Éxito', 'Todos los premios han sido reactivados');
+              await refetch();
+            } catch (error) {
+              const message = error.response?.data?.message || 'Error al reactivar premios. Este endpoint aún no está implementado en el backend.';
+              Alert.alert('Error', message);
+            } finally {
+              setReactivating(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderPrizeCard = (prize) => (
-    <TouchableOpacity
-      key={prize._id}
-      style={styles.prizeCard}
-      onPress={() => navigation.navigate('EditPrize', { prize })}
-    >
-      {prize.imagePath && (
-        <Image
-          source={{ uri: prize.imagePath }}
-          style={styles.prizeImage}
-        />
-      )}
-      <View style={styles.prizeInfo}>
-        <View style={styles.prizeHeader}>
-          <Text style={styles.prizeTitle}>{prize.title}</Text>
-        </View>
-        <Text style={styles.prizeDescription} numberOfLines={2}>
-          {prize.description}
-        </Text>
-        <View style={styles.prizeMeta}>
-          <View style={[styles.weightBadge, { backgroundColor: getWeightColor(prize.weight) }]}>
-            <Text style={styles.weightText}>Peso: {prize.weight}</Text>
-          </View>
-          {prize.used && (
-            <View style={styles.usedBadge}>
-              <Text style={styles.usedText}>Usado</Text>
-            </View>
-          )}
-        </View>
-      </View>
+    <View key={prize._id} style={styles.prizeCardContainer}>
       <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => handleDelete(prize)}
+        style={styles.prizeCard}
+        onPress={() => navigation.navigate('EditPrize', { prize })}
       >
-        <Text style={styles.deleteButtonText}>🗑️</Text>
+        {prize.imagePath && (
+          <Image
+            source={{ uri: prize.imagePath }}
+            style={styles.prizeImage}
+          />
+        )}
+        <View style={styles.prizeInfo}>
+          <View style={styles.prizeHeader}>
+            <Text style={styles.prizeTitle}>{prize.title}</Text>
+          </View>
+          <Text style={styles.prizeDescription} numberOfLines={2}>
+            {prize.description}
+          </Text>
+          <View style={styles.prizeMeta}>
+            <View style={[styles.weightBadge, { backgroundColor: getWeightColor(prize.weight) }]}>
+              <Text style={styles.weightText}>Peso: {prize.weight}</Text>
+            </View>
+            {prize.used && (
+              <View style={styles.usedBadge}>
+                <Text style={styles.usedText}>Usado</Text>
+              </View>
+            )}
+          </View>
+        </View>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDelete(prize)}
+        >
+          <Text style={styles.deleteButtonText}>🗑️</Text>
+        </TouchableOpacity>
       </TouchableOpacity>
-    </TouchableOpacity>
+      
+      {/* Reactivate button for used prizes */}
+      {prize.used && (
+        <TouchableOpacity
+          style={styles.reactivateButton}
+          onPress={() => handleReactivatePrize(prize._id)}
+          disabled={reactivating}
+        >
+          <Text style={styles.reactivateButtonText}>
+            🔄 Reactivar Premio
+          </Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 
   if (loading && !refreshing) {
@@ -124,6 +198,24 @@ const MyPrizesScreen = ({ navigation, route }) => {
             Gestiona tus premios para los juegos
           </Text>
         </View>
+
+        {/* Stats and Reactivate All Button */}
+        {allPrizes.filter(p => p.used).length > 0 && (
+          <View style={styles.actionSection}>
+            <View style={styles.usedPrizesInfo}>
+              <Text style={styles.usedPrizesText}>
+                {allPrizes.filter(p => p.used).length} premio(s) usado(s)
+              </Text>
+            </View>
+            <AppButton
+              title="Reactivar Todos los Premios Usados"
+              onPress={handleReactivateAll}
+              icon="🔄"
+              variant="outline"
+              disabled={reactivating}
+            />
+          </View>
+        )}
 
         {/* Filter Buttons */}
         <View style={styles.filterContainer}>
@@ -319,6 +411,41 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666666',
     textAlign: 'center',
+  },
+  prizeCardContainer: {
+    marginBottom: 12,
+  },
+  actionSection: {
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+  },
+  usedPrizesInfo: {
+    backgroundColor: '#FFF9E6',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  usedPrizesText: {
+    fontSize: 14,
+    color: '#FF9800',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  reactivateButton: {
+    marginTop: 8,
+    marginHorizontal: 24,
+    backgroundColor: '#FFF0F5',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FF6B9D',
+  },
+  reactivateButtonText: {
+    color: '#FF6B9D',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

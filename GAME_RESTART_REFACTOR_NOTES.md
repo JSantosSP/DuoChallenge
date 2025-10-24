@@ -1,8 +1,18 @@
 # Game Restart Refactor - Documentation
 
-## 📋 Overview
+## ⚠️ DOCUMENT STATUS: SUPERSEDED
 
-This document describes the refactoring of the "restart game" functionality in the mobile app to align with the new GameShare architecture. The main goal is to ensure that game restarts use existing GameShare codes rather than creating games from the user's own data.
+**This document has been superseded by:**
+- `SETTINGS_RESTART_FIX.md` - Current implementation details
+- `JOIN_DUPLICATE_LOGIC.md` - Duplicate join handling
+
+**Changes:** The functionality described here was further refined. The Settings button was restored with a GameShare selector modal instead of being removed. See the documents above for current implementation.
+
+---
+
+## 📋 Overview (Original)
+
+This document describes the **initial** refactoring of the "restart game" functionality in the mobile app to align with the new GameShare architecture. The main goal is to ensure that game restarts use existing GameShare codes rather than creating games from the user's own data.
 
 ---
 
@@ -514,7 +524,28 @@ For questions about this refactor, refer to:
 
 ---
 
-**Document Version:** 1.0  
+**Document Version:** 1.0 (Superseded)  
 **Last Updated:** 2025-10-24  
 **Author:** Cursor AI Assistant  
-**Status:** ✅ Completed
+**Status:** ⚠️ Superseded - See SETTINGS_RESTART_FIX.md for current implementation
+
+---
+
+## 🔄 What Changed After This Document
+
+After this initial refactoring, further improvements were made:
+
+1. **Settings Button Restored**
+   - Original: Removed from Settings
+   - Current: Restored with GameShare selector modal
+   - See: `SETTINGS_RESTART_FIX.md`
+
+2. **Duplicate Join Handling**
+   - Original: Basic error handling
+   - Current: Graceful handling, can restart same code multiple times
+   - See: `JOIN_DUPLICATE_LOGIC.md`
+
+3. **Prize Reactivation**
+   - Original: Moved to WonPrizesScreen only
+   - Current: Also in MyPrizesScreen with bulk actions
+   - See: `SETTINGS_RESTART_FIX.md`
