@@ -142,7 +142,7 @@ const Prizes = () => {
               <div className="h-48 bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center relative">
                 {prize.imagePath ? (
                   <img
-                    src={`${import.meta.env.VITE_API_URL}${prize.imagePath}`}
+                    src={`${import.meta.env.VITE_API_URL_DEV}${prize.imagePath}`}
                     alt={prize.title}
                     className="w-full h-full object-cover"
                   />

@@ -65,7 +65,7 @@ const EditPrizeScreen = ({ navigation, route }) => {
   const handleImagePicker = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -85,6 +85,7 @@ const EditPrizeScreen = ({ navigation, route }) => {
       }
     } catch (error) {
       Alert.alert('Error', 'No se pudo seleccionar la imagen');
+      console.error('ImagePicker Error:', error);
     }
   };
 

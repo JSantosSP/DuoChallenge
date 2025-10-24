@@ -107,7 +107,7 @@ const AddEditDataScreen = ({ navigation, route }) => {
   const handleImagePicker = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaType.Images,
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -127,6 +127,7 @@ const AddEditDataScreen = ({ navigation, route }) => {
       }
     } catch (error) {
       Alert.alert('Error', 'No se pudo seleccionar la imagen');
+      console.error('ImagePicker Error:', error);
     }
   };
 
