@@ -98,6 +98,7 @@ export const apiService = {
   // Share
   createShareCode: () => api.post('/api/share/create'),
   getUserShareCodes: () => api.get('/api/share/codes'),
+  getUserUsedShareCodes: () => api.get('/api/share/used-codes'),
   verifyShareCode: (code) => api.get(`/api/share/verify/${code}`),
   joinGame: (code) => api.post('/api/share/join', { code }),
   getSharedGames: () => api.get('/api/share/instances'),

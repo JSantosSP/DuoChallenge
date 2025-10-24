@@ -11,12 +11,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
-import { useGame, useGameShare } from '../hooks/useGame';
+import { useGame } from '../hooks/useGame';
 import AppButton from '../components/AppButton';
+import { useShare } from '../hooks/useShare';
 
 const SettingsScreen = ({ navigation }) => {
   const { user, logout } = useAuth();
   const { stats, restartGame, activeGames, refetchActiveGames } = useGame();
+  const { fetchUsedShareCodes, usedShareCodes } = useShare();
   const [showRestartModal, setShowRestartModal] = useState(false);
   const [restarting, setRestarting] = useState(false);
   const [availableShareCodes, setAvailableShareCodes] = useState([]);
@@ -38,19 +40,21 @@ const SettingsScreen = ({ navigation }) => {
 
   const handleRestartGame = async () => {
     // Refrescar juegos activos
-    await refetchActiveGames();
+    await fetchUsedShareCodes();
+    console.log(usedShareCodes)
+
     
     // Obtener códigos únicos de juegos compartidos
     const shareCodes = [];
     const seenCodes = new Set();
     
-    (activeGames || []).forEach(game => {
-      if (game.shareCode && game.shareId && !seenCodes.has(game.shareCode)) {
-        seenCodes.add(game.shareCode);
+    (usedShareCodes || []).forEach(code => {
+      if (code.code && code._id && !seenCodes.has(code.code)) {
+        seenCodes.add(code.code);
         shareCodes.push({
-          code: game.shareCode,
-          creatorId: game.creatorId,
-          shareId: game.shareId._id || game.shareId,
+          code: code.code,
+          creatorId: code.creatorId,
+          shareId: code._id,
         });
       }
     });

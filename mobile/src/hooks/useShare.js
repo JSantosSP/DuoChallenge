@@ -4,6 +4,7 @@ import { Alert, Share, Clipboard } from 'react-native';
 
 export const useShare = () => {
   const [shareCodes, setShareCodes] = useState([]);
+  const [usedShareCodes, setUsedShareCodes] = useState([]);
   const [gameInstances, setGameInstances] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,6 +19,20 @@ export const useShare = () => {
     } catch (error) {
       console.error('Error fetching share codes:', error);
       setError(error.response?.data?.message || 'Error al cargar códigos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUsedShareCodes = async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.getUserUsedShareCodes();
+      setUsedShareCodes(response.data.data.shareCodes || []);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching share codes usados:', error);
+      setError(error.response?.data?.message || 'Error al cargar códigos usados');
     } finally {
       setLoading(false);
     }
@@ -140,10 +155,12 @@ export const useShare = () => {
 
   return {
     shareCodes,
+    usedShareCodes,
     gameInstances,
     loading,
     error,
     fetchShareCodes,
+    fetchUsedShareCodes,
     fetchGameInstances,
     createShareCode,
     verifyShareCode,
@@ -154,6 +171,7 @@ export const useShare = () => {
     refetch: () => {
       fetchShareCodes();
       fetchGameInstances();
+      fetchUsedShareCodes();
     }
   };
 };

@@ -86,6 +86,30 @@ const getUserShareCodes = async (req, res) => {
   }
 };
 
+// Obtener códigos a los que se a unido el usuario
+const getUserUsedShareCodes = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const shareCodes = await GameShare.find({ "usedBy.userId":userId, "active": true })
+      .sort({ createdAt: -1 })
+      .populate('usedBy.userId', 'name email');
+
+
+    res.json({
+      success: true,
+      data: { shareCodes }
+    });
+  } catch (error) {
+    console.error('Error obteniendo códigos:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener códigos',
+      error: error.message
+    });
+  }
+};
+
 // Verificar código y obtener info del creador
 const verifyShareCode = async (req, res) => {
   try {
@@ -264,6 +288,7 @@ const deactivateShareCode = async (req, res) => {
 module.exports = {
   createShareCode,
   getUserShareCodes,
+  getUserUsedShareCodes,
   verifyShareCode,
   joinGame,
   getGameInstances,
