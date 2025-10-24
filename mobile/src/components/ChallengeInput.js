@@ -46,7 +46,7 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
 
   // Renderizar según tipo de reto
   switch (type) {
-    case 'date':
+    case 'fecha':
       return (
         <View>
           <TouchableOpacity 
@@ -83,7 +83,7 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
         </View>
       );
     
-    case 'photo':
+    case 'foto':
       // Puzzle interactivo
       if (challenge && challenge.imagePath) {
         return (
@@ -102,7 +102,19 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
         </View>
       );
     
-    case 'text':
+    case 'lugar':
+      // Tipo lugar: entrada de texto con placeholder específico
+      return (
+        <TextInput
+          style={[styles.input, style]}
+          placeholder="Ej: Madrid, Parque del Retiro, Casa..."
+          value={value}
+          onChangeText={onChangeText}
+          autoCapitalize="words"
+        />
+      );
+    
+    case 'texto':
     default:
       // Tipo texto: entrada libre normalizada
       return (
