@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useWonPrizes } from '../hooks/useGame';
-import { apiService } from '../api/api';
+import { apiService, getImageUrl } from '../api/api';
 import LoadingOverlay from '../components/LoadingOverlay';
 import AppButton from '../components/AppButton';
 
@@ -112,7 +112,7 @@ const WonPrizesScreen = ({ navigation }) => {
     <View key={index} style={styles.prizeCard}>
       {prize.imagePath && (
         <Image
-          source={{ uri: prize.imagePath }}
+          source={{ uri: getImageUrl(prize.imagePath) }}
           style={styles.prizeImage}
           resizeMode="cover"
         />

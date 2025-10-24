@@ -129,7 +129,12 @@ export const usePrize = () => {
       });
 
       const response = await apiService.uploadImage(formData);
-      return { success: true, path: response.data.data.path };
+      // Devolver fullUrl para usar directamente en Image component
+      return { 
+        success: true, 
+        path: response.data.data.path,
+        fullUrl: response.data.data.fullUrl 
+      };
     } catch (error) {
       console.error('Error uploading image:', error);
       const message = error.response?.data?.message || 'Error al subir imagen';

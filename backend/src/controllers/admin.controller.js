@@ -176,12 +176,18 @@ const uploadImage = async (req, res) => {
     }
 
     const imagePath = `/uploads/${req.file.filename}`;
+    
+    // Generar URL completa para el cliente
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const fullUrl = `${protocol}://${host}${imagePath}`;
 
     res.json({
       success: true,
       message: 'Imagen subida exitosamente',
       data: {
         path: imagePath,
+        fullUrl: fullUrl,
         filename: req.file.filename,
         size: req.file.size
       }

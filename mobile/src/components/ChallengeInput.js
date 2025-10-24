@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TextInput, StyleSheet, View, TouchableOpacity, Text, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { getImageUrl } from '../api/api';
 import PuzzleGame from './PuzzleGame';
 
 /**
@@ -85,10 +86,9 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
     case 'photo':
       // Puzzle interactivo
       if (challenge && challenge.imagePath) {
-        const API_URL = process.env.EXPO_PUBLIC_API_URL_DEV || 'http://localhost:4000';
         return (
           <PuzzleGame
-            imageUri={`${API_URL}${challenge.imagePath}`}
+            imageUri={getImageUrl(challenge.imagePath)}
             gridSize={challenge.puzzleGrid || 3}
             onComplete={onPuzzleComplete}
             style={style}

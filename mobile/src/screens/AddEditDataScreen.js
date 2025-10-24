@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { useUserData } from '../hooks/useUserData';
+import { getImageUrl } from '../api/api';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 
@@ -54,7 +55,7 @@ const AddEditDataScreen = ({ navigation, route }) => {
         puzzleGrid: item.puzzleGrid || 3,
       });
       if (item?.valor?.foto) {
-        setSelectedImage({ uri: item.valor.foto });
+        setSelectedImage({ uri: getImageUrl(item.valor.foto) });
       }
     }
   }, [isEditing, item]);
@@ -119,7 +120,9 @@ const AddEditDataScreen = ({ navigation, route }) => {
         // Upload image
         const uploadResult = await uploadImage(asset.uri);
         if (uploadResult.success) {
-          setFormData({ ...formData, valor: {foto:uploadResult.path} });
+          // Store path in DB, use fullUrl for immediate display
+          setFormData({ ...formData, valor: {foto: uploadResult.path} });
+          setSelectedImage({ uri: uploadResult.fullUrl });
         }
       }
     } catch (error) {

@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { usePrize } from '../hooks/usePrize';
+import { getImageUrl } from '../api/api';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 
@@ -46,7 +47,7 @@ const EditPrizeScreen = ({ navigation, route }) => {
         weight: prize.weight || 1,
       });
       if (prize.imagePath) {
-        setSelectedImage({ uri: prize.imagePath });
+        setSelectedImage({ uri: getImageUrl(prize.imagePath) });
       }
     } else if (isFromTemplate && template) {
       setFormData({
@@ -56,7 +57,7 @@ const EditPrizeScreen = ({ navigation, route }) => {
         weight: template.weight || 1,
       });
       if (template.imagePath) {
-        setSelectedImage({ uri: template.imagePath });
+        setSelectedImage({ uri: getImageUrl(template.imagePath) });
       }
     }
   }, [isEditing, prize, isFromTemplate, template]);
@@ -77,7 +78,9 @@ const EditPrizeScreen = ({ navigation, route }) => {
         // Upload image
         const uploadResult = await uploadImage(asset.uri);
         if (uploadResult.success) {
+          // Store path in DB, use fullUrl for immediate display
           setFormData({ ...formData, imagePath: uploadResult.path });
+          setSelectedImage({ uri: uploadResult.fullUrl });
         }
       }
     } catch (error) {

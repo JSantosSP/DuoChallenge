@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGame } from '../hooks/useGame';
+import { getImageUrl } from '../api/api';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 
@@ -96,7 +97,7 @@ const PrizeScreen = ({ route, navigation }) => {
 
             {prize.imagePath && (
               <Image
-                source={{ uri: `http://localhost:4000${prize.imagePath}` }}
+                source={{ uri: getImageUrl(prize.imagePath) }}
                 style={styles.prizeImage}
                 resizeMode="cover"
               />

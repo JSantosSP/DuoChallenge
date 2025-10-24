@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGame } from '../hooks/useGame';
+import { getImageUrl } from '../api/api';
 import AppButton from '../components/AppButton';
 import ChallengeInput from '../components/ChallengeInput';
 
@@ -126,7 +127,7 @@ const ChallengeScreen = ({ route, navigation }) => {
         {challenge.imagePath && challenge.tipoDato?.type !== 'foto' && (
           <View style={styles.imageContainer}>
             <Image
-              source={{ uri: `http://localhost:4000${challenge.imagePath}` }}
+              source={{ uri: getImageUrl(challenge.imagePath) }}
               style={styles.image}
               resizeMode="cover"
             />
