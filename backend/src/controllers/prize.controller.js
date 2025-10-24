@@ -164,6 +164,7 @@ const getUserWonPrizes = async (req, res) => {
     const wonPrizes = completedSets
       .filter(set => set.prizeId)
       .map(set => ({
+        _id: set.prizeId._id,
         prizeId: set.prizeId._id,
         title: set.prizeId.title,
         description: set.prizeId.description,
@@ -193,10 +194,94 @@ const getUserWonPrizes = async (req, res) => {
   }
 };
 
+// Reactivar un premio específico (marcar como no usado)
+const reactivatePrize = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    // Buscar el premio y verificar que pertenece al usuario
+    const prize = await Prize.findOne({ _id: id });
+
+    if (!prize) {
+      return res.status(404).json({
+        success: false,
+        message: 'Premio no encontrado'
+      });
+    }
+
+    // Verificar que el usuario es el dueño del premio
+    if (prize.userId.toString() !== userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'No tienes permiso para reactivar este premio'
+      });
+    }
+
+    // Reactivar el premio
+    prize.used = false;
+    prize.usedAt = null;
+    await prize.save();
+
+    res.json({
+      success: true,
+      message: 'Premio reactivado exitosamente',
+      data: { prize }
+    });
+
+  } catch (error) {
+    console.error('Error reactivando premio:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al reactivar premio',
+      error: error.message
+    });
+  }
+};
+
+// Reactivar todos los premios del usuario
+const reactivateAllPrizes = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Buscar todos los premios del usuario que están marcados como usados
+    const result = await Prize.updateMany(
+      { 
+        userId, 
+        used: true 
+      },
+      { 
+        $set: { 
+          used: false,
+          usedAt: null 
+        } 
+      }
+    );
+
+    res.json({
+      success: true,
+      message: `Se reactivaron ${result.modifiedCount} premio(s)`,
+      data: { 
+        reactivatedCount: result.modifiedCount 
+      }
+    });
+
+  } catch (error) {
+    console.error('Error reactivando todos los premios:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al reactivar premios',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getUserPrizes,
   createPrize,
   updatePrize,
   deletePrize,
-  getUserWonPrizes
+  getUserWonPrizes,
+  reactivatePrize,
+  reactivateAllPrizes
 };

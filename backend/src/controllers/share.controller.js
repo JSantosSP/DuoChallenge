@@ -135,6 +135,9 @@ const verifyShareCode = async (req, res) => {
 };
 
 // Unirse a un juego compartido
+// NOTA: Esta función permite reiniciar juegos permitiendo múltiples GameSets
+// del mismo código compartido. Si el usuario ya usó el código antes,
+// simplemente crea un nuevo GameSet sin añadirlo de nuevo a usedBy.
 const joinGame = async (req, res) => {
   try {
     const playerId = req.user._id;
@@ -156,10 +159,12 @@ const joinGame = async (req, res) => {
       });
     }
 
+    // Verificar si ya usó el código antes
     const alreadyUsed = gameShare.usedBy.some(
       u => u.userId.toString() === playerId.toString()
     );
 
+    // Solo añadir a usedBy si es la primera vez
     if (!alreadyUsed) {
       gameShare.usedBy.push({
         userId: playerId,
@@ -168,6 +173,8 @@ const joinGame = async (req, res) => {
       await gameShare.save();
     }
 
+    // IMPORTANTE: Siempre se genera un nuevo GameSet, incluso si el usuario
+    // ya había usado este código antes. Esto permite "reiniciar" el juego.
     const gameSet = await generateNewGameSet(
       gameShare.creatorId,
       playerId,
@@ -179,7 +186,9 @@ const joinGame = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Te has unido al juego exitosamente',
+      message: alreadyUsed 
+        ? 'Nuevo juego generado exitosamente' 
+        : 'Te has unido al juego exitosamente',
       data: { gameSet }
     });
   } catch (error) {
