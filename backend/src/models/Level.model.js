@@ -59,6 +59,10 @@ const levelSchema = new mongoose.Schema({
     min: 2,
     max: 5
   },
+  imagePath: {
+    type: String,
+    default: null
+  },
 }, {
   timestamps: true
 });

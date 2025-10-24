@@ -38,6 +38,7 @@ const AddEditDataScreen = ({ navigation, route }) => {
     categorias: '',
     difficulty: 'medium',
     puzzleGrid: 3,
+    imagePath: null,
   });
 
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -53,9 +54,10 @@ const AddEditDataScreen = ({ navigation, route }) => {
         categorias: item.categorias?._id || item.categorias,
         difficulty: item.difficulty || 'medium',
         puzzleGrid: item.puzzleGrid || 3,
+        imagePath: item.imagePath || null,
       });
-      if (item?.valor?.foto) {
-        setSelectedImage({ uri: getImageUrl(item.valor.foto) });
+      if (item?.imagePath) {
+        setSelectedImage({ uri: getImageUrl(item.imagePath) });
       }
     }
   }, [isEditing, item]);
@@ -120,8 +122,8 @@ const AddEditDataScreen = ({ navigation, route }) => {
         // Upload image
         const uploadResult = await uploadImage(asset.uri);
         if (uploadResult.success) {
-          // Store path in DB, use fullUrl for immediate display
-          setFormData({ ...formData, valor: {foto: uploadResult.path} });
+          // Store path in imagePath field, use fullUrl for immediate display
+          setFormData({ ...formData, imagePath: uploadResult.path });
           setSelectedImage({ uri: uploadResult.fullUrl });
         }
       }
@@ -142,10 +144,23 @@ const AddEditDataScreen = ({ navigation, route }) => {
       Alert.alert('Error', 'Selecciona un tipo de dato');
       return false;
     }
-    if (!formData.valor || (typeof formData.valor === 'object' && Object.keys(formData.valor).length === 0)) {
-      Alert.alert('Error', 'El valor es requerido');
-      return false;
+    
+    const typeName = getTypeName(formData.tipoDato);
+    
+    // Validación específica para tipo foto
+    if (typeName === 'foto') {
+      if (!formData.imagePath) {
+        Alert.alert('Error', 'Selecciona una imagen para el puzzle');
+        return false;
+      }
+    } else {
+      // Validación para otros tipos
+      if (!formData.valor || (typeof formData.valor === 'object' && Object.keys(formData.valor).length === 0)) {
+        Alert.alert('Error', 'El valor es requerido');
+        return false;
+      }
     }
+    
     if (!formData.pregunta) {
       Alert.alert('Error', 'La pregunta es requerida');
       return false;
@@ -168,10 +183,18 @@ const AddEditDataScreen = ({ navigation, route }) => {
     if (!validateForm()) return;
 
     const activePistas = formData.pistas.filter(p => p.trim() !== '');
-    const submitData = {
+    const typeName = getTypeName(formData.tipoDato);
+    
+    // Preparar datos según el tipo
+    let submitData = {
       ...formData,
       pistas: activePistas,
     };
+    
+    // Para tipo foto, no necesitamos valor, solo imagePath
+    if (typeName === 'foto') {
+      submitData.valor = {}; // Valor vacío para tipo foto
+    }
 
     try {
       let result;

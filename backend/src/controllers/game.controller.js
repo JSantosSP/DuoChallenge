@@ -43,7 +43,8 @@ const getLevels = async (req, res) => {
       userId: userId
     }).populate({
       path: 'levels',
-      options: { sort: { order: 1 } }
+      options: { sort: { order: 1 } },
+      populate: { path: 'tipoDato' }
     });
 
     if (!gameSet) {
