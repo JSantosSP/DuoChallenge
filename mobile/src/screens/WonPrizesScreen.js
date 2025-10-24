@@ -7,14 +7,18 @@ import {
   RefreshControl,
   Image,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useWonPrizes } from '../hooks/useGame';
+import { apiService } from '../api/api';
 import LoadingOverlay from '../components/LoadingOverlay';
+import AppButton from '../components/AppButton';
 
 const WonPrizesScreen = ({ navigation }) => {
   const { wonPrizes, isLoading, refetch, total } = useWonPrizes();
   const [refreshing, setRefreshing] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -44,6 +48,64 @@ const WonPrizesScreen = ({ navigation }) => {
     if (weight <= 3) return 'Pequeño';
     if (weight <= 6) return 'Mediano';
     return 'Grande';
+  };
+
+  const handleReactivatePrize = async (prizeId) => {
+    Alert.alert(
+      'Reactivar Premio',
+      '¿Quieres reactivar este premio para poder canjearlo nuevamente?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Reactivar',
+          onPress: async () => {
+            try {
+              setReactivating(true);
+              await apiService.reactivatePrize(prizeId);
+              Alert.alert('✅ Éxito', 'Premio reactivado correctamente');
+              await refetch();
+            } catch (error) {
+              const message = error.response?.data?.message || 'Error al reactivar premio';
+              Alert.alert('Error', message);
+            } finally {
+              setReactivating(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleReactivateAll = () => {
+    const usedPrizes = wonPrizes.filter(p => p.used);
+    if (usedPrizes.length === 0) {
+      Alert.alert('Info', 'No tienes premios canjeados para reactivar');
+      return;
+    }
+
+    Alert.alert(
+      'Reactivar Todos',
+      `¿Quieres reactivar todos los ${usedPrizes.length} premios canjeados?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Reactivar Todos',
+          onPress: async () => {
+            try {
+              setReactivating(true);
+              await apiService.reactivateAllPrizes();
+              Alert.alert('✅ Éxito', 'Todos los premios han sido reactivados');
+              await refetch();
+            } catch (error) {
+              const message = error.response?.data?.message || 'Error al reactivar premios';
+              Alert.alert('Error', message);
+            } finally {
+              setReactivating(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const renderPrizeCard = (prize, index) => (
@@ -87,6 +149,19 @@ const WonPrizesScreen = ({ navigation }) => {
             </Text>
           )}
         </View>
+
+        {/* Reactivate button for used prizes */}
+        {prize.used && (
+          <TouchableOpacity
+            style={styles.reactivateButton}
+            onPress={() => handleReactivatePrize(prize._id)}
+            disabled={reactivating}
+          >
+            <Text style={styles.reactivateButtonText}>
+              🔄 Reactivar Premio
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -134,6 +209,19 @@ const WonPrizesScreen = ({ navigation }) => {
               </Text>
               <Text style={styles.statLabel}>Disponibles</Text>
             </View>
+          </View>
+        )}
+
+        {/* Reactivate All Button */}
+        {wonPrizes.filter(p => p.used).length > 0 && (
+          <View style={styles.actionSection}>
+            <AppButton
+              title="Reactivar Todos los Premios Canjeados"
+              onPress={handleReactivateAll}
+              icon="🔄"
+              variant="outline"
+              disabled={reactivating}
+            />
           </View>
         )}
 
@@ -334,6 +422,26 @@ const styles = StyleSheet.create({
   emptyButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  actionSection: {
+    paddingHorizontal: 24,
+    paddingTop: 0,
+    paddingBottom: 16,
+  },
+  reactivateButton: {
+    marginTop: 12,
+    backgroundColor: '#FFF0F5',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FF6B9D',
+  },
+  reactivateButtonText: {
+    color: '#FF6B9D',
+    fontSize: 14,
     fontWeight: '600',
   },
 });

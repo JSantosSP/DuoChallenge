@@ -6,14 +6,16 @@ import {
   ScrollView,
   Image,
   Animated,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGame } from '../hooks/useGame';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 
-const PrizeScreen = ({ navigation }) => {
-  const { prize, getPrize, resetGame } = useGame();
+const PrizeScreen = ({ route, navigation }) => {
+  const { gameSetId, shareCode } = route.params || {};
+  const { prize, getPrize, restartGame } = useGame();
   const fadeAnim = new Animated.Value(0);
   const scaleAnim = new Animated.Value(0.8);
 
@@ -39,12 +41,26 @@ const PrizeScreen = ({ navigation }) => {
     }
   }, [prize]);
 
-  const handleNewGame = () => {
-    resetGame();
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Home' }],
-    });
+  const handleNewGame = async () => {
+    if (!shareCode) {
+      Alert.alert(
+        'No se puede reiniciar',
+        'Este juego no tiene un código de compartición válido. Solo puedes reiniciar juegos compartidos por otra persona.',
+        [{ text: 'Entendido', onPress: () => navigation.navigate('Home') }]
+      );
+      return;
+    }
+
+    try {
+      await restartGame({ shareCode });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    } catch (error) {
+      // El error ya se maneja en el hook
+      console.error('Error restarting game:', error);
+    }
   };
 
   if (!prize) {
