@@ -1,14 +1,14 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const os = require('os');
+const config = require('./src/config/index');
 const connectDB = require('./src/config/database');
 
 // Inicializar Express
 const app = express();
-const PORT = process.env.PORT || 4000;
-const HOST = '0.0.0.0';
+const PORT = config.port;
+const HOST = config.host;
 
 // Conectar a MongoDB
 connectDB();
@@ -19,8 +19,8 @@ connectDB();
 
 // CORS
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
+  origin: config.isProd 
+    ? config.frontendUrl 
     : '*',
   credentials: true
 }));
@@ -139,7 +139,7 @@ app.use((error, req, res, next) => {
   res.status(error.status || 500).json({
     success: false,
     message: error.message || 'Error interno del servidor',
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    ...(!config.isProd && { stack: error.stack })
   });
 });
 

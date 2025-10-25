@@ -1,11 +1,10 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Alert } from 'react-native';
+import { API_URL } from '../config/env';
 
 const api = axios.create({
-  baseURL: __DEV__ 
-    ? process.env.EXPO_PUBLIC_API_URL_DEV 
-    : process.env.EXPO_PUBLIC_API_URL_PRO,
+  baseURL: API_URL,
   timeout: 10000,
 });
 
@@ -44,21 +43,8 @@ api.interceptors.response.use(
 export default api;
 
 // Helper para convertir rutas de imagen relativas a URLs completas
-export const getImageUrl = (imagePath) => {
-  if (!imagePath) return null;
-  
-  // Si ya es una URL completa, retornarla tal cual
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
-  }
-  
-  // Si es una ruta relativa, agregar el base URL
-  const baseURL = __DEV__ 
-    ? process.env.EXPO_PUBLIC_API_URL_DEV 
-    : process.env.EXPO_PUBLIC_API_URL_PRO;
-  
-  return `${baseURL}${imagePath}`;
-};
+// (Re-exportado desde config/env.js para mantener compatibilidad)
+export { getImageUrl } from '../config/env';
 
 // Funciones API
 export const apiService = {

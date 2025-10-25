@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
+const config = require('./index');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
+    const conn = await mongoose.connect(config.mongodbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -20,7 +21,7 @@ const connectDB = async () => {
 
 const createIndexes = async () => {
   try {
-    const { User, Challenge, Level } = require('../models');
+    const { User, Level } = require('../models');
     
     // Índices para optimizar queries
     await User.collection.createIndex({ email: 1 }, { unique: true });
