@@ -1,6 +1,6 @@
 const { Level, Variable, UserData } = require('../models');
 const { hashAnswer, hashPuzzleAnswer, hashDateAnswer, generateSalt } = require('../utils/hash.util');
-const { seededRandom } = require('../utils/seed.util');
+const { selectRandomItems } = require('../utils/seed.util');
 
 /**
  * Genera niveles con sus niveles
@@ -14,29 +14,17 @@ const generateLevels = async (userId, gameSetId, seed, levelCount = 5) => {
       throw new Error('El usuario no tiene datos personalizados aún');
     }
 
-    const listaUserDataIds = [];
-    const maxAttempts = Math.min(levelCount * 2, userDataItems.length * 2); // Prevenir bucle infinito
-    let attempts = 0;
+    // Usar selectRandomItems para garantizar que no haya repeticiones
+    // Si hay menos items que levelCount, se usarán todos los disponibles sin repetir
+    const selectedUserDataItems = selectRandomItems(userDataItems, levelCount, seed);
     
-    while (listaUserDataIds.length < levelCount && attempts < maxAttempts) {
-      const randomIndex = Math.floor(seededRandom(seed, listaUserDataIds.length) * userDataItems.length);
-      const selectedUserData = userDataItems[randomIndex];
-      if (!listaUserDataIds.includes(selectedUserData._id.toString())) {
-        listaUserDataIds.push(selectedUserData._id.toString());
-      }
-      attempts++;
-    }
-    
-    // Si no tenemos suficientes únicos, repetir algunos
-    while (listaUserDataIds.length < levelCount) {
-      const randomIndex = Math.floor(seededRandom(seed, listaUserDataIds.length) * userDataItems.length);
-      listaUserDataIds.push(userDataItems[randomIndex]._id.toString());
-    }
+    // Si no hay suficientes items únicos, ajustar levelCount
+    const actualLevelCount = Math.min(levelCount, userDataItems.length);
 
-    for (let i = 0; i < levelCount; i++) {
+    for (let i = 0; i < actualLevelCount; i++) {
       // Crear nivel
       const level = await createLevelFromUserData(
-        userDataItems.find(ud => ud._id.toString() === listaUserDataIds[i]),
+        selectedUserDataItems[i],
         gameSetId,
         i + 1,
       );
