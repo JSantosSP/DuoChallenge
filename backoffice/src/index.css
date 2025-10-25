@@ -1,5 +1,41 @@
 @import "tailwindcss";
 
+/* Forest and Ocean Color Palette */
+:root {
+  /* Primary colors (for "her" elements or warm accents) */
+  --color-forest-dark: #1B4332;      /* Dark forest green */
+  --color-forest-medium: #2D6A4F;    /* Medium moss green */
+  --color-forest-light: #95D5B2;     /* Soft green accent */
+  
+  /* Secondary colors (for "his" elements or cool zones) */
+  --color-ocean-dark: #014F86;        /* Deep ocean blue */
+  --color-ocean-medium: #2A9D8F;      /* Medium turquoise */
+  --color-ocean-light: #A9D6E5;       /* Light blue accent */
+  
+  /* Neutral colors */
+  --color-bg-light: #F5F8F6;         /* Light background */
+  --color-bg-dark: #0B1D1B;          /* Dark background */
+  --color-text-light: #1C1C1C;       /* Text for light mode */
+  --color-text-dark: #E8F0EE;        /* Text for dark mode */
+  --color-muted: #A0B1AD;            /* Muted text */
+  --color-border: #DDE5E2;           /* Soft borders */
+  
+  /* Status colors */
+  --color-success: #2D6A4F;           /* Forest green for success */
+  --color-warning: #FF9800;          /* Orange for warnings */
+  --color-error: #F44336;            /* Red for errors */
+  --color-info: #2A9D8F;             /* Turquoise for info */
+  
+  /* Theme mapping for Tailwind */
+  --color-primary: var(--color-forest-medium);
+  --color-primary-dark: var(--color-forest-dark);
+  --color-secondary: var(--color-ocean-medium);
+  --color-secondary-dark: var(--color-ocean-dark);
+  --color-accent: var(--color-forest-light);
+  --color-background: var(--color-bg-light);
+  --color-text: var(--color-text-light);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -12,10 +48,124 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f9fafb;
+  background-color: var(--color-bg-light);
+  color: var(--color-text-light);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Custom utility classes for the new color scheme */
+.bg-forest-dark { background-color: var(--color-forest-dark); }
+.bg-forest-medium { background-color: var(--color-forest-medium); }
+.bg-forest-light { background-color: var(--color-forest-light); }
+.bg-ocean-dark { background-color: var(--color-ocean-dark); }
+.bg-ocean-medium { background-color: var(--color-ocean-medium); }
+.bg-ocean-light { background-color: var(--color-ocean-light); }
+
+.text-forest-dark { color: var(--color-forest-dark); }
+.text-forest-medium { color: var(--color-forest-medium); }
+.text-forest-light { color: var(--color-forest-light); }
+.text-ocean-dark { color: var(--color-ocean-dark); }
+.text-ocean-medium { color: var(--color-ocean-medium); }
+.text-ocean-light { color: var(--color-ocean-light); }
+
+.border-forest-dark { border-color: var(--color-forest-dark); }
+.border-forest-medium { border-color: var(--color-forest-medium); }
+.border-ocean-medium { border-color: var(--color-ocean-medium); }
+
+/* Gradient utilities */
+.gradient-forest-ocean {
+  background: linear-gradient(135deg, var(--color-forest-medium), var(--color-ocean-medium));
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-forest-medium), var(--color-ocean-medium));
+}
+
+/* Hover and focus states */
+.hover-forest:hover {
+  background-color: var(--color-forest-medium);
+  color: white;
+  transition: all 0.3s ease;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+}
+
+.hover-ocean:hover {
+  background-color: var(--color-ocean-medium);
+  color: white;
+  transition: all 0.3s ease;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(42, 157, 143, 0.3);
+}
+
+/* Enhanced button styles */
+.btn-forest {
+  background: linear-gradient(135deg, var(--color-forest-medium), var(--color-forest-dark));
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(45, 106, 79, 0.2);
+}
+
+.btn-forest:hover {
+  background: linear-gradient(135deg, var(--color-forest-dark), var(--color-forest-medium));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(45, 106, 79, 0.4);
+}
+
+.btn-ocean {
+  background: linear-gradient(135deg, var(--color-ocean-medium), var(--color-ocean-dark));
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(42, 157, 143, 0.2);
+}
+
+.btn-ocean:hover {
+  background: linear-gradient(135deg, var(--color-ocean-dark), var(--color-ocean-medium));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(42, 157, 143, 0.4);
+}
+
+/* Card enhancements */
+.card-forest {
+  background: linear-gradient(135deg, rgba(45, 106, 79, 0.05), rgba(149, 213, 178, 0.1));
+  border: 1px solid var(--color-forest-light);
+  transition: all 0.3s ease;
+}
+
+.card-forest:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(45, 106, 79, 0.15);
+  border-color: var(--color-forest-medium);
+}
+
+.card-ocean {
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.05), rgba(169, 214, 229, 0.1));
+  border: 1px solid var(--color-ocean-light);
+  transition: all 0.3s ease;
+}
+
+.card-ocean:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(42, 157, 143, 0.15);
+  border-color: var(--color-ocean-medium);
+}
+
+/* Input focus states */
+.input-forest:focus {
+  border-color: var(--color-forest-medium);
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+  outline: none;
+}
+
+.input-ocean:focus {
+  border-color: var(--color-ocean-medium);
+  box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.1);
+  outline: none;
 }

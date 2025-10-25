@@ -12,6 +12,7 @@ import { useGame } from '../hooks/useGame';
 import { getImageUrl } from '../api/api';
 import AppButton from '../components/AppButton';
 import ChallengeInput from '../components/ChallengeInput';
+import { colors } from '../utils/colors';
 
 const getChallengeTypeLabel = (type) => {
   const labels = {
@@ -207,7 +208,7 @@ const ChallengeScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -220,7 +221,7 @@ const styles = StyleSheet.create({
   },
   typeLabel: {
     fontSize: 16,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     fontWeight: '600',
   },
   imageContainer: {
@@ -258,17 +259,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   hintCard: {
-    backgroundColor: '#FFF9E6',
+    backgroundColor: colors.ocean.light,
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
     borderLeftWidth: 4,
-    borderLeftColor: '#FFD700',
+    borderLeftColor: colors.ocean.medium,
   },
   hintNumber: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     marginBottom: 4,
   },
   hintText: {

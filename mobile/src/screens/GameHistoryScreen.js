@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGame } from '../hooks/useGame';
 import LoadingOverlay from '../components/LoadingOverlay';
+import colors from '../utils/colors';
 
 const GameHistoryScreen = ({ navigation }) => {
   const { getHistory, stats, refetchStats } = useGame();
@@ -55,8 +56,8 @@ const GameHistoryScreen = ({ navigation }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'completed': return '#4CAF50';
-      case 'active': return '#FF9800';
-      case 'abandoned': return '#F44336';
+      case 'active': return colors.status.warning;
+      case 'abandoned': return colors.status.error;
       default: return '#999999';
     }
   };
@@ -216,7 +217,7 @@ const GameHistoryScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -249,8 +250,8 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
   },
   filterActive: {
-    backgroundColor: '#FF6B9D',
-    borderColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
+    borderColor: colors.forest.medium,
   },
   filterText: {
     fontSize: 14,
@@ -313,7 +314,7 @@ const styles = StyleSheet.create({
   gameStatValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
   },
   gameDates: {
     borderTopWidth: 1,
@@ -327,7 +328,7 @@ const styles = StyleSheet.create({
   },
   prizeIndicator: {
     marginTop: 8,
-    backgroundColor: '#FFF9E6',
+    backgroundColor: colors.ocean.light,
     padding: 8,
     borderRadius: 8,
     alignItems: 'center',
@@ -335,7 +336,7 @@ const styles = StyleSheet.create({
   prizeText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#FF9800',
+    color: colors.status.warning,
   },
   emptyState: {
     alignItems: 'center',

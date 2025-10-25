@@ -3,6 +3,7 @@ import { TextInput, StyleSheet, View, TouchableOpacity, Text, Platform } from 'r
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getImageUrl } from '../api/api';
 import PuzzleGame from './PuzzleGame';
+import { colors } from '../utils/colors';
 
 /**
  * Componente genérico para entrada de respuestas de retos
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.neutral.border,
   },
   dateInput: {
     backgroundColor: '#FFFFFF',
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.neutral.border,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iosButton: {
-    backgroundColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
     paddingHorizontal: 32,
     paddingVertical: 12,
     borderRadius: 8,

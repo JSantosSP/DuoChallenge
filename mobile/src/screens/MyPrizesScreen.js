@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React,  { useState } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { usePrize } from '../hooks/usePrize';
 import { getImageUrl } from '../api/api';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
+import colors from '../utils/colors';
 
 const MyPrizesScreen = ({ navigation, route }) => {
   const { userPrizes, loading, refetch, deletePrize } = usePrize();
@@ -61,8 +62,8 @@ const MyPrizesScreen = ({ navigation, route }) => {
 
   const getWeightColor = (weight) => {
     if (weight <= 3) return '#4CAF50'; // Verde
-    if (weight <= 6) return '#FF9800'; // Naranja
-    return '#F44336'; // Rojo
+    if (weight <= 6) return colors.status.warning; // Naranja
+    return colors.status.error; // Rojo
   };
 
   const renderPrizeCard = (prize) => (
@@ -172,7 +173,7 @@ const MyPrizesScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -205,8 +206,8 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
   },
   filterActive: {
-    backgroundColor: '#FF6B9D',
-    borderColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
+    borderColor: colors.forest.medium,
   },
   filterText: {
     fontSize: 14,
@@ -291,7 +292,7 @@ const styles = StyleSheet.create({
   },
   systemText: {
     fontSize: 12,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     fontStyle: 'italic',
     marginTop: 4,
   },

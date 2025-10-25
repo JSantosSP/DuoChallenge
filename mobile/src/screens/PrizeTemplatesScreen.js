@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React,  { useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { usePrize } from '../hooks/usePrize';
 import { getImageUrl } from '../api/api';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
+import colors from '../utils/colors';
 
 const PrizeTemplatesScreen = ({ navigation }) => {
   const { prizeTemplates, loading, fetchPrizeTemplates } = usePrize();
@@ -118,7 +119,7 @@ const PrizeTemplatesScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -186,16 +187,16 @@ const styles = StyleSheet.create({
   },
   templateWeight: {
     fontSize: 12,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     fontWeight: '500',
-    backgroundColor: '#FFF0F5',
+    backgroundColor: colors.forest.light,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
   },
   templateArrow: {
     fontSize: 20,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
   },
   emptyState: {
     alignItems: 'center',

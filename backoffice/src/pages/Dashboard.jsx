@@ -12,7 +12,7 @@ const Dashboard = () => {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-forest-medium"></div>
         </div>
       </MainLayout>
     );
@@ -24,28 +24,28 @@ const Dashboard = () => {
       value: stats?.users?.total || 0,
       subtitle: `${stats?.users?.players || 0} jugadores, ${stats?.users?.admins || 0} admins`,
       icon: '👤',
-      color: 'bg-blue-500'
+      color: 'bg-ocean-medium'
     },
     {
       title: 'Plantillas',
       value: stats?.templates?.total || 0,
       subtitle: `${stats?.templates?.active || 0} activas`,
       icon: '🧩',
-      color: 'bg-purple-500'
+      color: 'bg-forest-medium'
     },
     {
       title: 'Premios',
       value: stats?.prizes?.total || 0,
       subtitle: `${stats?.prizes?.available || 0} disponibles`,
       icon: '🏆',
-      color: 'bg-yellow-500'
+      color: 'bg-ocean-light'
     },
     {
       title: 'Juegos Completados',
       value: stats?.gameSets?.completed || 0,
       subtitle: `${stats?.gameSets?.active || 0} activos`,
       icon: '✅',
-      color: 'bg-green-500'
+      color: 'bg-forest-light'
     }
   ];
 
@@ -53,8 +53,8 @@ const Dashboard = () => {
     <MainLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Resumen general del sistema</p>
+          <h1 className="text-3xl font-bold text-forest-dark">Dashboard</h1>
+          <p className="text-muted mt-2">Resumen general del sistema</p>
         </div>
 
         {/* Cards */}

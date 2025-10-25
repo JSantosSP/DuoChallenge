@@ -8,6 +8,7 @@ import {
   Text,
   Alert
 } from 'react-native';
+import { colors } from '../utils/colors';
 
 const { width: screenWidth } = Dimensions.get('window');
 const PUZZLE_SIZE = Math.min(screenWidth - 48, 400); // Tamaño del puzzle con margen
@@ -132,7 +133,7 @@ const PuzzleGame = ({ imageUri, gridSize = 3, onComplete, style }) => {
             width: pieceSize,
             height: pieceSize,
             borderWidth: isSelected ? 3 : 1,
-            borderColor: isSelected ? '#FF6B9D' : '#FFFFFF',
+            borderColor: isSelected ? colors.forest.medium : '#FFFFFF',
           },
         ]}
         onPress={() => handlePiecePress(index)}
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
   },
   selectedText: {
     fontSize: 12,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     marginTop: 4,
     fontWeight: '600',
   },

@@ -67,7 +67,7 @@ const Variables = () => {
       key: 'type', 
       label: 'Tipo',
       render: (row) => (
-        <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">
+        <span className="px-2 py-1 bg-forest-light text-forest-dark rounded-full text-xs">
           {row.type}
         </span>
       )
@@ -77,7 +77,7 @@ const Variables = () => {
       label: 'Status',
       render: (row) => (
         row.active ?
-        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+        <span className="px-2 py-1 bg-forest-light text-forest-dark rounded-full text-xs">
           Activa
         </span>
         :
@@ -93,14 +93,14 @@ const Variables = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Tipos de Datos</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-3xl font-bold text-forest-dark">Tipos de Datos</h1>
+            <p className="text-muted mt-2">
               Define los tipos de datos que los usuarios pueden crear
             </p>
           </div>
           <button
             onClick={() => openModal()}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            className="bg-forest-medium hover:bg-forest-dark text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             ➕ Nuevo Tipo
           </button>

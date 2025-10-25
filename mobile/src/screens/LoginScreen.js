@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React,  { useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import AppButton from '../components/AppButton';
+import { colors } from '../utils/colors';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -91,7 +92,7 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   content: {
     flex: 1,
@@ -109,12 +110,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.neutral.textLight,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666666',
+    color: colors.neutral.muted,
   },
   form: {
     marginBottom: 32,
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.neutral.textLight,
     marginBottom: 8,
   },
   input: {
@@ -134,14 +135,14 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.neutral.border,
   },
   button: {
     marginTop: 16,
   },
   footer: {
     textAlign: 'center',
-    color: '#999999',
+    color: colors.neutral.muted,
     fontSize: 14,
   },
 });

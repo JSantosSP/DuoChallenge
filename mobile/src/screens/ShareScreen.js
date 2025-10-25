@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React,  { useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useShare, useShareValidation } from '../hooks/useShare';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
+import colors from '../utils/colors';
 
 const ShareScreen = ({ navigation }) => {
   const { 
@@ -114,8 +115,8 @@ const ShareScreen = ({ navigation }) => {
   };
 
   const getStatusColor = (active, expiresAt) => {
-    if (!active) return '#F44336'; // Rojo - inactivo
-    if (expiresAt && new Date() > new Date(expiresAt)) return '#F44336'; // Rojo - expirado
+    if (!active) return colors.status.error; // Rojo - inactivo
+    if (expiresAt && new Date() > new Date(expiresAt)) return colors.status.error; // Rojo - expirado
     return '#4CAF50'; // Verde - activo
   };
 
@@ -231,7 +232,7 @@ const ShareScreen = ({ navigation }) => {
                 <View key={code._id} style={[styles.codeCard, styles.inactiveCard]}>
                   <View style={styles.codeHeader}>
                     <Text style={[styles.codeText, styles.inactiveText]}>{code.code}</Text>
-                    <View style={[styles.statusBadge, { backgroundColor: '#F44336' }]}>
+                    <View style={[styles.statusBadge, { backgroundColor: colors.status.error }]}>
                       <Text style={styles.statusText}>Inactivo</Text>
                     </View>
                   </View>
@@ -279,7 +280,7 @@ const ShareScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -315,7 +316,7 @@ const styles = StyleSheet.create({
   },
   validationMessage: {
     fontSize: 14,
-    color: '#F44336',
+    color: colors.status.error,
     textAlign: 'center',
     marginTop: 8,
     paddingHorizontal: 16,
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
   codeText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     fontFamily: 'monospace',
   },
   inactiveText: {
@@ -370,7 +371,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   actionButton: {
-    backgroundColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -383,7 +384,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   deactivateButton: {
-    backgroundColor: '#F44336',
+    backgroundColor: colors.status.error,
   },
   instanceCard: {
     backgroundColor: '#FFFFFF',
@@ -410,7 +411,7 @@ const styles = StyleSheet.create({
   },
   instanceCode: {
     fontSize: 14,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     fontFamily: 'monospace',
   },
   instanceMeta: {

@@ -3,6 +3,7 @@ import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
+import { colors } from '../utils/colors';
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
@@ -32,7 +33,7 @@ const MainStack = () => {
         headerStyle: {
           backgroundColor: '#FFFFFF',
         },
-        headerTintColor: '#333333',
+        headerTintColor: colors.neutral.textLight,
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -43,7 +44,7 @@ const MainStack = () => {
         name="Home"
         component={HomeScreen}
         options={({ navigation }) => ({
-          title: 'Escape Room',
+          title: 'DuoChallenge',
           headerRight: () => (
             <TouchableOpacity
               onPress={() => navigation.navigate('Settings')}

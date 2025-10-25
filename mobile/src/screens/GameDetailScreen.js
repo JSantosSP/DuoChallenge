@@ -13,6 +13,7 @@ import { useGame } from '../hooks/useGame';
 import ProgressBar from '../components/ProgressBar';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
+import colors from '../utils/colors';
 
 const GameDetailScreen = ({ route, navigation }) => {
   const { gameSet } = route.params;
@@ -177,7 +178,7 @@ const GameDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#FFF0F5',
+    backgroundColor: colors.forest.light,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
   },
   levelAttempts: {
     fontSize: 12,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
   },
   levelLockedText: {
     fontSize: 12,
@@ -288,7 +289,7 @@ const styles = StyleSheet.create({
   },
   levelArrow: {
     fontSize: 20,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
   },
   emptyState: {
     alignItems: 'center',

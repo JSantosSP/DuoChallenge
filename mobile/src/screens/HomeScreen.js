@@ -14,6 +14,7 @@ import { useGame, useWonPrizes } from '../hooks/useGame';
 import ProgressBar from '../components/ProgressBar';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
+import { colors } from '../utils/colors';
 
 const HomeScreen = ({ navigation }) => {
   const { user } = useAuth();
@@ -322,7 +323,7 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -334,12 +335,12 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.neutral.textLight,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666666',
+    color: colors.neutral.muted,
   },
   section: {
     padding: 24,
@@ -354,22 +355,22 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.neutral.textLight,
   },
   seeAllText: {
     fontSize: 14,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     fontWeight: '600',
   },
   emptySection: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.neutral.border,
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
   },
   emptySectionText: {
     fontSize: 14,
-    color: '#666666',
+    color: colors.neutral.muted,
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -394,12 +395,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 11,
-    color: '#666666',
+    color: colors.neutral.muted,
     textAlign: 'center',
   },
   gameCard: {
@@ -417,13 +418,13 @@ const styles = StyleSheet.create({
   },
   gameCardSelected: {
     borderWidth: 2,
-    borderColor: '#FF6B9D',
+    borderColor: colors.forest.medium,
   },
   gameIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#FFF0F5',
+    backgroundColor: colors.ocean.light,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -437,30 +438,30 @@ const styles = StyleSheet.create({
   gameType: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.neutral.textLight,
     marginBottom: 4,
   },
   gameProgress: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     marginBottom: 2,
   },
   gameLevels: {
     fontSize: 13,
-    color: '#666666',
+    color: colors.neutral.muted,
     marginBottom: 2,
   },
   gameDate: {
     fontSize: 12,
-    color: '#999999',
+    color: colors.neutral.muted,
   },
   gameArrow: {
     marginLeft: 12,
   },
   arrowText: {
     fontSize: 24,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
   },
   actionButton: {
     marginBottom: 12,
@@ -485,13 +486,13 @@ const styles = StyleSheet.create({
   prizeTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.neutral.textLight,
     textAlign: 'center',
     marginBottom: 4,
   },
   prizeUsed: {
     fontSize: 11,
-    color: '#4CAF50',
+    color: colors.status.success,
     fontWeight: '600',
   },
   historyCard: {
@@ -517,12 +518,12 @@ const styles = StyleSheet.create({
   historyType: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.neutral.textLight,
     marginBottom: 2,
   },
   historyDate: {
     fontSize: 11,
-    color: '#999999',
+    color: colors.neutral.muted,
   },
   historyStatus: {
     marginLeft: 8,
@@ -530,7 +531,7 @@ const styles = StyleSheet.create({
   historyProgress: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
   },
   emptyState: {
     alignItems: 'center',
@@ -544,12 +545,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.neutral.textLight,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 16,
-    color: '#666666',
+    color: colors.neutral.muted,
     textAlign: 'center',
     marginBottom: 24,
     paddingHorizontal: 16,
@@ -567,12 +568,12 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: colors.neutral.border,
   },
   dividerText: {
     marginHorizontal: 16,
     fontSize: 14,
-    color: '#999999',
+    color: colors.neutral.muted,
   },
 });
 

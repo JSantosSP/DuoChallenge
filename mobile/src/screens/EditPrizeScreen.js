@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { colors } from '../utils/colors';
 import {
   View,
   Text,
@@ -132,8 +133,8 @@ const EditPrizeScreen = ({ navigation, route }) => {
 
   const getWeightColor = (weight) => {
     if (weight <= 3) return '#4CAF50'; // Verde
-    if (weight <= 6) return '#FF9800'; // Naranja
-    return '#F44336'; // Rojo
+    if (weight <= 6) return colors.status.warning; // Naranja
+    return colors.status.error; // Rojo
   };
 
   if (loading) {
@@ -246,7 +247,7 @@ const EditPrizeScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -311,7 +312,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   changeImageButton: {
-    backgroundColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,

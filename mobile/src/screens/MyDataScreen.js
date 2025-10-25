@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React,  { useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useUserData } from '../hooks/useUserData';
 import { apiService } from '../api/api';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
+import colors from '../utils/colors';
 
 const MyDataScreen = ({ navigation, route }) => {
   const { userData, availableTypes, categories, loading, refetch } = useUserData();
@@ -195,7 +196,7 @@ const MyDataScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -228,8 +229,8 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
   },
   filterActive: {
-    backgroundColor: '#FF6B9D',
-    borderColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
+    borderColor: colors.forest.medium,
   },
   filterText: {
     fontSize: 14,
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#FFF0F5',
+    backgroundColor: colors.forest.light,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
   },
   dataHints: {
     fontSize: 12,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     fontWeight: '500',
   },
   deleteButton: {

@@ -25,22 +25,22 @@ const Sidebar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="w-64 bg-gray-900 text-white min-h-screen flex flex-col">
+    <div className="w-64 bg-forest-dark text-white min-h-screen flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b border-gray-800">
+      <div className="p-6 border-b border-forest-medium">
         <h1 className="text-2xl font-bold">🎮 DuoChallenge</h1>
-        <p className="text-sm text-gray-400 mt-1">Panel Admin</p>
+        <p className="text-sm text-forest-light mt-1">Panel Admin</p>
       </div>
 
       {/* User Info */}
-      <div className="p-4 border-b border-gray-800">
+      <div className="p-4 border-b border-forest-medium">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-ocean-medium flex items-center justify-center">
             <span className="text-lg">👑</span>
           </div>
           <div>
             <p className="font-medium">{user?.name}</p>
-            <p className="text-xs text-gray-400">{user?.email}</p>
+            <p className="text-xs text-forest-light">{user?.email}</p>
           </div>
         </div>
       </div>
@@ -49,7 +49,7 @@ const Sidebar = () => {
       <nav className="flex-1 p-4 overflow-y-auto">
         {sections.map((section) => (
           <div key={section.key} className="mb-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-4">
+            <h3 className="text-xs font-semibold text-forest-light uppercase tracking-wider mb-2 px-4">
               {section.label}
             </h3>
             <ul className="space-y-1">
@@ -59,8 +59,8 @@ const Sidebar = () => {
                     to={item.path}
                     className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
                       isActive(item.path)
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-300 hover:bg-gray-800'
+                        ? 'bg-ocean-medium text-white'
+                        : 'text-forest-light hover:bg-forest-medium'
                     }`}
                   >
                     <span className="text-lg">{item.icon}</span>
@@ -74,7 +74,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Logout Button */}
-      <div className="p-4 border-t border-gray-800">
+      <div className="p-4 border-t border-forest-medium">
         <button
           onClick={logout}
           className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"

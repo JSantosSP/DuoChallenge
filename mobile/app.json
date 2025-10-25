@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FFF5F8"
+      "backgroundColor": "#F5F8F6"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -21,7 +21,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFF5F8"
+        "backgroundColor": "#F5F8F6"
       },
       "package": "com.duochallenge.mobile",
       "permissions": [

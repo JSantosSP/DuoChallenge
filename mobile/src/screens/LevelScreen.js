@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React,  { useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused, useFocusEffect } from '@react-navigation/native';
 import { useGame } from '../hooks/useGame';
+import colors from '../utils/colors';
 
 const getChallengeTypeLabel = (type) => {
   const labels = {
@@ -115,7 +116,7 @@ const LevelScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   progressIndicator: {
-    backgroundColor: '#FFF0F5',
+    backgroundColor: colors.forest.light,
     padding: 12,
     borderRadius: 12,
     alignSelf: 'flex-start',
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
   progressText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
   },
   challengesContainer: {
     padding: 24,
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#FFF0F5',
+    backgroundColor: colors.forest.light,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
   challengeNumberText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
   },
   challengeInfo: {
     flex: 1,
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
   },
   arrowText: {
     fontSize: 24,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
   },
   levelInfoCard: {
     backgroundColor: '#FFFFFF',
@@ -235,7 +236,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   playButton: {
-    backgroundColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
     borderRadius: 16,
     padding: 16,
     alignItems: 'center',

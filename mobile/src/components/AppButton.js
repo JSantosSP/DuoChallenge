@@ -1,5 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { colors } from '../utils/colors';
 
 const AppButton = ({ 
   title, 
@@ -12,17 +13,17 @@ const AppButton = ({
 }) => {
   const variants = {
     primary: {
-      bg: '#FF6B9D',
+      bg: colors.forest.medium,
       text: '#FFFFFF',
     },
     secondary: {
-      bg: '#FFC2D4',
-      text: '#333333',
+      bg: colors.ocean.light,
+      text: colors.neutral.textLight,
     },
     outline: {
       bg: 'transparent',
-      text: '#FF6B9D',
-      border: '#FF6B9D',
+      text: colors.forest.medium,
+      border: colors.forest.medium,
     },
   };
 
@@ -64,6 +65,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 16,
     minHeight: 56,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   disabled: {
     opacity: 0.5,

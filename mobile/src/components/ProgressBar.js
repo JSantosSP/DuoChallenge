@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { colors } from '../utils/colors';
 
 const ProgressBar = ({ progress = 0, total = 100 }) => {
   const percentage = Math.round((progress / total) * 100);
@@ -36,7 +37,7 @@ const styles = StyleSheet.create({
   },
   percentage: {
     fontSize: 14,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     fontWeight: '700',
   },
   barContainer: {
@@ -47,7 +48,7 @@ const styles = StyleSheet.create({
   },
   bar: {
     height: '100%',
-    backgroundColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
     borderRadius: 4,
   },
   info: {

@@ -16,6 +16,7 @@ import { useUserData } from '../hooks/useUserData';
 import { getImageUrl } from '../api/api';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
+import colors from '../utils/colors';
 
 const AddEditDataScreen = ({ navigation, route }) => {
   const { item } = route.params || {};
@@ -452,7 +453,7 @@ const AddEditDataScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -464,7 +465,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.neutral.textLight,
   },
   section: {
     padding: 24,
@@ -473,7 +474,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.neutral.textLight,
     marginBottom: 12,
   },
   input: {
@@ -482,7 +483,7 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.neutral.border,
     minHeight: 50,
   },
   typeContainer: {
@@ -496,12 +497,12 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.neutral.border,
     minWidth: 80,
   },
   typeActive: {
-    backgroundColor: '#FF6B9D',
-    borderColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
+    borderColor: colors.forest.medium,
   },
   typeIcon: {
     fontSize: 24,
@@ -509,7 +510,7 @@ const styles = StyleSheet.create({
   },
   typeText: {
     fontSize: 14,
-    color: '#666666',
+    color: colors.neutral.muted,
     fontWeight: '500',
   },
   typeTextActive: {
@@ -520,14 +521,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.neutral.border,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   dateButtonText: {
     fontSize: 16,
-    color: '#333333',
+    color: colors.neutral.textLight,
   },
   dateButtonIcon: {
     fontSize: 20,
@@ -538,12 +539,12 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.neutral.border,
     borderStyle: 'dashed',
   },
   imageButtonText: {
     fontSize: 16,
-    color: '#666666',
+    color: colors.neutral.muted,
   },
   imagePreview: {
     alignItems: 'center',
@@ -555,7 +556,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   changeImageButton: {
-    backgroundColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -576,15 +577,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.neutral.border,
   },
   puzzleGridActive: {
-    backgroundColor: '#FF6B9D',
-    borderColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
+    borderColor: colors.forest.medium,
   },
   puzzleGridText: {
     fontSize: 14,
-    color: '#666666',
+    color: colors.neutral.muted,
     fontWeight: '500',
   },
   puzzleGridTextActive: {
@@ -601,15 +602,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.neutral.border,
   },
   categoryActive: {
-    backgroundColor: '#FF6B9D',
-    borderColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
+    borderColor: colors.forest.medium,
   },
   categoryText: {
     fontSize: 14,
-    color: '#666666',
+    color: colors.neutral.muted,
     fontWeight: '500',
   },
   categoryTextActive: {
@@ -625,12 +626,12 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.neutral.border,
     flex: 1,
   },
   difficultyActive: {
-    backgroundColor: '#FF6B9D',
-    borderColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
+    borderColor: colors.forest.medium,
   },
   difficultyIcon: {
     fontSize: 20,
@@ -638,7 +639,7 @@ const styles = StyleSheet.create({
   },
   difficultyText: {
     fontSize: 12,
-    color: '#666666',
+    color: colors.neutral.muted,
     fontWeight: '500',
   },
   difficultyTextActive: {

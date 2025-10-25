@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React,  { useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useWonPrizes } from '../hooks/useGame';
 import { apiService, getImageUrl } from '../api/api';
 import LoadingOverlay from '../components/LoadingOverlay';
 import AppButton from '../components/AppButton';
+import colors from '../utils/colors';
 
 const WonPrizesScreen = ({ navigation }) => {
   const { wonPrizes, isLoading, refetch, total } = useWonPrizes();
@@ -40,8 +41,8 @@ const WonPrizesScreen = ({ navigation }) => {
 
   const getWeightColor = (weight) => {
     if (weight <= 3) return '#4CAF50'; // Verde
-    if (weight <= 6) return '#FF9800'; // Naranja
-    return '#F44336'; // Rojo
+    if (weight <= 6) return colors.status.warning; // Naranja
+    return colors.status.error; // Rojo
   };
 
   const getWeightLabel = (weight) => {
@@ -259,7 +260,7 @@ const WonPrizesScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -298,7 +299,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     marginBottom: 4,
   },
   statLabel: {
@@ -414,7 +415,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   emptyButton: {
-    backgroundColor: '#FF6B9D',
+    backgroundColor: colors.forest.medium,
     paddingHorizontal: 32,
     paddingVertical: 12,
     borderRadius: 12,
@@ -431,16 +432,16 @@ const styles = StyleSheet.create({
   },
   reactivateButton: {
     marginTop: 12,
-    backgroundColor: '#FFF0F5',
+    backgroundColor: colors.forest.light,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#FF6B9D',
+    borderColor: colors.forest.medium,
   },
   reactivateButtonText: {
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     fontSize: 14,
     fontWeight: '600',
   },

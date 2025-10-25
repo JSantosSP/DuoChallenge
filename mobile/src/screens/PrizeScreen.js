@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React,  { useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGame } from '../hooks/useGame';
 import { getImageUrl } from '../api/api';
 import AppButton from '../components/AppButton';
+import { colors } from '../utils/colors';
 import LoadingOverlay from '../components/LoadingOverlay';
 
 const PrizeScreen = ({ route, navigation }) => {
@@ -138,7 +139,7 @@ const PrizeScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#FFF0F5',
+    backgroundColor: colors.forest.light,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     textAlign: 'center',
     lineHeight: 24,
     fontStyle: 'italic',

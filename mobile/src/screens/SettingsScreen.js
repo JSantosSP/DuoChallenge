@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React,  { useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { useGame } from '../hooks/useGame';
 import AppButton from '../components/AppButton';
 import { useShare } from '../hooks/useShare';
+import { colors } from '../utils/colors';
 
 const SettingsScreen = ({ navigation }) => {
   const { user, logout } = useAuth();
@@ -298,7 +299,7 @@ const SettingsScreen = ({ navigation }) => {
       {restarting && (
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FF6B9D" />
+            <ActivityIndicator size="large" color={colors.forest.medium} />
             <Text style={styles.loadingText}>Reiniciando juego...</Text>
           </View>
         </View>
@@ -310,7 +311,7 @@ const SettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   scroll: {
     flex: 1,
@@ -353,7 +354,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: colors.neutral.border,
   },
   infoLabel: {
     fontSize: 16,
@@ -377,7 +378,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
   },
   actionCard: {
     flexDirection: 'row',
@@ -451,7 +452,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: colors.neutral.border,
   },
   modalTitle: {
     fontSize: 20,
@@ -469,12 +470,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   shareCodeCard: {
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     borderWidth: 2,
-    borderColor: '#FF6B9D',
+    borderColor: colors.forest.medium,
   },
   shareCodeHeader: {
     flexDirection: 'row',
@@ -501,7 +502,7 @@ const styles = StyleSheet.create({
   shareCodeCode: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
     marginBottom: 4,
     letterSpacing: 2,
   },

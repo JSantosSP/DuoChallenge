@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React,  { useState } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useShare } from '../hooks/useShare';
 import AppButton from '../components/AppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
+import colors from '../utils/colors';
 
 const JoinGameScreen = ({ navigation }) => {
   const { joinGame, verifyShareCode, loading } = useShare();
@@ -165,7 +166,7 @@ const JoinGameScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5F8',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   content: {
     flex: 1,
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
   creatorName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FF6B9D',
+    color: colors.forest.medium,
   },
   codeInfo: {
     marginBottom: 16,
