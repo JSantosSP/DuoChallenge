@@ -173,8 +173,6 @@ const ChallengeScreen = ({ route, navigation }) => {
                'Tu respuesta:'}
             </Text>
           )}
-          {console.log('Rendering ChallengeInput with type:', challenge.tipoDato
-          )}
           <ChallengeInput
             type={challenge.tipoDato?.type}
             value={answer}

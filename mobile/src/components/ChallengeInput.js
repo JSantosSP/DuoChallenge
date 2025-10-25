@@ -44,7 +44,6 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
       return dateString;
     }
   };
-console.log('ChallengeInput render type:', type);
   // Renderizar según tipo de reto
   switch (type) {
     case 'fecha':

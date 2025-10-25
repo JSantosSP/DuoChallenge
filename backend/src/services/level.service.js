@@ -56,12 +56,14 @@ const createLevelFromUserData = async (userData, gameSetId, order) => {
     
     // Para fechas, usar normalización específica
     if (levelType === 'fecha') {
-      answerHash = hashDateAnswer(userData.valor, salt);
+      answerHash = hashDateAnswer(userData.valor.fecha, salt);
     } else if (levelType === 'foto') {
       // Para puzzles, el hash representa el orden correcto [1,2,3,...]
       answerHash = hashPuzzleAnswer(userData.puzzleGrid || 3, salt);
-    } else {
-      answerHash = hashAnswer(userData.valor, salt);
+    } else if (levelType === 'lugar') {
+      answerHash = hashAnswer(userData.valor.lugar, salt);
+    }else {
+      answerHash = hashAnswer(userData.valor.texto, salt);
     }
 
     // Crear el reto
