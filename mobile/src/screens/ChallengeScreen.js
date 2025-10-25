@@ -59,23 +59,48 @@ const ChallengeScreen = ({ route, navigation }) => {
       {
         onSuccess: (data) => {
           if (data.data.correct) {
-            navigation.goBack();
+            navigation.pop(2);  // Volver a la pantalla detalles del juego
           } else {
-            setAttempts(attempts + 1);
-            if (challengeType !== 'foto') {
-              setAnswer('');
-            }
+            // Verificar si se agotaron los intentos
+            const hasNoAttemptsLeft = data.data.attemptsLeft === 0 || 
+                                     data.data.levelLocked === true ||
+                                     data.data.message?.includes('Límite de intentos alcanzado');
             
-            // Mostrar siguiente pista si hay intentos fallidos
-            if (data.data.hint && currentHintIndex < challenge.pistas?.length - 1) {
-              setCurrentHintIndex(currentHintIndex + 1);
+            if (hasNoAttemptsLeft) {
+              Alert.alert(
+                '❌ Intentos Agotados',
+                'Has agotado todos tus intentos en este juego. Volverás a la pantalla principal.',
+                [
+                  {
+                    text: 'Entendido',
+                    onPress: () => {
+                      // Navegar a Home y resetear el stack de navegación
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'Home' }],
+                      });
+                    }
+                  }
+                ],
+                { cancelable: false }
+              );
+            } else {
+              setAttempts(attempts + 1);
+              if (challengeType !== 'foto') {
+                setAnswer('');
+              }
+              
+              // Mostrar siguiente pista si hay intentos fallidos
+              if (data.data.hint && currentHintIndex < challenge.pistas?.length - 1) {
+                setCurrentHintIndex(currentHintIndex + 1);
+              }
+              
+              Alert.alert(
+                'Intenta de nuevo 💭',
+                data.data.message + 
+                (data.data.attemptsLeft ? `\n\nIntentos restantes: ${data.data.attemptsLeft}` : '')
+              );
             }
-            
-            Alert.alert(
-              'Intenta de nuevo 💭',
-              data.data.message + 
-              (data.data.attemptsLeft ? `\n\nIntentos restantes: ${data.data.attemptsLeft}` : '')
-            );
           }
         },
       }
@@ -94,14 +119,39 @@ const ChallengeScreen = ({ route, navigation }) => {
         {
           onSuccess: (data) => {
             if (data.data.correct) {
-              navigation.goBack();
+              navigation.pop(2);  // Volver a la pantalla detalles del juego
             } else {
-              setAttempts(attempts + 1);
-              Alert.alert(
-                'Intenta de nuevo 💭',
-                data.data.message + 
-                (data.data.attemptsLeft ? `\n\nIntentos restantes: ${data.data.attemptsLeft}` : '')
-              );
+              // Verificar si se agotaron los intentos
+              const hasNoAttemptsLeft = data.data.attemptsLeft === 0 || 
+                                       data.data.levelLocked === true ||
+                                       data.data.message?.includes('Límite de intentos alcanzado');
+              
+              if (hasNoAttemptsLeft) {
+                Alert.alert(
+                  '❌ Intentos Agotados',
+                  'Has agotado todos tus intentos en este juego. Volverás a la pantalla principal.',
+                  [
+                    {
+                      text: 'Entendido',
+                      onPress: () => {
+                        // Navegar a Home y resetear el stack de navegación
+                        navigation.reset({
+                          index: 0,
+                          routes: [{ name: 'Home' }],
+                        });
+                      }
+                    }
+                  ],
+                  { cancelable: false }
+                );
+              } else {
+                setAttempts(attempts + 1);
+                Alert.alert(
+                  'Intenta de nuevo 💭',
+                  data.data.message + 
+                  (data.data.attemptsLeft ? `\n\nIntentos restantes: ${data.data.attemptsLeft}` : '')
+                );
+              }
             }
           },
         }

@@ -75,10 +75,24 @@ export const useGame = (gameSetId = null) => {
     mutationFn: ({ levelId, payload }) => 
       apiService.verifyLevel(levelId, payload),
     onSuccess: (data) => {
+      // Invalidar queries para actualizar el estado
       queryClient.invalidateQueries(['levels', gameSetId]);
       queryClient.invalidateQueries(['progress', gameSetId]);
       queryClient.invalidateQueries(['activeGames']);
       queryClient.invalidateQueries(['gameStats']);
+      
+      // Verificar si se agotaron los intentos
+      const hasNoAttemptsLeft = data.data.attemptsLeft === 0 || 
+                               data.data.levelLocked === true ||
+                               data.data.message?.includes('Límite de intentos alcanzado');
+      
+      if (hasNoAttemptsLeft) {
+        // Forzar actualización inmediata del cache para reflejar el estado inactivo
+        queryClient.refetchQueries(['activeGames']);
+        queryClient.refetchQueries(['levels', gameSetId]);
+        queryClient.refetchQueries(['progress', gameSetId]);
+        queryClient.refetchQueries(['gameStats']);
+      }
       
       if (data.data.correct) {
         if (data.data.gameCompleted) {

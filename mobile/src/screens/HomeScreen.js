@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -77,6 +78,15 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handlePlayGame = (game) => {
+    // Verificar si el juego tiene un estado de abandonado o inactivo
+    if (game.status === 'abandoned' || game.active === false) {
+      Alert.alert(
+        'Juego Inactivo',
+        'Este juego ya no está activo. No puedes continuar jugando.',
+        [{ text: 'Entendido' }]
+      );
+      return;
+    }
     navigation.navigate('GameDetail', { gameSet: game });
   };
 
@@ -199,36 +209,44 @@ const HomeScreen = ({ navigation }) => {
           </View>
           {hasActiveGames ? (
             <>
-              {activeGames.map((game) => (
-                <TouchableOpacity
-                  key={game._id}
-                  style={styles.gameCard}
-                  onPress={() => handlePlayGame(game)}
-                >
-                  <View style={styles.gameIcon}>
-                    <Text style={styles.gameIconText}>
-                      {game.shareCode ? '🔗' : '🎮'}
-                    </Text>
-                  </View>
-                  <View style={styles.gameInfo}>
-                    <Text style={styles.gameType}>
-                      {getGameTypeLabel(game)}
-                    </Text>
-                    <Text style={styles.gameProgress}>
-                      Progreso: {game.progress || 0}%
-                    </Text>
-                    <Text style={styles.gameLevels}>
-                      {game.completedLevels?.length || 0} / {game.totalLevels || 0} niveles
-                    </Text>
-                    <Text style={styles.gameDate}>
-                      Iniciado: {formatDate(game.startedAt)}
-                    </Text>
-                  </View>
-                  <View style={styles.gameArrow}>
-                    <Text style={styles.arrowText}>→</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
+              {activeGames.map((game) => {
+                const isInactive = game.status === 'abandoned' || game.active === false;
+                return (
+                  <TouchableOpacity
+                    key={game._id}
+                    style={[styles.gameCard, isInactive && styles.gameCardInactive]}
+                    onPress={() => handlePlayGame(game)}
+                  >
+                    <View style={[styles.gameIcon, isInactive && styles.gameIconInactive]}>
+                      <Text style={styles.gameIconText}>
+                        {isInactive ? '⛔' : (game.shareCode ? '🔗' : '🎮')}
+                      </Text>
+                    </View>
+                    <View style={styles.gameInfo}>
+                      <Text style={styles.gameType}>
+                        {getGameTypeLabel(game)}
+                      </Text>
+                      {isInactive && (
+                        <Text style={styles.gameInactiveText}>
+                          ⚠️ Juego Inactivo
+                        </Text>
+                      )}
+                      <Text style={styles.gameProgress}>
+                        Progreso: {game.progress || 0}%
+                      </Text>
+                      <Text style={styles.gameLevels}>
+                        {game.completedLevels?.length || 0} / {game.totalLevels || 0} niveles
+                      </Text>
+                      <Text style={styles.gameDate}>
+                        Iniciado: {formatDate(game.startedAt)}
+                      </Text>
+                    </View>
+                    <View style={styles.gameArrow}>
+                      <Text style={styles.arrowText}>→</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
             </>
           ) : (
             <View style={styles.emptySection}>
@@ -420,6 +438,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.forest.medium,
   },
+  gameCardInactive: {
+    opacity: 0.6,
+    backgroundColor: '#F5F5F5',
+  },
   gameIcon: {
     width: 48,
     height: 48,
@@ -428,6 +450,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
+  },
+  gameIconInactive: {
+    backgroundColor: '#E0E0E0',
   },
   gameIconText: {
     fontSize: 24,
@@ -439,6 +464,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.neutral.textLight,
+    marginBottom: 4,
+  },
+  gameInactiveText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#F44336',
     marginBottom: 4,
   },
   gameProgress: {

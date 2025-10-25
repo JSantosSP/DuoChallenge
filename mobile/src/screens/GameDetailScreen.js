@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -33,7 +34,22 @@ const GameDetailScreen = ({ route, navigation }) => {
     React.useCallback(() => {
       refetchLevels();
       refetchProgress();
-    }, [])
+      
+      // Verificar si el juego está inactivo
+      if (gameSet.status === 'abandoned' || gameSet.active === false) {
+        Alert.alert(
+          'Juego Inactivo',
+          'Este juego ya no está activo y no puedes continuar jugando.',
+          [
+            {
+              text: 'Volver a Home',
+              onPress: () => navigation.navigate('Home')
+            }
+          ],
+          { cancelable: false }
+        );
+      }
+    }, [gameSet])
   );
 
   const onRefresh = async () => {
@@ -102,6 +118,9 @@ const GameDetailScreen = ({ route, navigation }) => {
           {levels && levels.length > 0 ? (
             levels.map((level, index) => {
               const isLocked = index > 0 && !levels[index - 1]?.completed && !level.completed;
+              const hasNoAttemptsLeft = !level.completed && 
+                                       level.currentAttempts >= level.maxAttempts;
+              const isDisabled = isLocked || hasNoAttemptsLeft;
               
               return (
                 <TouchableOpacity
@@ -110,17 +129,33 @@ const GameDetailScreen = ({ route, navigation }) => {
                     styles.levelCard,
                     level.completed && styles.levelCompleted,
                     isLocked && styles.levelLocked,
+                    hasNoAttemptsLeft && styles.levelFailed,
                   ]}
-                  onPress={() => !isLocked && navigation.navigate('Level', { level, gameSetId: gameSet._id })}
-                  disabled={isLocked}
+                  onPress={() => {
+                    if (hasNoAttemptsLeft) {
+                      Alert.alert(
+                        'Nivel Bloqueado',
+                        'Has agotado todos los intentos en este nivel.',
+                        [{ text: 'Entendido' }]
+                      );
+                      return;
+                    }
+                    if (!isDisabled) {
+                      navigation.navigate('Level', { level, gameSetId: gameSet._id });
+                    }
+                  }}
+                  disabled={isDisabled}
                 >
                   <View style={[
                     styles.levelIcon,
                     level.completed && styles.levelIconCompleted,
                     isLocked && styles.levelIconLocked,
+                    hasNoAttemptsLeft && styles.levelIconFailed,
                   ]}>
                     <Text style={styles.levelIconText}>
-                      {level.completed ? '✅' : isLocked ? '🔒' : '🎯'}
+                      {level.completed ? '✅' : 
+                       hasNoAttemptsLeft ? '❌' : 
+                       isLocked ? '🔒' : '🎯'}
                     </Text>
                   </View>
                   <View style={styles.levelInfo}>
@@ -133,12 +168,17 @@ const GameDetailScreen = ({ route, navigation }) => {
                         ✓ Completado
                       </Text>
                     )}
-                    {!level.completed && !isLocked && (
+                    {hasNoAttemptsLeft && (
+                      <Text style={styles.levelFailedText}>
+                        ❌ Intentos agotados
+                      </Text>
+                    )}
+                    {!level.completed && !isLocked && !hasNoAttemptsLeft && (
                       <Text style={styles.levelAttempts}>
                         Intentos: {level.currentAttempts || 0} / {level.maxAttempts || 5}
                       </Text>
                     )}
-                    {isLocked && (
+                    {isLocked && !hasNoAttemptsLeft && (
                       <Text style={styles.levelLockedText}>
                         Completa el nivel anterior
                       </Text>
@@ -242,6 +282,10 @@ const styles = StyleSheet.create({
   levelLocked: {
     opacity: 0.5,
   },
+  levelFailed: {
+    backgroundColor: '#FFEBEE',
+    opacity: 0.7,
+  },
   levelIcon: {
     width: 48,
     height: 48,
@@ -256,6 +300,9 @@ const styles = StyleSheet.create({
   },
   levelIconLocked: {
     backgroundColor: '#E0E0E0',
+  },
+  levelIconFailed: {
+    backgroundColor: '#FFCDD2',
   },
   levelIconText: {
     fontSize: 24,
@@ -277,6 +324,11 @@ const styles = StyleSheet.create({
   levelCompletedAt: {
     fontSize: 12,
     color: '#4CAF50',
+  },
+  levelFailedText: {
+    fontSize: 12,
+    color: '#F44336',
+    fontWeight: '600',
   },
   levelAttempts: {
     fontSize: 12,

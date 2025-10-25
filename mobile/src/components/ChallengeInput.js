@@ -65,7 +65,6 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={handleDateChange}
-              maximumDate={new Date()}
               locale="es-ES"
             />
           )}
