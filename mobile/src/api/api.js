@@ -8,6 +8,14 @@ const api = axios.create({
   timeout: 10000,
 });
 
+// Variable para guardar la referencia al logout del AuthContext
+let logoutCallback = null;
+
+// Función para setear el callback de logout desde el AuthContext
+export const setLogoutCallback = (callback) => {
+  logoutCallback = callback;
+};
+
 // Interceptor para añadir token
 api.interceptors.request.use(
   async (config) => {
@@ -35,6 +43,9 @@ api.interceptors.response.use(
       await SecureStore.deleteItemAsync('token');
       await SecureStore.deleteItemAsync('user');
       Alert.alert('Sesión expirada', 'Por favor, inicia sesión nuevamente');
+      if (logoutCallback) {
+        logoutCallback();
+      }
     }
     return Promise.reject(error);
   }

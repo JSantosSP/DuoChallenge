@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { apiService } from '../api/api';
+import { apiService, setLogoutCallback } from '../api/api';
 
 const AuthContext = createContext();
 
@@ -12,6 +12,11 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     loadStoredAuth();
+  }, []);
+
+  // Registrar la función logout en el interceptor de api.js
+  useEffect(() => {
+    setLogoutCallback(logout);
   }, []);
 
   const loadStoredAuth = async () => {
