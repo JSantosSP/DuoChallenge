@@ -1,6 +1,24 @@
+/**
+ * @fileoverview Controlador de Autenticación
+ * @description Gestiona registro, login, refresh de tokens y perfil de usuario
+ */
+
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 
+/**
+ * @function register
+ * @async
+ * @description Registra un nuevo usuario en el sistema
+ * @param {Object} req.body - Datos del usuario
+ * @param {string} req.body.name - Nombre del usuario
+ * @param {string} req.body.email - Email del usuario
+ * @param {string} req.body.password - Contraseña del usuario
+ * @param {string} [req.body.role='player'] - Rol del usuario
+ * @returns {Object} 201 - Usuario creado con tokens JWT
+ * @returns {Object} 400 - Error de validación o email duplicado
+ * @returns {Object} 500 - Error del servidor
+ */
 const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -52,6 +70,18 @@ const register = async (req, res) => {
   }
 };
 
+/**
+ * @function login
+ * @async
+ * @description Autentica un usuario y genera tokens JWT
+ * @param {Object} req.body - Credenciales del usuario
+ * @param {string} req.body.email - Email del usuario
+ * @param {string} req.body.password - Contraseña del usuario
+ * @returns {Object} 200 - Login exitoso con tokens JWT
+ * @returns {Object} 400 - Faltan credenciales
+ * @returns {Object} 401 - Credenciales inválidas
+ * @returns {Object} 500 - Error del servidor
+ */
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -102,6 +132,16 @@ const login = async (req, res) => {
   }
 };
 
+/**
+ * @function refreshToken
+ * @async
+ * @description Genera nuevos tokens JWT usando un refresh token válido
+ * @param {Object} req.body - Datos del refresh
+ * @param {string} req.body.refreshToken - Refresh token JWT
+ * @returns {Object} 200 - Nuevos tokens generados
+ * @returns {Object} 400 - Refresh token no proporcionado
+ * @returns {Object} 401 - Refresh token inválido o expirado
+ */
 const refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
@@ -142,6 +182,14 @@ const refreshToken = async (req, res) => {
   }
 };
 
+/**
+ * @function getProfile
+ * @async
+ * @description Obtiene el perfil del usuario autenticado
+ * @param {Object} req.user - Usuario autenticado (inyectado por middleware)
+ * @returns {Object} 200 - Datos del perfil del usuario
+ * @returns {Object} 500 - Error del servidor
+ */
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
@@ -162,6 +210,12 @@ const getProfile = async (req, res) => {
   }
 };
 
+/**
+ * @function generateToken
+ * @description Genera un JWT de acceso con duración de 24 horas
+ * @param {string} userId - ID del usuario
+ * @returns {string} Token JWT firmado
+ */
 const generateToken = (userId) => {
   return jwt.sign(
     { userId },
@@ -170,6 +224,12 @@ const generateToken = (userId) => {
   );
 };
 
+/**
+ * @function generateRefreshToken
+ * @description Genera un refresh token JWT con duración de 7 días
+ * @param {string} userId - ID del usuario
+ * @returns {string} Refresh token JWT firmado
+ */
 const generateRefreshToken = (userId) => {
   return jwt.sign(
     { userId },

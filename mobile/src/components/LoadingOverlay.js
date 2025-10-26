@@ -1,7 +1,18 @@
+/**
+ * @file LoadingOverlay.js - Overlay de carga de pantalla completa
+ * @description Muestra un indicador de carga con mensaje sobre fondo oscuro
+ */
+
 import React from 'react';
 import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { colors } from '../utils/colors';
 
+/**
+ * Overlay de carga posicionado absolutamente sobre la pantalla
+ * @param {Object} props
+ * @param {string} [props.message='Cargando...'] - Mensaje a mostrar
+ * @returns {JSX.Element}
+ */
 const LoadingOverlay = ({ message = 'Cargando...' }) => {
   return (
     <View style={styles.container}>

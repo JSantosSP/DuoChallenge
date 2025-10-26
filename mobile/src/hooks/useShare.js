@@ -1,8 +1,17 @@
+/**
+ * @file useShare.js - Hook de gestión de códigos compartidos
+ * @description Maneja creación, verificación y uso de códigos para compartir juegos
+ */
+
 import { useState, useEffect } from 'react';
 import { apiService } from '../api/api';
 import { Alert, Share } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 
+/**
+ * Hook principal para gestión de compartir juegos
+ * @returns {Object} Métodos para crear, verificar, unirse y compartir códigos
+ */
 export const useShare = () => {
   const [shareCodes, setShareCodes] = useState([]);
   const [usedShareCodes, setUsedShareCodes] = useState([]);
@@ -178,6 +187,11 @@ export const useShare = () => {
 };
 
 // Hook para verificar si el usuario puede generar códigos
+/**
+ * Hook para validar si el usuario puede generar códigos
+ * Verifica que tenga al menos 1 dato personal y 1 premio
+ * @returns {Object} canGenerate (boolean), validationMessage (string), checkCanGenerate (function)
+ */
 export const useShareValidation = () => {
   const [canGenerate, setCanGenerate] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');

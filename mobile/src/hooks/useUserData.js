@@ -1,7 +1,16 @@
+/**
+ * @file useUserData.js - Hook de gestión de datos personales
+ * @description Maneja CRUD de datos personales, tipos y categorías
+ */
+
 import { useState, useEffect } from 'react';
 import { apiService } from '../api/api';
 import { Alert } from 'react-native';
 
+/**
+ * Hook principal para gestión de datos personales del usuario
+ * @returns {Object} Métodos CRUD de datos, tipos disponibles, categorías y subida de imágenes
+ */
 export const useUserData = () => {
   const [userData, setUserData] = useState([]);
   const [availableTypes, setAvailableTypes] = useState([]);
@@ -143,6 +152,11 @@ export const useUserData = () => {
 };
 
 // Hook para un dato específico
+/**
+ * Hook para obtener un dato personal específico por ID
+ * @param {string} id - ID del dato
+ * @returns {Object} Datos del item, loading y refetch
+ */
 export const useUserDataItem = (id) => {
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(false);

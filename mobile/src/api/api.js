@@ -1,19 +1,37 @@
+/**
+ * @file api.js - Cliente HTTP y servicios de API
+ * @description Configura Axios con interceptores y define todos los servicios de la API REST
+ */
+
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Alert } from 'react-native';
 import { API_URL } from '../config/env';
 
+/**
+ * Cliente Axios configurado con URL base y timeout
+ * @type {import('axios').AxiosInstance}
+ */
 const api = axios.create({
   baseURL: API_URL,
   timeout: 10000,
 });
 
+/** Callback para ejecutar cuando se detecta sesión expirada */
 let logoutCallback = null;
 
+/**
+ * Establece el callback de logout para ser ejecutado en errores 401
+ * @param {Function} callback - Función a ejecutar al cerrar sesión
+ */
 export const setLogoutCallback = (callback) => {
   logoutCallback = callback;
 };
 
+/**
+ * Interceptor de peticiones: agrega token de autenticación automáticamente
+ * Lee el token de SecureStore y lo añade al header Authorization
+ */
 api.interceptors.request.use(
   async (config) => {
     try {
@@ -31,6 +49,10 @@ api.interceptors.request.use(
   }
 );
 
+/**
+ * Interceptor de respuestas: maneja errores 401 (sesión expirada)
+ * Elimina tokens, muestra alerta y ejecuta callback de logout
+ */
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -48,8 +70,13 @@ api.interceptors.response.use(
 
 export default api;
 
+/** Re-exportación de utilidad para construir URLs de imágenes */
 export { getImageUrl } from '../config/env';
 
+/**
+ * Objeto con todos los servicios de la API organizados por dominio
+ * @namespace apiService
+ */
 export const apiService = {
   login: (email, password) => api.post('/auth/login', { email, password }),
   refreshToken: (refreshToken) => api.post('/auth/refresh', { refreshToken }),

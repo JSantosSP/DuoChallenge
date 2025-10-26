@@ -1,3 +1,8 @@
+/**
+ * @file ChallengeInput.js - Input adaptable según tipo de reto
+ * @description Componente que renderiza diferentes inputs según tipo: texto, fecha, foto o lugar
+ */
+
 import React, { useState } from 'react';
 import { TextInput, StyleSheet, View, TouchableOpacity, Text, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -5,6 +10,17 @@ import { getImageUrl } from '../api/api';
 import PuzzleGame from './PuzzleGame';
 import { colors } from '../utils/colors';
 
+/**
+ * Input especializado que cambia según el tipo de reto
+ * @param {Object} props
+ * @param {('texto'|'fecha'|'foto'|'lugar')} props.type - Tipo de input
+ * @param {string} props.value - Valor actual del input
+ * @param {Function} props.onChangeText - Callback al cambiar texto
+ * @param {Object} [props.challenge] - Datos del reto (necesario para tipo foto)
+ * @param {Function} [props.onPuzzleComplete] - Callback al completar puzzle
+ * @param {Object} [props.style] - Estilos adicionales
+ * @returns {JSX.Element}
+ */
 const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete, style }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(value ? new Date(value) : new Date());

@@ -1,6 +1,18 @@
+/**
+ * @fileoverview Configuración y conexión a la base de datos MongoDB
+ * @description Gestiona la conexión a MongoDB y la creación de índices
+ */
+
 const mongoose = require('mongoose');
 const config = require('./index');
 
+/**
+ * @function connectDB
+ * @async
+ * @description Establece la conexión a MongoDB y crea los índices necesarios
+ * @throws {Error} Termina el proceso si no puede conectar a MongoDB
+ * @returns {Promise<void>}
+ */
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(config.mongodbUri, {
@@ -18,6 +30,12 @@ const connectDB = async () => {
   }
 };
 
+/**
+ * @function createIndexes
+ * @async
+ * @description Crea índices en la base de datos para optimizar consultas
+ * @returns {Promise<void>}
+ */
 const createIndexes = async () => {
   try {
     const { User, Level } = require('../models');

@@ -1,3 +1,8 @@
+/**
+ * @file PuzzleGame.js - Juego de puzzle interactivo
+ * @description Divide una imagen en piezas y permite intercambiarlas para resolver el puzzle
+ */
+
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
@@ -13,6 +18,15 @@ import { colors } from '../utils/colors';
 const { width: screenWidth } = Dimensions.get('window');
 const PUZZLE_SIZE = Math.min(screenWidth - 48, 400);
 
+/**
+ * Componente de juego de puzzle con imagen
+ * @param {Object} props
+ * @param {string} props.imageUri - URL de la imagen a usar
+ * @param {number} [props.gridSize=3] - Tamaño de la cuadrícula (3x3, 4x4, 5x5)
+ * @param {Function} [props.onComplete] - Callback con array del orden al completar
+ * @param {Object} [props.style] - Estilos adicionales
+ * @returns {JSX.Element}
+ */
 const PuzzleGame = ({ imageUri, gridSize = 3, onComplete, style }) => {
   const [pieces, setPieces] = useState([]);
   const [selectedPiece, setSelectedPiece] = useState(null);

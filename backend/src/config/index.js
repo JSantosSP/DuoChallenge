@@ -1,7 +1,26 @@
+/**
+ * @fileoverview Configuración centralizada del backend
+ * @description Carga y valida todas las variables de entorno necesarias para el funcionamiento del sistema
+ */
+
 require('dotenv').config();
 
 const isProd = process.env.PRO === 'true';
 
+/**
+ * @typedef {Object} Config
+ * @property {boolean} isProd - Indica si el entorno es producción
+ * @property {string} nodeEnv - Entorno de Node.js (development/production)
+ * @property {number} port - Puerto del servidor
+ * @property {string} host - Host del servidor
+ * @property {string} mongodbUri - URI de conexión a MongoDB
+ * @property {string} jwtSecret - Secreto para tokens JWT principales
+ * @property {string} jwtRefreshSecret - Secreto para refresh tokens JWT
+ * @property {string} apiUrl - URL base del API
+ * @property {string} frontendUrl - URL del frontend para CORS
+ * @property {string} uploadPath - Ruta para almacenar archivos subidos
+ * @property {number} maxFileSize - Tamaño máximo de archivo en bytes (5MB)
+ */
 const config = {
   isProd,
   nodeEnv: (isProd ? 'production' : 'development'),
@@ -28,6 +47,12 @@ const config = {
   maxFileSize: process.env.MAX_FILE_SIZE || 5242880,
 };
 
+/**
+ * @function validateConfig
+ * @description Valida que todas las variables de entorno requeridas estén presentes
+ * @throws {Error} Termina el proceso si faltan variables requeridas
+ * @returns {void}
+ */
 const validateConfig = () => {
   const required = [
     'mongodbUri',
@@ -57,4 +82,3 @@ if (!isProd) {
 }
 
 module.exports = config;
-
