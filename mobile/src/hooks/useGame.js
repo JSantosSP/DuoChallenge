@@ -1,9 +1,20 @@
+/**
+ * @file useGame.js - Hook de gestión de juegos
+ * @description Maneja juegos, niveles, verificación, progreso, premios y historial
+ */
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { apiService } from '../api/api';
 import { Alert } from 'react-native';
 
+/**
+ * Hook principal para gestión completa de juegos
+ * @param {string} [gameSetId] - ID del juego actual
+ * @param {string} [shareCode] - Código de compartir del juego
+ * @returns {Object} Métodos y datos de juegos (levels, progress, verify, generate, etc.)
+ */
 export const useGame = (gameSetId = null, shareCode = null) => {
   const queryClient = useQueryClient();
   const navigation = useNavigation();
@@ -197,6 +208,10 @@ export const useGame = (gameSetId = null, shareCode = null) => {
   };
 };
 
+/**
+ * Hook para gestión de códigos compartidos y unirse a juegos
+ * @returns {Object} Métodos para crear, verificar y usar códigos compartidos
+ */
 export const useGameShare = () => {
   const queryClient = useQueryClient();
 
@@ -276,6 +291,10 @@ export const useGameShare = () => {
   };
 };
 
+/**
+ * Hook para consultar premios ganados por el usuario
+ * @returns {Object} Lista de premios ganados, loading y refetch
+ */
 export const useWonPrizes = () => {
   const { data: wonPrizes, isLoading, refetch } = useQuery({
     queryKey: ['wonPrizes'],

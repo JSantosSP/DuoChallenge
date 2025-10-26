@@ -1,7 +1,16 @@
+/**
+ * @file usePrize.js - Hook de gestión de premios
+ * @description Maneja CRUD de premios, plantillas, subida de imágenes y reactivación
+ */
+
 import { useState, useEffect } from 'react';
 import { apiService } from '../api/api';
 import { Alert } from 'react-native';
 
+/**
+ * Hook principal para gestión de premios y plantillas
+ * @returns {Object} Métodos CRUD de premios, plantillas, subida de imágenes y reactivación
+ */
 export const usePrize = () => {
   const [prizeTemplates, setPrizeTemplates] = useState([]);
   const [userPrizes, setUserPrizes] = useState([]);
@@ -206,6 +215,11 @@ export const usePrize = () => {
 };
 
 // Hook para un premio específico
+/**
+ * Hook para obtener un premio específico por ID
+ * @param {string} id - ID del premio
+ * @returns {Object} Datos del premio, loading y refetch
+ */
 export const usePrizeItem = (id) => {
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(false);
