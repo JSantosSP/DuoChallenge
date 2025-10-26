@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Servidor Principal del Backend
+ * @description Punto de entrada de la aplicación, configura Express, middleware y rutas
+ */
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -9,7 +14,16 @@ const app = express();
 const PORT = config.port;
 const HOST = config.host;
 
+/**
+ * Conectar a MongoDB
+ */
 connectDB();
+
+/**
+ * Configuración de CORS
+ * - Producción: solo permite el dominio del frontend configurado
+ * - Desarrollo: permite cualquier origen
+ */
 app.use(cors({
   origin: config.isProd 
     ? config.frontendUrl 
@@ -17,15 +31,29 @@ app.use(cors({
   credentials: true
 }));
 
+/**
+ * Middleware para parsear JSON y URL-encoded
+ */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+/**
+ * Servir archivos estáticos desde /uploads
+ */
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+/**
+ * Middleware de logging de todas las peticiones
+ */
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`);
   next();
 });
 
+/**
+ * @route GET /
+ * @description Endpoint raíz que retorna información básica del API
+ */
 app.get('/', (req, res) => {
   console.log('✅ GET / - Request recibido');
   res.json({ 
@@ -35,6 +63,10 @@ app.get('/', (req, res) => {
   });
 });
 
+/**
+ * @route GET /health
+ * @description Health check para monitoreo del servidor
+ */
 app.get('/health', (req, res) => {
   console.log('✅ GET /health - Request recibido');
   res.json({ 
@@ -44,6 +76,9 @@ app.get('/health', (req, res) => {
   });
 });
 
+/**
+ * Importación de rutas
+ */
 const authRoutes = require('./src/routes/auth.routes');
 const gameRoutes = require('./src/routes/game.routes');
 const adminRoutes = require('./src/routes/admin.routes');
@@ -54,6 +89,9 @@ const shareRoutes = require('./src/routes/share.routes');
 const categoryRoutes = require('./src/routes/category.routes');
 const categoryGetRoutes = require('./src/routes/category.get.routes');
 
+/**
+ * Endpoint directo para subir imágenes (con autenticación)
+ */
 const { verifyToken } = require('./src/middlewares/auth.middleware');
 const upload = require('./src/middlewares/upload.middleware');
 app.post('/api/upload', verifyToken, upload.single('image'), async (req, res) => {
@@ -86,6 +124,9 @@ app.post('/api/upload', verifyToken, upload.single('image'), async (req, res) =>
   }
 });
 
+/**
+ * Registro de rutas principales
+ */
 app.use('/auth', authRoutes);
 app.use('/api', gameRoutes);
 app.use('/api/game', gameRoutes);
@@ -97,6 +138,9 @@ app.use('/api/share', shareRoutes);
 app.use('/admin/categories', categoryRoutes);
 app.use('/api/categories', categoryGetRoutes);
 
+/**
+ * Middleware 404 - Ruta no encontrada
+ */
 app.use((req, res) => {
   console.log(`❌ 404 - Ruta no encontrada: ${req.method} ${req.path}`);
   res.status(404).json({
@@ -105,6 +149,9 @@ app.use((req, res) => {
   });
 });
 
+/**
+ * Middleware de manejo de errores global
+ */
 app.use((error, req, res, next) => {
   console.error('❌ Error:', error);
   
@@ -115,6 +162,9 @@ app.use((error, req, res, next) => {
   });
 });
 
+/**
+ * Iniciar servidor
+ */
 const server = app.listen(PORT, HOST, () => {
   console.log('');
   console.log('============================================');
@@ -170,6 +220,9 @@ const server = app.listen(PORT, HOST, () => {
   console.log('');
 });
 
+/**
+ * Manejo de errores del servidor
+ */
 server.on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
     console.error(`❌ ERROR: El puerto ${PORT} ya está en uso`);
@@ -186,6 +239,9 @@ server.on('error', (error) => {
   process.exit(1);
 });
 
+/**
+ * Manejo de señales de terminación
+ */
 process.on('SIGTERM', () => {
   console.log('\nSIGTERM recibido, cerrando servidor...');
   server.close(() => {
@@ -202,4 +258,4 @@ process.on('SIGINT', () => {
   });
 });
 
-module.exports = app
+module.exports = app;

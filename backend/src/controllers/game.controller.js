@@ -1,8 +1,21 @@
+/**
+ * @fileoverview Controlador de Juego
+ * @description Gestiona la lógica principal del juego: generación de sets, niveles, verificación de respuestas y progreso
+ */
+
 const { User, Level, GameSet } = require('../models');
 const { generateNewGameSet, checkGameSetCompletion, resetAndGenerateNewSet } = require('../services/gameset.service');
 const { getUserPrize } = require('../services/prize.service');
 const { verifyAnswer, verifyDateAnswer, verifyPuzzleAnswer } = require('../utils/hash.util');
 
+/**
+ * @function generateGame
+ * @async
+ * @description Genera un nuevo set de juego para el usuario autenticado
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Set de juego generado con niveles
+ * @returns {Object} 500 - Error al generar el juego
+ */
 const generateGame = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -27,6 +40,16 @@ const generateGame = async (req, res) => {
   }
 };
 
+/**
+ * @function getLevels
+ * @async
+ * @description Obtiene todos los niveles de un set de juego específico
+ * @param {string} req.params.gameSetId - ID del set de juego
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Lista de niveles y datos del set
+ * @returns {Object} 404 - Juego no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const getLevels = async (req, res) => {
   try {
     const { gameSetId } = req.params;
@@ -71,6 +94,15 @@ const getLevels = async (req, res) => {
   }
 };
 
+/**
+ * @function getLevel
+ * @async
+ * @description Obtiene los detalles de un nivel específico (sin datos sensibles)
+ * @param {string} req.params.LevelId - ID del nivel
+ * @returns {Object} 200 - Datos del nivel (sin hash ni salt)
+ * @returns {Object} 404 - Nivel no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const getLevel = async (req, res) => {
   try {
     const { LevelId } = req.params;
@@ -104,6 +136,20 @@ const getLevel = async (req, res) => {
   }
 };
 
+/**
+ * @function verifyLevel
+ * @async
+ * @description Verifica la respuesta de un nivel y actualiza el progreso
+ * @param {string} req.params.levelId - ID del nivel
+ * @param {Object} req.body - Respuesta del usuario
+ * @param {string} [req.body.answer] - Respuesta de texto/fecha/lugar
+ * @param {Array<number>} [req.body.puzzleOrder] - Orden de piezas del puzzle
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Resultado de la verificación (correcto/incorrecto)
+ * @returns {Object} 400 - Respuesta no proporcionada o nivel ya completado
+ * @returns {Object} 404 - Nivel no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const verifyLevel = async (req, res) => {
   try {
     const { levelId } = req.params;
@@ -235,6 +281,16 @@ const verifyLevel = async (req, res) => {
   }
 };
 
+/**
+ * @function getPrize
+ * @async
+ * @description Obtiene el premio de un set completado o del usuario
+ * @param {Object} req.user - Usuario autenticado
+ * @param {string} [req.query.gameSetId] - ID del set (opcional)
+ * @returns {Object} 200 - Datos del premio
+ * @returns {Object} 404 - Premio no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const getPrize = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -288,6 +344,14 @@ const getPrize = async (req, res) => {
   }
 };
 
+/**
+ * @function resetGame
+ * @async
+ * @description Reinicia todos los juegos activos y genera un nuevo set
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Nuevo set generado
+ * @returns {Object} 500 - Error del servidor
+ */
 const resetGame = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -310,6 +374,16 @@ const resetGame = async (req, res) => {
   }
 };
 
+/**
+ * @function getProgress
+ * @async
+ * @description Obtiene el progreso de un set de juego específico
+ * @param {string} req.params.gameSetId - ID del set de juego
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Datos de progreso del set
+ * @returns {Object} 404 - Juego no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const getProgress = async (req, res) => {
   try {
     const { gameSetId } = req.params;
@@ -350,6 +424,15 @@ const getProgress = async (req, res) => {
   }
 };
 
+/**
+ * @function getHistory
+ * @async
+ * @description Obtiene el historial de juegos del usuario
+ * @param {Object} req.user - Usuario autenticado
+ * @param {string} [req.query.status] - Filtrar por estado (active/completed/abandoned)
+ * @returns {Object} 200 - Lista de sets de juego
+ * @returns {Object} 500 - Error del servidor
+ */
 const getHistory = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -384,6 +467,14 @@ const getHistory = async (req, res) => {
   }
 };
 
+/**
+ * @function getStats
+ * @async
+ * @description Obtiene estadísticas del usuario: juegos completados, progreso promedio, etc.
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Estadísticas del usuario
+ * @returns {Object} 500 - Error del servidor
+ */
 const getStats = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -447,6 +538,14 @@ const getStats = async (req, res) => {
   }
 };
 
+/**
+ * @function getActiveGames
+ * @async
+ * @description Obtiene todos los juegos activos del usuario
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Lista de juegos activos
+ * @returns {Object} 500 - Error del servidor
+ */
 const getActiveGames = async (req, res) => {
   try {
     const userId = req.user._id;

@@ -1,5 +1,24 @@
+/**
+ * @fileoverview Modelo de Premio
+ * @description Premio personalizado creado por un usuario para ser asignado al completar un GameSet
+ */
+
 const mongoose = require('mongoose');
 
+/**
+ * @typedef {Object} PrizeSchema
+ * @property {ObjectId} userId - ID del usuario propietario del premio
+ * @property {string} title - Título del premio
+ * @property {string} description - Descripción detallada del premio
+ * @property {string} imagePath - Ruta de la imagen del premio
+ * @property {boolean} used - Indica si el premio ya fue usado/ganado
+ * @property {ObjectId} usedBy - ID del usuario que ganó el premio
+ * @property {Date} usedAt - Fecha en que fue usado/ganado
+ * @property {number} weight - Peso para selección aleatoria ponderada (1-10)
+ * @property {boolean} active - Indica si el premio está activo
+ * @property {Date} createdAt - Fecha de creación
+ * @property {Date} updatedAt - Fecha de última actualización
+ */
 const prizeSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,

@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Controlador de Administración
+ * @description Gestiona operaciones administrativas: variables, premios, usuarios y estadísticas
+ */
+
 const {  
   Variable,
   User,
@@ -7,6 +12,13 @@ const {
 } = require('../models');
 const { resetAndGenerateNewSet } = require('../services/gameset.service');
 
+/**
+ * @function getVariables
+ * @async
+ * @description Obtiene todas las variables (tipos de dato) del sistema
+ * @returns {Object} 200 - Lista de variables
+ * @returns {Object} 500 - Error del servidor
+ */
 const getVariables = async (req, res) => {
   try {
     const variables = await Variable.find().sort({ key: 1 });
@@ -16,6 +28,14 @@ const getVariables = async (req, res) => {
   }
 };
 
+/**
+ * @function createVariable
+ * @async
+ * @description Crea una nueva variable (tipo de dato)
+ * @param {Object} req.body - Datos de la variable
+ * @returns {Object} 201 - Variable creada
+ * @returns {Object} 500 - Error del servidor
+ */
 const createVariable = async (req, res) => {
   try {
     const variable = new Variable(req.body);
@@ -30,6 +50,16 @@ const createVariable = async (req, res) => {
   }
 };
 
+/**
+ * @function updateVariable
+ * @async
+ * @description Actualiza una variable existente
+ * @param {string} req.params.id - ID de la variable
+ * @param {Object} req.body - Datos a actualizar
+ * @returns {Object} 200 - Variable actualizada
+ * @returns {Object} 404 - Variable no encontrada
+ * @returns {Object} 500 - Error del servidor
+ */
 const updateVariable = async (req, res) => {
   try {
     const { id } = req.params;
@@ -49,6 +79,14 @@ const updateVariable = async (req, res) => {
   }
 };
 
+/**
+ * @function deleteVariable
+ * @async
+ * @description Elimina una variable del sistema
+ * @param {string} req.params.id - ID de la variable
+ * @returns {Object} 200 - Variable eliminada
+ * @returns {Object} 500 - Error del servidor
+ */
 const deleteVariable = async (req, res) => {
   try {
     const { id } = req.params;
@@ -59,6 +97,13 @@ const deleteVariable = async (req, res) => {
   }
 };
 
+/**
+ * @function getPrizes
+ * @async
+ * @description Obtiene todas las plantillas de premios
+ * @returns {Object} 200 - Lista de plantillas de premios
+ * @returns {Object} 500 - Error del servidor
+ */
 const getPrizes = async (req, res) => {
   try {
     const prizes = await PrizeTemplate.find()
@@ -69,6 +114,14 @@ const getPrizes = async (req, res) => {
   }
 };
 
+/**
+ * @function createPrize
+ * @async
+ * @description Crea una nueva plantilla de premio
+ * @param {Object} req.body - Datos del premio
+ * @returns {Object} 201 - Premio creado
+ * @returns {Object} 500 - Error del servidor
+ */
 const createPrize = async (req, res) => {
   try {
     const prize = new PrizeTemplate(req.body);
@@ -83,6 +136,16 @@ const createPrize = async (req, res) => {
   }
 };
 
+/**
+ * @function updatePrize
+ * @async
+ * @description Actualiza una plantilla de premio
+ * @param {string} req.params.id - ID del premio
+ * @param {Object} req.body - Datos a actualizar
+ * @returns {Object} 200 - Premio actualizado
+ * @returns {Object} 404 - Premio no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const updatePrize = async (req, res) => {
   try {
     const { id } = req.params;
@@ -102,6 +165,14 @@ const updatePrize = async (req, res) => {
   }
 };
 
+/**
+ * @function deletePrize
+ * @async
+ * @description Elimina una plantilla de premio
+ * @param {string} req.params.id - ID del premio
+ * @returns {Object} 200 - Premio eliminado
+ * @returns {Object} 500 - Error del servidor
+ */
 const deletePrize = async (req, res) => {
   try {
     const { id } = req.params;
@@ -112,6 +183,13 @@ const deletePrize = async (req, res) => {
   }
 };
 
+/**
+ * @function getUsers
+ * @async
+ * @description Obtiene todos los usuarios del sistema
+ * @returns {Object} 200 - Lista de usuarios
+ * @returns {Object} 500 - Error del servidor
+ */
 const getUsers = async (req, res) => {
   try {
     const users = await User.find()
@@ -124,6 +202,15 @@ const getUsers = async (req, res) => {
   }
 };
 
+/**
+ * @function getUserById
+ * @async
+ * @description Obtiene un usuario específico por ID
+ * @param {string} req.params.id - ID del usuario
+ * @returns {Object} 200 - Datos del usuario
+ * @returns {Object} 404 - Usuario no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -142,6 +229,14 @@ const getUserById = async (req, res) => {
   }
 };
 
+/**
+ * @function resetUserProgress
+ * @async
+ * @description Reinicia el progreso de un usuario y genera un nuevo set
+ * @param {string} req.params.id - ID del usuario
+ * @returns {Object} 200 - Nuevo set generado
+ * @returns {Object} 500 - Error del servidor
+ */
 const resetUserProgress = async (req, res) => {
   try {
     const { id } = req.params;
@@ -156,6 +251,15 @@ const resetUserProgress = async (req, res) => {
   }
 };
 
+/**
+ * @function uploadImage
+ * @async
+ * @description Gestiona la subida de una imagen al servidor
+ * @param {Object} req.file - Archivo subido (procesado por multer)
+ * @returns {Object} 200 - Información del archivo subido
+ * @returns {Object} 400 - No se proporcionó archivo
+ * @returns {Object} 500 - Error del servidor
+ */
 const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
@@ -186,6 +290,13 @@ const uploadImage = async (req, res) => {
   }
 };
 
+/**
+ * @function getStats
+ * @async
+ * @description Obtiene estadísticas globales del sistema
+ * @returns {Object} 200 - Estadísticas de usuarios, premios y juegos
+ * @returns {Object} 500 - Error del servidor
+ */
 const getStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
@@ -227,6 +338,14 @@ const getStats = async (req, res) => {
   }
 };
 
+/**
+ * @function getUserDataById
+ * @async
+ * @description Obtiene los datos personalizados de un usuario específico
+ * @param {string} req.params.id - ID del usuario
+ * @returns {Object} 200 - Lista de datos del usuario
+ * @returns {Object} 500 - Error del servidor
+ */
 const getUserDataById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -244,6 +363,15 @@ const getUserDataById = async (req, res) => {
   }
 };
 
+/**
+ * @function getAllUserData
+ * @async
+ * @description Obtiene todos los datos personalizados del sistema con filtros opcionales
+ * @param {string} [req.query.tipoDato] - Filtrar por tipo de dato
+ * @param {string} [req.query.active] - Filtrar por estado activo
+ * @returns {Object} 200 - Lista de datos personalizados
+ * @returns {Object} 500 - Error del servidor
+ */
 const getAllUserData = async (req, res) => {
   try {
     const { UserData } = require('../models');
@@ -267,6 +395,15 @@ const getAllUserData = async (req, res) => {
   }
 };
 
+/**
+ * @function toggleUserDataActive
+ * @async
+ * @description Activa/desactiva un dato personalizado
+ * @param {string} req.params.id - ID del dato
+ * @returns {Object} 200 - Dato actualizado
+ * @returns {Object} 404 - Dato no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const toggleUserDataActive = async (req, res) => {
   try {
     const { id } = req.params;

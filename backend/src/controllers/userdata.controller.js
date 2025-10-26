@@ -1,5 +1,18 @@
+/**
+ * @fileoverview Controlador de Datos de Usuario
+ * @description Gestiona los datos personalizados que crea cada usuario para generar niveles
+ */
+
 const { UserData, Variable } = require('../models');
 
+/**
+ * @function getUserData
+ * @async
+ * @description Obtiene todos los datos personalizados del usuario autenticado
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Lista de datos del usuario
+ * @returns {Object} 500 - Error del servidor
+ */
 const getUserData = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -21,6 +34,23 @@ const getUserData = async (req, res) => {
   }
 };
 
+/**
+ * @function createUserData
+ * @async
+ * @description Crea un nuevo dato personalizado para el usuario
+ * @param {Object} req.user - Usuario autenticado
+ * @param {Object} req.body - Datos del nuevo elemento
+ * @param {string} req.body.tipoDato - ID del tipo de dato (Variable)
+ * @param {Object} req.body.valor - Valor/respuesta del dato
+ * @param {string} req.body.pregunta - Pregunta asociada
+ * @param {string[]} [req.body.pistas] - Array de pistas
+ * @param {string} req.body.categorias - ID de la categoría
+ * @param {string} [req.body.imagePath] - Ruta de la imagen (para tipo foto)
+ * @param {string} [req.body.difficulty] - Dificultad (easy/medium/hard)
+ * @returns {Object} 201 - Dato creado
+ * @returns {Object} 400 - Tipo de dato inválido o formato de fecha incorrecto
+ * @returns {Object} 500 - Error del servidor
+ */
 const createUserData = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -71,6 +101,17 @@ const createUserData = async (req, res) => {
   }
 };
 
+/**
+ * @function updateUserData
+ * @async
+ * @description Actualiza un dato personalizado del usuario
+ * @param {string} req.params.id - ID del dato a actualizar
+ * @param {Object} req.user - Usuario autenticado
+ * @param {Object} req.body - Campos a actualizar
+ * @returns {Object} 200 - Dato actualizado
+ * @returns {Object} 404 - Dato no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const updateUserData = async (req, res) => {
   try {
     const { id } = req.params;
@@ -109,6 +150,16 @@ const updateUserData = async (req, res) => {
   }
 };
 
+/**
+ * @function deleteUserData
+ * @async
+ * @description Desactiva un dato personalizado (soft delete)
+ * @param {string} req.params.id - ID del dato a eliminar
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Dato eliminado
+ * @returns {Object} 404 - Dato no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const deleteUserData = async (req, res) => {
   try {
     const { id } = req.params;
@@ -140,6 +191,13 @@ const deleteUserData = async (req, res) => {
   }
 };
 
+/**
+ * @function getAvailableTypes
+ * @async
+ * @description Obtiene todos los tipos de datos disponibles (Variables activas)
+ * @returns {Object} 200 - Lista de variables/tipos disponibles
+ * @returns {Object} 500 - Error del servidor
+ */
 const getAvailableTypes = async (req, res) => {
   try {
     const variables = await Variable.find({ active: true })

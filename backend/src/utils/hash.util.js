@@ -1,9 +1,26 @@
+/**
+ * @fileoverview Utilidades de Hashing
+ * @description Funciones para hashear y verificar respuestas de niveles de forma segura
+ */
+
 const crypto = require('crypto');
 
+/**
+ * @function generateSalt
+ * @description Genera un salt aleatorio de 16 bytes en hexadecimal
+ * @returns {string} Salt generado (32 caracteres hex)
+ */
 const generateSalt = () => {
   return crypto.randomBytes(16).toString('hex');
 };
 
+/**
+ * @function hashAnswer
+ * @description Hashea una respuesta de texto usando SHA-256
+ * @param {string} answer - Respuesta a hashear
+ * @param {string} salt - Salt para el hash
+ * @returns {string} Hash SHA-256 de la respuesta canonicalizada
+ */
 const hashAnswer = (answer, salt) => {
   const canonical = canonicalizeAnswer(answer);
   return crypto
@@ -12,6 +29,15 @@ const hashAnswer = (answer, salt) => {
     .digest('hex');
 };
 
+/**
+ * @function canonicalizeAnswer
+ * @description Normaliza una respuesta para comparación consistente
+ * - Convierte a minúsculas
+ * - Elimina espacios extras
+ * - Normaliza caracteres Unicode (elimina acentos)
+ * @param {string} answer - Respuesta a canonicalizar
+ * @returns {string} Respuesta normalizada
+ */
 const canonicalizeAnswer = (answer) => {
   return answer
     .toString()
@@ -22,6 +48,12 @@ const canonicalizeAnswer = (answer) => {
     .replace(/[\u0300-\u036f]/g, '');
 };
 
+/**
+ * @function normalizeDateAnswer
+ * @description Normaliza una fecha a formato YYYY-MM-DD
+ * @param {Date|string} dateValue - Fecha a normalizar
+ * @returns {string} Fecha en formato YYYY-MM-DD
+ */
 const normalizeDateAnswer = (dateValue) => {
   try {
     if (dateValue instanceof Date) {
@@ -51,11 +83,26 @@ const normalizeDateAnswer = (dateValue) => {
   }
 };
 
+/**
+ * @function verifyAnswer
+ * @description Verifica si una respuesta de texto es correcta
+ * @param {string} userAnswer - Respuesta proporcionada por el usuario
+ * @param {string} correctHash - Hash de la respuesta correcta
+ * @param {string} salt - Salt usado en el hash
+ * @returns {boolean} True si la respuesta es correcta
+ */
 const verifyAnswer = (userAnswer, correctHash, salt) => {
   const userHash = hashAnswer(userAnswer, salt);
   return userHash === correctHash;
 };
 
+/**
+ * @function hashDateAnswer
+ * @description Hashea una respuesta de fecha usando SHA-256
+ * @param {Date|string} dateAnswer - Fecha a hashear
+ * @param {string} salt - Salt para el hash
+ * @returns {string} Hash SHA-256 de la fecha normalizada
+ */
 const hashDateAnswer = (dateAnswer, salt) => {
   const normalizedDate = normalizeDateAnswer(dateAnswer);
   return crypto
@@ -64,11 +111,26 @@ const hashDateAnswer = (dateAnswer, salt) => {
     .digest('hex');
 };
 
+/**
+ * @function verifyDateAnswer
+ * @description Verifica si una respuesta de fecha es correcta
+ * @param {string} userAnswer - Fecha proporcionada por el usuario
+ * @param {string} correctHash - Hash de la fecha correcta
+ * @param {string} salt - Salt usado en el hash
+ * @returns {boolean} True si la fecha es correcta
+ */
 const verifyDateAnswer = (userAnswer, correctHash, salt) => {
   const userHash = hashDateAnswer(userAnswer, salt);
   return userHash === correctHash;
 };
 
+/**
+ * @function hashPuzzleAnswer
+ * @description Genera el hash del orden correcto de un puzzle
+ * @param {number} puzzleGrid - Tamaño de la cuadrícula (ej: 3 = 3x3 = 9 piezas)
+ * @param {string} salt - Salt para el hash
+ * @returns {string} Hash SHA-256 del orden correcto [1,2,3,...,n]
+ */
 const hashPuzzleAnswer = (puzzleGrid, salt) => {
   const totalPieces = puzzleGrid * puzzleGrid;
   const correctOrder = Array.from({ length: totalPieces }, (_, i) => i + 1);
@@ -79,6 +141,14 @@ const hashPuzzleAnswer = (puzzleGrid, salt) => {
     .digest('hex');
 };
 
+/**
+ * @function verifyPuzzleAnswer
+ * @description Verifica si el orden del puzzle es correcto
+ * @param {number[]} userOrder - Orden proporcionado por el usuario
+ * @param {string} correctHash - Hash del orden correcto
+ * @param {string} salt - Salt usado en el hash
+ * @returns {boolean} True si el orden es correcto
+ */
 const verifyPuzzleAnswer = (userOrder, correctHash, salt) => {
   if (!Array.isArray(userOrder)) {
     return false;

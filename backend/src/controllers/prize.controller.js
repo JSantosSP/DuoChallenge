@@ -1,5 +1,18 @@
+/**
+ * @fileoverview Controlador de Premios
+ * @description Gestiona los premios personalizados que crea cada usuario
+ */
+
 const { Prize, GameSet } = require('../models');
 
+/**
+ * @function getUserPrizes
+ * @async
+ * @description Obtiene todos los premios creados por el usuario autenticado
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Lista de premios del usuario
+ * @returns {Object} 500 - Error del servidor
+ */
 const getUserPrizes = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -25,6 +38,21 @@ const getUserPrizes = async (req, res) => {
   }
 };
 
+/**
+ * @function createPrize
+ * @async
+ * @description Crea un nuevo premio personalizado
+ * @param {Object} req.user - Usuario autenticado
+ * @param {Object} req.body - Datos del premio
+ * @param {string} req.body.title - Título del premio
+ * @param {string} req.body.description - Descripción del premio
+ * @param {string} [req.body.imagePath] - Ruta de la imagen
+ * @param {number} [req.body.weight=1] - Peso para selección aleatoria
+ * @param {string} [req.body.category='personal'] - Categoría del premio
+ * @returns {Object} 201 - Premio creado
+ * @returns {Object} 400 - Título o descripción faltantes
+ * @returns {Object} 500 - Error del servidor
+ */
 const createPrize = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -64,6 +92,17 @@ const createPrize = async (req, res) => {
   }
 };
 
+/**
+ * @function updatePrize
+ * @async
+ * @description Actualiza un premio del usuario
+ * @param {string} req.params.id - ID del premio
+ * @param {Object} req.user - Usuario autenticado
+ * @param {Object} req.body - Campos a actualizar
+ * @returns {Object} 200 - Premio actualizado
+ * @returns {Object} 404 - Premio no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const updatePrize = async (req, res) => {
   try {
     const { id } = req.params;
@@ -106,6 +145,16 @@ const updatePrize = async (req, res) => {
   }
 };
 
+/**
+ * @function deletePrize
+ * @async
+ * @description Desactiva un premio (soft delete)
+ * @param {string} req.params.id - ID del premio
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Premio eliminado
+ * @returns {Object} 404 - Premio no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const deletePrize = async (req, res) => {
   try {
     const { id } = req.params;
@@ -140,6 +189,14 @@ const deletePrize = async (req, res) => {
   }
 };
 
+/**
+ * @function getUserWonPrizes
+ * @async
+ * @description Obtiene los premios ganados por el usuario al completar juegos
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Lista de premios ganados con información del juego
+ * @returns {Object} 500 - Error del servidor
+ */
 const getUserWonPrizes = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -185,6 +242,17 @@ const getUserWonPrizes = async (req, res) => {
   }
 };
 
+/**
+ * @function reactivatePrize
+ * @async
+ * @description Reactiva un premio usado para que pueda ser asignado nuevamente
+ * @param {string} req.params.id - ID del premio
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Premio reactivado
+ * @returns {Object} 403 - Sin permisos
+ * @returns {Object} 404 - Premio no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const reactivatePrize = async (req, res) => {
   try {
     const { id } = req.params;
@@ -226,6 +294,14 @@ const reactivatePrize = async (req, res) => {
   }
 };
 
+/**
+ * @function reactivateAllPrizes
+ * @async
+ * @description Reactiva todos los premios usados del usuario
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Cantidad de premios reactivados
+ * @returns {Object} 500 - Error del servidor
+ */
 const reactivateAllPrizes = async (req, res) => {
   try {
     const userId = req.user._id;
