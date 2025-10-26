@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiService } from '../api/api';
-import { Alert, Share, Clipboard } from 'react-native';
+import { Alert, Share } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 
 export const useShare = () => {
   const [shareCodes, setShareCodes] = useState([]);
@@ -138,7 +139,7 @@ export const useShare = () => {
   // Copiar código al portapapeles
   const copyCodeToClipboard = async (code) => {
     try {
-      await Clipboard.setString(code);
+      await Clipboard.setStringAsync(code);
       Alert.alert('Copiado', 'Código copiado al portapapeles');
       return { success: true };
     } catch (error) {
