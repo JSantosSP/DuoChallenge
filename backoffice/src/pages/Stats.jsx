@@ -27,7 +27,6 @@ const Stats = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Usuarios */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-lg font-bold mb-4 flex items-center">
               <span className="text-2xl mr-2">👤</span> Usuarios
@@ -48,7 +47,6 @@ const Stats = () => {
             </div>
           </div>
 
-          {/* Plantillas */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-lg font-bold mb-4 flex items-center">
               <span className="text-2xl mr-2">🧩</span> Plantillas
@@ -65,7 +63,6 @@ const Stats = () => {
             </div>
           </div>
 
-          {/* Premios */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-lg font-bold mb-4 flex items-center">
               <span className="text-2xl mr-2">🏆</span> Premios
@@ -86,7 +83,6 @@ const Stats = () => {
             </div>
           </div>
 
-          {/* Juegos Compartidos */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-lg font-bold mb-4 flex items-center">
               <span className="text-2xl mr-2">🔗</span> Compartidos
@@ -107,7 +103,6 @@ const Stats = () => {
             </div>
           </div>
 
-          {/* Niveles */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-lg font-bold mb-4 flex items-center">
               <span className="text-2xl mr-2">🎮</span> Niveles
@@ -124,7 +119,6 @@ const Stats = () => {
             </div>
           </div>
 
-          {/* Sets de Juego */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-lg font-bold mb-4 flex items-center">
               <span className="text-2xl mr-2">📦</span> Sets de Juego
@@ -145,7 +139,6 @@ const Stats = () => {
             </div>
           </div>
 
-          {/* Variables */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-lg font-bold mb-4 flex items-center">
               <span className="text-2xl mr-2">📝</span> Variables

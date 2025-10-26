@@ -10,7 +10,7 @@ const Prizes = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPrize, setEditingPrize] = useState(null);
   const [imagePath, setImagePath] = useState(null);
-  const [filterType, setFilterType] = useState('all'); // all, system, users
+  const [filterType, setFilterType] = useState('all');
   const { register, handleSubmit, reset, setValue } = useForm();
 
   const { data: prizes, isLoading } = useFetch('prizes', async () => {
@@ -118,7 +118,6 @@ const Prizes = () => {
           </div>
         </div>
 
-        {/* Filtros */}
         <div className="flex space-x-4">
           <button
             onClick={() => setFilterType('all')}
@@ -132,7 +131,6 @@ const Prizes = () => {
           </button>
         </div>
 
-        {/* Grid de premios */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {prizes?.map((prize) => (
             <div

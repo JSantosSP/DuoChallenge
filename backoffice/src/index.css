@@ -1,32 +1,26 @@
 @import "tailwindcss";
 
-/* Forest and Ocean Color Palette */
 :root {
-  /* Primary colors (for "her" elements or warm accents) */
-  --color-forest-dark: #1B4332;      /* Dark forest green */
-  --color-forest-medium: #2D6A4F;    /* Medium moss green */
-  --color-forest-light: #95D5B2;     /* Soft green accent */
+  --color-forest-dark: #1B4332;
+  --color-forest-medium: #2D6A4F;
+  --color-forest-light: #95D5B2;
   
-  /* Secondary colors (for "his" elements or cool zones) */
-  --color-ocean-dark: #014F86;        /* Deep ocean blue */
-  --color-ocean-medium: #2A9D8F;      /* Medium turquoise */
-  --color-ocean-light: #A9D6E5;       /* Light blue accent */
+  --color-ocean-dark: #014F86;
+  --color-ocean-medium: #2A9D8F;
+  --color-ocean-light: #A9D6E5;
   
-  /* Neutral colors */
-  --color-bg-light: #F5F8F6;         /* Light background */
-  --color-bg-dark: #0B1D1B;          /* Dark background */
-  --color-text-light: #1C1C1C;       /* Text for light mode */
-  --color-text-dark: #E8F0EE;        /* Text for dark mode */
-  --color-muted: #A0B1AD;            /* Muted text */
-  --color-border: #DDE5E2;           /* Soft borders */
+  --color-bg-light: #F5F8F6;
+  --color-bg-dark: #0B1D1B;
+  --color-text-light: #1C1C1C;
+  --color-text-dark: #E8F0EE;
+  --color-muted: #A0B1AD;
+  --color-border: #DDE5E2;
   
-  /* Status colors */
-  --color-success: #2D6A4F;           /* Forest green for success */
-  --color-warning: #FF9800;          /* Orange for warnings */
-  --color-error: #F44336;            /* Red for errors */
-  --color-info: #2A9D8F;             /* Turquoise for info */
+  --color-success: #2D6A4F;
+  --color-warning: #FF9800;
+  --color-error: #F44336;
+  --color-info: #2A9D8F;
   
-  /* Theme mapping for Tailwind */
   --color-primary: var(--color-forest-medium);
   --color-primary-dark: var(--color-forest-dark);
   --color-secondary: var(--color-ocean-medium);
@@ -58,7 +52,6 @@ code {
     monospace;
 }
 
-/* Custom utility classes for the new color scheme */
 .bg-forest-dark { background-color: var(--color-forest-dark); }
 .bg-forest-medium { background-color: var(--color-forest-medium); }
 .bg-forest-light { background-color: var(--color-forest-light); }
@@ -77,7 +70,6 @@ code {
 .border-forest-medium { border-color: var(--color-forest-medium); }
 .border-ocean-medium { border-color: var(--color-ocean-medium); }
 
-/* Gradient utilities */
 .gradient-forest-ocean {
   background: linear-gradient(135deg, var(--color-forest-medium), var(--color-ocean-medium));
 }
@@ -86,7 +78,6 @@ code {
   background: linear-gradient(135deg, var(--color-forest-medium), var(--color-ocean-medium));
 }
 
-/* Hover and focus states */
 .hover-forest:hover {
   background-color: var(--color-forest-medium);
   color: white;
@@ -103,7 +94,6 @@ code {
   box-shadow: 0 4px 12px rgba(42, 157, 143, 0.3);
 }
 
-/* Enhanced button styles */
 .btn-forest {
   background: linear-gradient(135deg, var(--color-forest-medium), var(--color-forest-dark));
   border: none;
@@ -132,7 +122,6 @@ code {
   box-shadow: 0 6px 16px rgba(42, 157, 143, 0.4);
 }
 
-/* Card enhancements */
 .card-forest {
   background: linear-gradient(135deg, rgba(45, 106, 79, 0.05), rgba(149, 213, 178, 0.1));
   border: 1px solid var(--color-forest-light);
@@ -157,7 +146,6 @@ code {
   border-color: var(--color-ocean-medium);
 }
 
-/* Input focus states */
 .input-forest:focus {
   border-color: var(--color-forest-medium);
   box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);

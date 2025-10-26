@@ -97,7 +97,7 @@ const Users = () => {
           data={users}
           loading={isLoading}
           onEdit={viewUserDetails}
-          onDelete={() => {}} // Desactivado
+          onDelete={() => {}}
         />
 
         <Modal

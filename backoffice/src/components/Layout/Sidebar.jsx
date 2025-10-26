@@ -26,13 +26,11 @@ const Sidebar = () => {
 
   return (
     <div className="w-64 bg-forest-dark text-white min-h-screen flex flex-col">
-      {/* Header */}
       <div className="p-6 border-b border-forest-medium">
         <h1 className="text-2xl font-bold">🎮 DuoChallenge</h1>
         <p className="text-sm text-forest-light mt-1">Panel Admin</p>
       </div>
 
-      {/* User Info */}
       <div className="p-4 border-b border-forest-medium">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-full bg-ocean-medium flex items-center justify-center">
@@ -45,7 +43,6 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Menu Items */}
       <nav className="flex-1 p-4 overflow-y-auto">
         {sections.map((section) => (
           <div key={section.key} className="mb-6">
@@ -73,7 +70,6 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      {/* Logout Button */}
       <div className="p-4 border-t border-forest-medium">
         <button
           onClick={logout}

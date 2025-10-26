@@ -22,7 +22,6 @@ const UserDataPage = () => {
     setIsModalOpen(true);
 
     try {
-      // Hacer petición como ese usuario (necesitarás un endpoint en el backend)
       const res = await api.get(`/admin/users/${user._id}/userdata`);
       setUserData(res.data.data.userData);
     } catch (error) {

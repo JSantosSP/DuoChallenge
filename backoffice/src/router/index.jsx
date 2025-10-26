@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '../context/AuthContext';
 import ProtectedRoute from '../components/ProtectedRoute';
 
-// Pages
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
 import Variables from '../pages/Variables';
@@ -17,10 +16,8 @@ const AppRouter = () => {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Ruta pública */}
           <Route path="/login" element={<Login />} />
 
-          {/* Rutas protegidas */}
           <Route
             path="/dashboard"
             element={
@@ -78,7 +75,6 @@ const AppRouter = () => {
             }
           />
 
-          {/* Redirecciones */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

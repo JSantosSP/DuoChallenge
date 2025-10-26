@@ -9,7 +9,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Cargar usuario y token del localStorage al iniciar
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
 
@@ -25,7 +24,6 @@ export const AuthProvider = ({ children }) => {
       const response = await api.post('/auth/login', { email, password });
       const { token, user } = response.data.data;
 
-      // Verificar que sea admin
       if (user.role !== 'admin') {
         throw new Error('No tienes permisos de administrador');
       }

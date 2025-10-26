@@ -57,7 +57,6 @@ const Dashboard = () => {
           <p className="text-muted mt-2">Resumen general del sistema</p>
         </div>
 
-        {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {cards.map((card, index) => (
             <div
@@ -78,7 +77,6 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Estadísticas adicionales */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-xl font-bold mb-4">🎮 Sets de Juego</h2>
