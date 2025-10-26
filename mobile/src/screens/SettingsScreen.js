@@ -1,4 +1,4 @@
-import React,  { useState } from 'react';
+import React,  { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,11 @@ const SettingsScreen = ({ navigation }) => {
   const [restarting, setRestarting] = useState(false);
   const [availableShareCodes, setAvailableShareCodes] = useState([]);
 
+  useEffect(() => {
+    fetchUsedShareCodes();
+    refetchActiveGames();
+  }, []);
+
   const handleLogout = () => {
     Alert.alert(
       'Cerrar Sesión',
@@ -40,10 +45,6 @@ const SettingsScreen = ({ navigation }) => {
   };
 
   const handleRestartGame = async () => {
-    // Refrescar juegos activos
-    await fetchUsedShareCodes();
-    console.log(usedShareCodes)
-
     
     // Obtener códigos únicos de juegos compartidos
     const shareCodes = [];
