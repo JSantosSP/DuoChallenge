@@ -1,3 +1,8 @@
+/**
+ * @file app.config.js - Configuración de Expo para la aplicación móvil
+ * @description Define metadatos, configuraciones de plataforma (iOS/Android), variables de entorno y plugins
+ */
+
 module.exports = {
   expo: {
     name: 'DuoChallenge',
@@ -12,10 +17,14 @@ module.exports = {
       backgroundColor: '#F5F8F6',
     },
     assetBundlePatterns: ['**/*'],
+    
+    /** Configuración específica para iOS */
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.duochallenge.mobile',
     },
+    
+    /** Configuración específica para Android */
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
@@ -24,9 +33,13 @@ module.exports = {
       package: 'com.duochallenge.mobile',
       permissions: ['android.permission.INTERNET'],
     },
+    
+    /** Configuración para Web */
     web: {
       favicon: './assets/favicon.png',
     },
+    
+    /** Variables de entorno y configuración extra */
     extra: {
       EXPO_PUBLIC_PRO: process.env.EXPO_PUBLIC_PRO || 'false',
       EXPO_PUBLIC_API_URL_DEV: process.env.EXPO_PUBLIC_API_URL_DEV || 'http://localhost:4000',
@@ -38,6 +51,8 @@ module.exports = {
         projectId: 'tu-project-id',
       },
     },
+    
+    /** Plugins de Expo utilizados en la aplicación */
     plugins: ['expo-secure-store'],
   },
 };

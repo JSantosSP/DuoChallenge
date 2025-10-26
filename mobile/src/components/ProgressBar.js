@@ -1,7 +1,19 @@
+/**
+ * @file ProgressBar.js - Barra de progreso visual
+ * @description Muestra progreso con porcentaje y barra animada
+ */
+
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../utils/colors';
 
+/**
+ * Barra de progreso con etiquetas y porcentaje
+ * @param {Object} props
+ * @param {number} [props.progress=0] - Valor actual de progreso
+ * @param {number} [props.total=100] - Valor máximo
+ * @returns {JSX.Element}
+ */
 const ProgressBar = ({ progress = 0, total = 100 }) => {
   const percentage = Math.round((progress / total) * 100);
 

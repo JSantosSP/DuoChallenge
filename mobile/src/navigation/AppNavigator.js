@@ -1,3 +1,8 @@
+/**
+ * @file AppNavigator.js - Sistema de navegación principal
+ * @description Define stacks de navegación y rutas de la aplicación
+ */
+
 import React from 'react';
 import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -25,6 +30,11 @@ import PrizeTemplatesScreen from '../screens/PrizeTemplatesScreen';
 
 const Stack = createNativeStackNavigator();
 
+/**
+ * Stack de navegación principal para usuarios autenticados
+ * Incluye todas las pantallas de la aplicación excepto login
+ * @returns {JSX.Element}
+ */
 const MainStack = () => {
   return (
     <Stack.Navigator
@@ -181,6 +191,11 @@ const MainStack = () => {
   );
 };
 
+/**
+ * Stack de navegación para usuarios no autenticados
+ * Solo contiene la pantalla de login
+ * @returns {JSX.Element}
+ */
 const AuthStack = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -189,6 +204,11 @@ const AuthStack = () => {
   );
 };
 
+/**
+ * Componente principal de navegación
+ * Muestra AuthStack o MainStack según estado de autenticación
+ * @returns {JSX.Element}
+ */
 const AppNavigator = () => {
   const { isAuthenticated, loading } = useAuth();
 

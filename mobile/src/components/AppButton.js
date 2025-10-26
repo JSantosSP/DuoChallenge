@@ -1,7 +1,24 @@
+/**
+ * @file AppButton.js - Botón reutilizable con variantes
+ * @description Botón estilizado con soporte para loading, iconos y múltiples variantes
+ */
+
 import React from 'react';
 import { TouchableOpacity, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { colors } from '../utils/colors';
 
+/**
+ * Botón personalizado con variantes de estilo
+ * @param {Object} props
+ * @param {string} props.title - Texto del botón
+ * @param {Function} props.onPress - Callback al presionar
+ * @param {boolean} [props.loading=false] - Muestra indicador de carga
+ * @param {boolean} [props.disabled=false] - Deshabilita el botón
+ * @param {('primary'|'secondary'|'outline')} [props.variant='primary'] - Estilo del botón
+ * @param {string} [props.icon] - Emoji o texto para icono
+ * @param {Object} [props.style] - Estilos adicionales
+ * @returns {JSX.Element}
+ */
 const AppButton = ({ 
   title, 
   onPress, 

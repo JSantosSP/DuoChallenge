@@ -1,4 +1,4 @@
-export const colors = {
+/**\n * @file colors.js - Paleta de colores de la aplicación\n * @description Define colores, gradientes y temas para diseño consistente\n */\n\n/**\n * Paleta de colores principal organizada por categorías\n */\nexport const colors = {
   forest: {
     dark: '#1B4332',
     medium: '#2D6A4F',
