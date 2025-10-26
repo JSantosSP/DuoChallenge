@@ -1,7 +1,6 @@
 const { GameShare, User, UserData } = require('../models');
 const { generateNewGameSet } = require('../services/gameset.service');
 
-// Generar código único de 6 caracteres
 const generateShareCode = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code = '';
@@ -11,12 +10,10 @@ const generateShareCode = () => {
   return code;
 };
 
-// Crear código de compartición
 const createShareCode = async (req, res) => {
   try {
     const creatorId = req.user._id;
     
-    // Verificar que el usuario tiene datos para compartir
     const userData = await UserData.find({ userId: creatorId, active: true });
     if (userData.length === 0) {
       return res.status(400).json({
@@ -25,13 +22,11 @@ const createShareCode = async (req, res) => {
       });
     }
 
-    // Desactivar códigos anteriores del usuario
     await GameShare.updateMany(
       { creatorId, active: true },
       { active: false }
     );
 
-    // Generar código único
     let code;
     let exists = true;
     while (exists) {
@@ -39,7 +34,6 @@ const createShareCode = async (req, res) => {
       exists = await GameShare.findOne({ code });
     }
 
-    // Crear nuevo código
     const gameShare = new GameShare({
       creatorId,
       code,
@@ -63,7 +57,6 @@ const createShareCode = async (req, res) => {
   }
 };
 
-// Obtener códigos del usuario
 const getUserShareCodes = async (req, res) => {
   try {
     const creatorId = req.user._id;
@@ -86,7 +79,6 @@ const getUserShareCodes = async (req, res) => {
   }
 };
 
-// Obtener códigos a los que se a unido el usuario
 const getUserUsedShareCodes = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -110,7 +102,6 @@ const getUserUsedShareCodes = async (req, res) => {
   }
 };
 
-// Verificar código y obtener info del creador
 const verifyShareCode = async (req, res) => {
   try {
     const { code } = req.params;
@@ -125,7 +116,6 @@ const verifyShareCode = async (req, res) => {
       });
     }
 
-    // Verificar si ya expiró
     if (gameShare.expiresAt && new Date() > gameShare.expiresAt) {
       return res.status(400).json({
         success: false,
@@ -133,7 +123,6 @@ const verifyShareCode = async (req, res) => {
       });
     }
 
-    // Verificar máximo de usos
     if (gameShare.maxUses && gameShare.usedBy.length >= gameShare.maxUses) {
       return res.status(400).json({
         success: false,
@@ -158,10 +147,6 @@ const verifyShareCode = async (req, res) => {
   }
 };
 
-// Unirse a un juego compartido
-// NOTA: Esta función permite reiniciar juegos permitiendo múltiples GameSets
-// del mismo código compartido. Si el usuario ya usó el código antes,
-// simplemente crea un nuevo GameSet sin añadirlo de nuevo a usedBy.
 const joinGame = async (req, res) => {
   try {
     const playerId = req.user._id;
@@ -183,12 +168,10 @@ const joinGame = async (req, res) => {
       });
     }
 
-    // Verificar si ya usó el código antes
     const alreadyUsed = gameShare.usedBy.some(
       u => u.userId.toString() === playerId.toString()
     );
 
-    // Solo añadir a usedBy si es la primera vez
     if (!alreadyUsed) {
       gameShare.usedBy.push({
         userId: playerId,
@@ -197,8 +180,6 @@ const joinGame = async (req, res) => {
       await gameShare.save();
     }
 
-    // IMPORTANTE: Siempre se genera un nuevo GameSet, incluso si el usuario
-    // ya había usado este código antes. Esto permite "reiniciar" el juego.
     const gameSet = await generateNewGameSet(
       gameShare.creatorId,
       playerId,
@@ -225,7 +206,6 @@ const joinGame = async (req, res) => {
   }
 };
 
-// Obtener juegos activos del usuario (de códigos compartidos)
 const getGameInstances = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -253,7 +233,6 @@ const getGameInstances = async (req, res) => {
   }
 };
 
-// Desactivar código de compartición
 const deactivateShareCode = async (req, res) => {
   try {
     const { id } = req.params;

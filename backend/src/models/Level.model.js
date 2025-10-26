@@ -55,7 +55,7 @@ const levelSchema = new mongoose.Schema({
   }],
   puzzleGrid: {
     type: Number,
-    default: 3, // 3x3 por defecto para retos de foto
+    default: 3,
     min: 2,
     max: 5
   },

@@ -10,7 +10,6 @@ const connectDB = async () => {
 
     console.log(`✅ MongoDB conectado: ${conn.connection.host}`);
     
-    // Crear índices si no existen
     await createIndexes();
     
   } catch (error) {
@@ -23,7 +22,6 @@ const createIndexes = async () => {
   try {
     const { User, Level } = require('../models');
     
-    // Índices para optimizar queries
     await User.collection.createIndex({ email: 1 }, { unique: true });
     await Level.collection.createIndex({ gameSetId: 1, order: 1 });
     

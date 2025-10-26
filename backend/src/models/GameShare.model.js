@@ -28,17 +28,16 @@ const gameShareSchema = new mongoose.Schema({
   }],
   maxUses: {
     type: Number,
-    default: null // null = ilimitado
+    default: null
   },
   expiresAt: {
     type: Date,
-    default: null // null = no expira
+    default: null
   }
 }, {
   timestamps: true
 });
 
-// Índices
 gameShareSchema.index({ code: 1 });
 gameShareSchema.index({ creatorId: 1, active: 1 });
 

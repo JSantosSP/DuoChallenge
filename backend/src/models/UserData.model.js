@@ -33,7 +33,7 @@ const userDataSchema = new mongoose.Schema({
   },
   puzzleGrid: {
     type: Number,
-    default: 3, // 3x3 por defecto para retos de foto
+    default: 3,
     min: 2,
     max: 5
   },
@@ -50,7 +50,6 @@ const userDataSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Índice para búsquedas rápidas
 userDataSchema.index({ userId: 1, tipoDato: 1 });
 
 module.exports = mongoose.model('UserData', userDataSchema);

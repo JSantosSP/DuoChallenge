@@ -1,11 +1,9 @@
 const { Prize, GameSet } = require('../models');
 
-// Obtener premios del usuario (propios + sistema)
 const getUserPrizes = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // Premios propios del usuario
     const userPrizes = await Prize.find({ 
       userId, 
       active: true 
@@ -27,7 +25,6 @@ const getUserPrizes = async (req, res) => {
   }
 };
 
-// Crear nuevo premio
 const createPrize = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -67,7 +64,6 @@ const createPrize = async (req, res) => {
   }
 };
 
-// Actualizar premio
 const updatePrize = async (req, res) => {
   try {
     const { id } = req.params;
@@ -86,7 +82,6 @@ const updatePrize = async (req, res) => {
       });
     }
 
-    // Actualizar campos permitidos
     const allowedFields = ['title', 'description', 'imagePath', 'weight', 'category'];
     allowedFields.forEach(field => {
       if (updates[field] !== undefined) {
@@ -111,7 +106,6 @@ const updatePrize = async (req, res) => {
   }
 };
 
-// Eliminar premio (soft delete)
 const deletePrize = async (req, res) => {
   try {
     const { id } = req.params;
@@ -146,12 +140,10 @@ const deletePrize = async (req, res) => {
   }
 };
 
-// Obtener premios ganados por el usuario
 const getUserWonPrizes = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // Buscar todos los GameSets completados con premio
     const completedSets = await GameSet.find({ 
       userId, 
       status: 'completed',
@@ -160,7 +152,6 @@ const getUserWonPrizes = async (req, res) => {
       .populate('prizeId')
       .sort({ completedAt: -1 });
 
-    // Mapear los premios con información del juego
     const wonPrizes = completedSets
       .filter(set => set.prizeId)
       .map(set => ({
@@ -194,13 +185,11 @@ const getUserWonPrizes = async (req, res) => {
   }
 };
 
-// Reactivar un premio específico (marcar como no usado)
 const reactivatePrize = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user._id;
 
-    // Buscar el premio y verificar que pertenece al usuario
     const prize = await Prize.findOne({ _id: id });
 
     if (!prize) {
@@ -210,7 +199,6 @@ const reactivatePrize = async (req, res) => {
       });
     }
 
-    // Verificar que el usuario es el dueño del premio
     if (prize.userId.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
@@ -218,7 +206,6 @@ const reactivatePrize = async (req, res) => {
       });
     }
 
-    // Reactivar el premio
     prize.used = false;
     prize.usedAt = null;
     await prize.save();
@@ -239,12 +226,10 @@ const reactivatePrize = async (req, res) => {
   }
 };
 
-// Reactivar todos los premios del usuario
 const reactivateAllPrizes = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // Buscar todos los premios del usuario que están marcados como usados
     const result = await Prize.updateMany(
       { 
         userId, 

@@ -1,28 +1,21 @@
 require('dotenv').config();
 
-
-
 const isProd = process.env.PRO === 'true';
 
 const config = {
-  // Estado del entorno
   isProd,
   nodeEnv: process.env.NODE_ENV || (isProd ? 'production' : 'development'),
   
-  // Configuración del servidor
   port: process.env.PORT || 4000,
   host: '0.0.0.0',
   
-  // Base de datos
   mongodbUri: isProd 
     ? process.env.MONGODB_URI_PRO 
     : process.env.MONGODB_URI_DEV,
   
-  // JWT
   jwtSecret: process.env.JWT_SECRET,
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET,
   
-  // URLs
   apiUrl: isProd 
     ? process.env.API_URL_PRO 
     : process.env.API_URL_DEV,
@@ -31,12 +24,10 @@ const config = {
     ? process.env.FRONTEND_URL_PRO 
     : process.env.FRONTEND_URL_DEV,
   
-  // Uploads
   uploadPath: process.env.UPLOAD_PATH || './uploads',
-  maxFileSize: process.env.MAX_FILE_SIZE || 5242880, // 5MB por defecto
+  maxFileSize: process.env.MAX_FILE_SIZE || 5242880,
 };
 
-// Validar configuración crítica al inicio
 const validateConfig = () => {
   const required = [
     'mongodbUri',
@@ -54,10 +45,8 @@ const validateConfig = () => {
   }
 };
 
-// Validar al cargar el módulo
 validateConfig();
 
-// Log de configuración (solo en desarrollo)
 if (!isProd) {
   console.log('\n📋 Configuración cargada:');
   console.log(`   Entorno: ${isProd ? 'PRODUCCIÓN' : 'DESARROLLO'}`);

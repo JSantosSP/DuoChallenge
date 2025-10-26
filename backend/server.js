@@ -5,19 +5,11 @@ const os = require('os');
 const config = require('./src/config/index');
 const connectDB = require('./src/config/database');
 
-// Inicializar Express
 const app = express();
 const PORT = config.port;
 const HOST = config.host;
 
-// Conectar a MongoDB
 connectDB();
-
-// ========================================
-// MIDDLEWARES
-// ========================================
-
-// CORS
 app.use(cors({
   origin: config.isProd 
     ? config.frontendUrl 
@@ -25,24 +17,15 @@ app.use(cors({
   credentials: true
 }));
 
-// Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos (imágenes)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Logger mejorado
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`);
   next();
 });
 
-// ========================================
-// RUTAS
-// ========================================
-
-// Ruta de prueba
 app.get('/', (req, res) => {
   console.log('✅ GET / - Request recibido');
   res.json({ 
@@ -52,7 +35,6 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check
 app.get('/health', (req, res) => {
   console.log('✅ GET /health - Request recibido');
   res.json({ 
@@ -62,7 +44,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Importar rutas
 const authRoutes = require('./src/routes/auth.routes');
 const gameRoutes = require('./src/routes/game.routes');
 const adminRoutes = require('./src/routes/admin.routes');
@@ -73,7 +54,6 @@ const shareRoutes = require('./src/routes/share.routes');
 const categoryRoutes = require('./src/routes/category.routes');
 const categoryGetRoutes = require('./src/routes/category.get.routes');
 
-// Upload route (public para usuarios autenticados)
 const { verifyToken } = require('./src/middlewares/auth.middleware');
 const upload = require('./src/middlewares/upload.middleware');
 app.post('/api/upload', verifyToken, upload.single('image'), async (req, res) => {
@@ -87,7 +67,6 @@ app.post('/api/upload', verifyToken, upload.single('image'), async (req, res) =>
 
     const imagePath = `/uploads/${req.file.filename}`;
     
-    // Generar URL completa para el cliente
     const protocol = req.protocol;
     const host = req.get('host');
     const fullUrl = `${protocol}://${host}${imagePath}`;
@@ -107,7 +86,6 @@ app.post('/api/upload', verifyToken, upload.single('image'), async (req, res) =>
   }
 });
 
-// Usar rutas
 app.use('/auth', authRoutes);
 app.use('/api', gameRoutes);
 app.use('/api/game', gameRoutes);
@@ -119,11 +97,6 @@ app.use('/api/share', shareRoutes);
 app.use('/admin/categories', categoryRoutes);
 app.use('/api/categories', categoryGetRoutes);
 
-// ========================================
-// MANEJO DE ERRORES
-// ========================================
-
-// Ruta no encontrada
 app.use((req, res) => {
   console.log(`❌ 404 - Ruta no encontrada: ${req.method} ${req.path}`);
   res.status(404).json({
@@ -132,7 +105,6 @@ app.use((req, res) => {
   });
 });
 
-// Manejador de errores global
 app.use((error, req, res, next) => {
   console.error('❌ Error:', error);
   
@@ -142,10 +114,6 @@ app.use((error, req, res, next) => {
     ...(!config.isProd && { stack: error.stack })
   });
 });
-
-// ========================================
-// INICIAR SERVIDOR
-// ========================================
 
 const server = app.listen(PORT, HOST, () => {
   console.log('');
@@ -157,7 +125,6 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`   Local:    http://localhost:${PORT}`);
   console.log(`   Local:    http://127.0.0.1:${PORT}`);
   
-  // Mostrar todas las IPs de red
   const interfaces = os.networkInterfaces();
   Object.keys(interfaces).forEach(name => {
     interfaces[name].forEach(iface => {
@@ -203,7 +170,6 @@ const server = app.listen(PORT, HOST, () => {
   console.log('');
 });
 
-// Manejo de errores del servidor
 server.on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
     console.error(`❌ ERROR: El puerto ${PORT} ya está en uso`);
@@ -220,7 +186,6 @@ server.on('error', (error) => {
   process.exit(1);
 });
 
-// Manejo de cierre graceful
 process.on('SIGTERM', () => {
   console.log('\nSIGTERM recibido, cerrando servidor...');
   server.close(() => {

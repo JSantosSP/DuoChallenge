@@ -1,30 +1,23 @@
 const { Prize, User } = require('../models');
 const { seededRandom } = require('../utils/seed.util');
 
-/**
- * Asigna un premio aleatorio al usuario (de sus premios + sistema)
- */
 const assignPrize = async (userId, seed) => {
   try {
-    // Buscar premios disponibles del usuario y del sistema
     const availablePrizes = await Prize.find({ 
-      userId, active: true, used: false  // Premios del usuario
+      userId, active: true, used: false
     });
 
     if (availablePrizes.length === 0) {
       throw new Error('No hay premios disponibles');
     }
 
-    // Seleccionar premio basado en peso
     const selectedPrize = selectPrizeByWeight(availablePrizes, seed);
 
-    // Marcar premio como usado
     selectedPrize.used = true;
     selectedPrize.usedBy = userId;
     selectedPrize.usedAt = new Date();
     await selectedPrize.save();
 
-    // Actualizar usuario
     await User.findByIdAndUpdate(userId, {
       $push: { currentPrizeId: selectedPrize._id }
     });
@@ -37,9 +30,6 @@ const assignPrize = async (userId, seed) => {
   }
 };
 
-/**
- * Selecciona un premio basado en pesos
- */
 const selectPrizeByWeight = (prizes, seed) => {
   const totalWeight = prizes.reduce((sum, prize) => sum + prize.weight, 0);
   const random = seededRandom(seed, 0) * totalWeight;
@@ -55,9 +45,6 @@ const selectPrizeByWeight = (prizes, seed) => {
   return prizes[prizes.length - 1];
 };
 
-/**
- * Obtiene el premio actual de un usuario
- */
 const getUserPrize = async (userId) => {
   try {
     const user = await User.findById(userId).populate('currentPrizeId');
@@ -68,9 +55,6 @@ const getUserPrize = async (userId) => {
   }
 };
 
-/**
- * Reinicia premios del usuario (marca todos como no usados)
- */
 const resetUserPrizes = async (userId) => {
   try {
     await Prize.updateMany(
@@ -88,8 +72,6 @@ const resetUserPrizes = async (userId) => {
     throw error;
   }
 };
-
-
 
 module.exports = {
   assignPrize,

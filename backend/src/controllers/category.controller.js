@@ -1,6 +1,5 @@
 const { Category } = require('../models');
 
-// Obtener todas las categorías
 const getCategories = async (req, res) => {
   try {
     const categories = await Category.find().sort({ name: 1 });
@@ -10,7 +9,6 @@ const getCategories = async (req, res) => {
   }
 };
 
-// Obtener una categoría por ID
 const getCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -26,7 +24,6 @@ const getCategoryById = async (req, res) => {
   }
 };
 
-// Crear nueva categoría
 const createCategory = async (req, res) => {
   try {
     const category = new Category(req.body);
@@ -47,7 +44,6 @@ const createCategory = async (req, res) => {
   }
 };
 
-// Actualizar categoría
 const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -77,12 +73,10 @@ const updateCategory = async (req, res) => {
   }
 };
 
-// Eliminar categoría
 const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Verificar si hay plantillas asociadas
     const { LevelTemplate } = require('../models');
     const templatesCount = await LevelTemplate.countDocuments({ categoryId: id });
     

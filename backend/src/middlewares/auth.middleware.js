@@ -1,9 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 
-/**
- * Middleware para verificar JWT token
- */
 const verifyToken = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -17,7 +14,6 @@ const verifyToken = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Buscar usuario
     const user = await User.findById(decoded.userId);
     
     if (!user) {
@@ -27,7 +23,6 @@ const verifyToken = async (req, res, next) => {
       });
     }
 
-    // Agregar usuario al request
     req.user = user;
     next();
     
@@ -45,9 +40,7 @@ const verifyToken = async (req, res, next) => {
     });
   }
 };
-/**
- * Middleware para verificar rol de admin
- */
+
 const checkRole = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -68,9 +61,6 @@ const checkRole = (...roles) => {
   };
 };
 
-/**
- * Middleware opcional de verificación (no falla si no hay token)
- */
 const optionalAuth = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -83,7 +73,6 @@ const optionalAuth = async (req, res, next) => {
       }
     }
   } catch (error) {
-    // No hacer nada, continuar sin usuario
   }
   
   next();

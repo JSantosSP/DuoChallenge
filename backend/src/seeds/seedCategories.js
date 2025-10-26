@@ -60,17 +60,14 @@ async function seedCategories() {
   try {
     console.log('🌱 Iniciando seed de categorías...\n');
 
-    // Limpiar categorías existentes
     console.log('🧹 Limpiando categorías...');
     const deletedCount = await Category.deleteMany({});
     console.log(`   🗑️  ${deletedCount.deletedCount} categoría(s) eliminada(s)\n`);
 
-    // Insertar nuevas categorías
     console.log('📁 Creando categorías...');
     const result = await Category.insertMany(categories);
     console.log(`✅ ${result.length} categorías creadas\n`);
     
-    // Mostrar categorías creadas
     console.log('📋 Categorías creadas:');
     result.forEach((cat, index) => {
       console.log(`   ${index + 1}. ${cat.name}`);
@@ -89,7 +86,6 @@ async function seedCategories() {
   }
 };
 
-// Ejecutar seed
 const run = async () => {
   try {
     console.log('');
@@ -116,7 +112,6 @@ const run = async () => {
   }
 };
 
-// Ejecutar solo si se llama directamente
 if (require.main === module) {
   run();
 }

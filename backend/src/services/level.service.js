@@ -2,9 +2,6 @@ const { Level, Variable, UserData } = require('../models');
 const { hashAnswer, hashPuzzleAnswer, hashDateAnswer, generateSalt } = require('../utils/hash.util');
 const { selectRandomItems } = require('../utils/seed.util');
 
-/**
- * Genera niveles con sus niveles
- */
 const generateLevels = async (userId, gameSetId, seed, levelCount = 5) => {
   try {
     const levels = [];
@@ -14,15 +11,11 @@ const generateLevels = async (userId, gameSetId, seed, levelCount = 5) => {
       throw new Error('El usuario no tiene datos personalizados aún');
     }
 
-    // Usar selectRandomItems para garantizar que no haya repeticiones
-    // Si hay menos items que levelCount, se usarán todos los disponibles sin repetir
     const selectedUserDataItems = selectRandomItems(userDataItems, levelCount, seed);
     
-    // Si no hay suficientes items únicos, ajustar levelCount
     const actualLevelCount = Math.min(levelCount, userDataItems.length);
 
     for (let i = 0; i < actualLevelCount; i++) {
-      // Crear nivel
       const level = await createLevelFromUserData(
         selectedUserDataItems[i],
         gameSetId,
@@ -40,25 +33,18 @@ const generateLevels = async (userId, gameSetId, seed, levelCount = 5) => {
   }
 };
 
-/**
- * Crea un reto desde un UserData
- */
 const createLevelFromUserData = async (userData, gameSetId, order) => {
   try {
-    // Obtener el tipo de variable para determinar el tipo de reto
     const variable = await Variable.findOne({ _id: userData.tipoDato });
     
-    let levelType = variable.type; //'foto', 'fecha', 'lugar', 'texto'
+    let levelType = variable.type;
 
-    // Generar salt y hash de la respuesta)
     const salt = generateSalt();
     let answerHash;
     
-    // Para fechas, usar normalización específica
     if (levelType === 'fecha') {
       answerHash = hashDateAnswer(userData.valor.fecha, salt);
     } else if (levelType === 'foto') {
-      // Para puzzles, el hash representa el orden correcto [1,2,3,...]
       answerHash = hashPuzzleAnswer(userData.puzzleGrid || 3, salt);
     } else if (levelType === 'lugar') {
       answerHash = hashAnswer(userData.valor.lugar, salt);
@@ -66,7 +52,6 @@ const createLevelFromUserData = async (userData, gameSetId, order) => {
       answerHash = hashAnswer(userData.valor.texto, salt);
     }
 
-    // Crear el reto
     const level = new Level({
       tipoDato: userData.tipoDato,
       pregunta: userData.pregunta,

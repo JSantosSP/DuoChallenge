@@ -3,7 +3,6 @@ const router = express.Router();
 const shareController = require('../controllers/share.controller');
 const { verifyToken } = require('../middlewares/auth.middleware');
 
-// Todas las rutas requieren autenticación
 router.use(verifyToken);
 
 router.post('/create', shareController.createShareCode);

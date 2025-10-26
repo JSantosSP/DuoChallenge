@@ -3,9 +3,6 @@ const { generateGameSeed, seededRandom } = require('../utils/seed.util');
 const { generateLevels } = require('../services/level.service');
 const { assignPrize } = require('../services/prize.service');
 
-/**
- * Genera un nuevo set de juego completo
- */
 const generateNewGameSet = async (creatorId, playerId = null, shareId = null, shareCode = null) => {
   try {
     const seed = generateGameSeed();
@@ -44,9 +41,6 @@ const generateNewGameSet = async (creatorId, playerId = null, shareId = null, sh
   }
 };
 
-/**
- * Verifica si el set está completado y asigna premio
- */
 const checkGameSetCompletion = async (gameSetId) => {
   try {
     const gameSet = await GameSet.findById(gameSetId).populate('levels');
@@ -89,9 +83,6 @@ const checkGameSetCompletion = async (gameSetId) => {
   }
 };
 
-/**
- * Reinicia el progreso y genera nuevo set
- */
 const resetAndGenerateNewSet = async (userId) => {
   try {
     await GameSet.updateMany(
@@ -113,9 +104,6 @@ const resetAndGenerateNewSet = async (userId) => {
   }
 };
 
-/**
- * Actualizar progreso de un GameSet
- */
 const updateGameSetProgress = async (gameSetId) => {
   try {
     const gameSet = await GameSet.findById(gameSetId);

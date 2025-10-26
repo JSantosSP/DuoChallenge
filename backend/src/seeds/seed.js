@@ -28,7 +28,6 @@ const seedDatabase = async () => {
   try {
     console.log('🌱 Iniciando seed de base de datos...\n');
 
-    // Limpiar colecciones existentes
     console.log('🧹 Limpiando colecciones...');
     await User.deleteMany({});
     await Variable.deleteMany({});
@@ -41,15 +40,12 @@ const seedDatabase = async () => {
     await PrizeTemplate.deleteMany({});
     console.log('✅ Colecciones limpiadas\n');
 
-    // ========================================
-    // 1. CREAR USUARIOS
-    // ========================================
     console.log('👤 Creando usuarios...');
     
     const admin = new User({
       name: 'Administrador',
       email: 'admin@demo.com',
-      passwordHash: 'admin123', // Se hasheará automáticamente
+      passwordHash: 'admin123',
       role: 'admin'
     });
     await admin.save();
@@ -74,9 +70,6 @@ const seedDatabase = async () => {
     console.log(`   - Player: player@demo.com / player123`);
     console.log(`   - Player: player2@demo.com / player123\n`);
 
-    // ========================================
-    // 2. CREAR VARIABLES
-    // ========================================
     console.log('📝 Creando variables...');
     
     const variables = [
@@ -101,10 +94,6 @@ const seedDatabase = async () => {
     await Variable.insertMany(variables);
     console.log(`✅ ${variables.length} variables creadas\n`);
     
-
-    // ========================================
-    // 4. CREAR PREMIOS
-    // ========================================
     console.log('🏆 Creando premios...');
     
     const prizes = [
@@ -185,12 +174,8 @@ const seedDatabase = async () => {
 
     await seedCategories();
 
-    // ========================================
-    // 5. CREAR USERDATA DE PRUEBA
-    // ========================================
     console.log('📊 Creando UserData de prueba...');
     
-    // Obtener IDs necesarios
     const fechaVar = await Variable.findOne({ type: 'fecha' });
     const textoVar = await Variable.findOne({ type: 'texto' });
     const fotoVar = await Variable.findOne({ type: 'foto' });
@@ -256,9 +241,6 @@ const seedDatabase = async () => {
     await UserData.insertMany(userDataItems);
     console.log(`✅ ${userDataItems.length} UserData creados para player@demo.com\n`);
 
-    // ========================================
-    // RESUMEN FINAL
-    // ========================================
     console.log('============================================');
     console.log('✨ Seed completado exitosamente');
     console.log('============================================');
@@ -279,7 +261,6 @@ const seedDatabase = async () => {
   }
 };
 
-// Ejecutar seed
 const run = async () => {
   try {
     await connectDB();
@@ -293,7 +274,6 @@ const run = async () => {
   }
 };
 
-// Ejecutar solo si se llama directamente
 if (require.main === module) {
   run();
 }

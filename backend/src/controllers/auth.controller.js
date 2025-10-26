@@ -1,14 +1,10 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 
-/**
- * Registrar nuevo usuario
- */
 const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // Validar datos
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -16,7 +12,6 @@ const register = async (req, res) => {
       });
     }
 
-    // Verificar si el usuario ya existe
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -25,17 +20,15 @@ const register = async (req, res) => {
       });
     }
 
-    // Crear usuario
     const user = new User({
       name,
       email,
-      passwordHash: password, // Se hasheará automáticamente en el pre-save
+      passwordHash: password,
       role: role || 'player'
     });
 
     await user.save();
 
-    // Generar token
     const token = generateToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
 
@@ -59,14 +52,10 @@ const register = async (req, res) => {
   }
 };
 
-/**
- * Login de usuario
- */
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validar datos
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -74,7 +63,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Buscar usuario
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({
@@ -83,7 +71,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Verificar contraseña
     const isValidPassword = await user.comparePassword(password);
     if (!isValidPassword) {
       return res.status(401).json({
@@ -92,7 +79,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Generar tokens
     const token = generateToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
 
@@ -116,9 +102,6 @@ const login = async (req, res) => {
   }
 };
 
-/**
- * Refrescar token
- */
 const refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
@@ -159,9 +142,6 @@ const refreshToken = async (req, res) => {
   }
 };
 
-/**
- * Obtener perfil del usuario actual
- */
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
@@ -182,7 +162,6 @@ const getProfile = async (req, res) => {
   }
 };
 
-// Helpers
 const generateToken = (userId) => {
   return jwt.sign(
     { userId },

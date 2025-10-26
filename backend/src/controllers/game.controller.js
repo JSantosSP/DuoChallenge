@@ -3,9 +3,6 @@ const { generateNewGameSet, checkGameSetCompletion, resetAndGenerateNewSet } = r
 const { getUserPrize } = require('../services/prize.service');
 const { verifyAnswer, verifyDateAnswer, verifyPuzzleAnswer } = require('../utils/hash.util');
 
-/**
- * Generar nuevo set de juego
- */
 const generateGame = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -30,9 +27,6 @@ const generateGame = async (req, res) => {
   }
 };
 
-/**
- * Obtener niveles de un GameSet específico
- */
 const getLevels = async (req, res) => {
   try {
     const { gameSetId } = req.params;
@@ -77,9 +71,6 @@ const getLevels = async (req, res) => {
   }
 };
 
-/**
- * Obtener un reto específico
- */
 const getLevel = async (req, res) => {
   try {
     const { LevelId } = req.params;
@@ -95,7 +86,6 @@ const getLevel = async (req, res) => {
       });
     }
 
-    // No enviar salt ni answerHash al cliente
     const levelData = level.toObject();
     delete levelData.salt;
     delete levelData.answerHash;
@@ -114,9 +104,6 @@ const getLevel = async (req, res) => {
   }
 };
 
-/**
- * Verificar respuesta de un nivel
- */
 const verifyLevel = async (req, res) => {
   try {
     const { levelId } = req.params;
@@ -248,9 +235,6 @@ const verifyLevel = async (req, res) => {
   }
 };
 
-/**
- * Obtener premio actual del usuario o de un GameSet específico
- */
 const getPrize = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -258,7 +242,6 @@ const getPrize = async (req, res) => {
 
     let prize;
 
-    // Si se proporciona gameSetId, obtener el premio de ese juego específico
     if (gameSetId) {
       const gameSet = await GameSet.findOne({
         _id: gameSetId,
@@ -281,7 +264,6 @@ const getPrize = async (req, res) => {
 
       prize = gameSet.prizeId;
     } else {
-      // Si no hay gameSetId, obtener el premio actual del usuario (último completado)
       prize = await getUserPrize(userId);
     }
 
@@ -306,9 +288,6 @@ const getPrize = async (req, res) => {
   }
 };
 
-/**
- * Reiniciar juego y generar nuevo set
- */
 const resetGame = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -331,9 +310,6 @@ const resetGame = async (req, res) => {
   }
 };
 
-/**
- * Obtener progreso de un GameSet específico
- */
 const getProgress = async (req, res) => {
   try {
     const { gameSetId } = req.params;
@@ -374,9 +350,6 @@ const getProgress = async (req, res) => {
   }
 };
 
-/**
- * Obtener historial de juegos del usuario
- */
 const getHistory = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -411,9 +384,6 @@ const getHistory = async (req, res) => {
   }
 };
 
-/**
- * Obtener estadísticas del usuario
- */
 const getStats = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -444,7 +414,6 @@ const getStats = async (req, res) => {
       ]
     });
 
-    // Contar premios ganados
     const prizesWon = await GameSet.countDocuments({ 
       userId, 
       status: 'completed', 
@@ -478,9 +447,6 @@ const getStats = async (req, res) => {
   }
 };
 
-/**
- * Obtener todos los juegos activos
- */
 const getActiveGames = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -493,7 +459,6 @@ const getActiveGames = async (req, res) => {
       .populate('shareId', 'code')
       .sort({ createdAt: -1 });
 
-    // Agregar shareCode a cada juego si tiene shareId
     const gamesWithShareCode = activeGames.map(game => {
       const gameObj = game.toObject();
       if (gameObj.shareId && gameObj.shareId.code) {

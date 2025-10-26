@@ -45,7 +45,6 @@ const prizeSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Índice para búsquedas rápidas
 prizeSchema.index({ userId: 1, active: 1 });
 
 module.exports = mongoose.model('Prize', prizeSchema);

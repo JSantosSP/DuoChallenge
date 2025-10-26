@@ -3,7 +3,6 @@ const router = express.Router();
 const userDataController = require('../controllers/userdata.controller');
 const { verifyToken } = require('../middlewares/auth.middleware');
 
-// Todas las rutas requieren autenticación
 router.use(verifyToken);
 
 router.get('/types', userDataController.getAvailableTypes);

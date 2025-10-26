@@ -31,16 +31,13 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save para sincronizar roles
 userSchema.pre('save', async function(next) {
   if (!this.isModified('passwordHash') && !this.isNew) return next();
   
-  // Sincronizar role con roles array
   if (!this.roles || this.roles.length === 0) {
     this.roles = [this.role];
   }
   
-  // Hash password si es nuevo o modificado
   if (this.isModified('passwordHash')) {
     const salt = await bcrypt.genSalt(10);
     this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
@@ -59,7 +56,6 @@ userSchema.methods.toJSON = function() {
   return user;
 };
 
-// NUEVO: Método para verificar si tiene un rol
 userSchema.methods.hasRole = function(role) {
   return this.roles.includes(role);
 };

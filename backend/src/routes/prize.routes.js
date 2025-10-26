@@ -3,7 +3,6 @@ const router = express.Router();
 const prizeController = require('../controllers/prize.controller');
 const { verifyToken } = require('../middlewares/auth.middleware');
 
-// Todas las rutas requieren autenticación
 router.use(verifyToken);
 
 router.get('/', prizeController.getUserPrizes);

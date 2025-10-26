@@ -28,7 +28,6 @@ const prizeTemplateSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Índice para búsquedas rápidas
 prizeTemplateSchema.index({ userId: 1, active: 1 });
 prizeTemplateSchema.index({ isDefault: 1, active: 1 });
 

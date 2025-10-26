@@ -7,9 +7,6 @@ const {
 } = require('../models');
 const { resetAndGenerateNewSet } = require('../services/gameset.service');
 
-
-// ========== VARIABLES ==========
-
 const getVariables = async (req, res) => {
   try {
     const variables = await Variable.find().sort({ key: 1 });
@@ -61,8 +58,6 @@ const deleteVariable = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// ========== PREMIOS TEMPLATE ==========
 
 const getPrizes = async (req, res) => {
   try {
@@ -117,9 +112,6 @@ const deletePrize = async (req, res) => {
   }
 };
 
-
-// ========== USUARIOS ==========
-
 const getUsers = async (req, res) => {
   try {
     const users = await User.find()
@@ -164,8 +156,6 @@ const resetUserProgress = async (req, res) => {
   }
 };
 
-// ========== UPLOAD ==========
-
 const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
@@ -177,7 +167,6 @@ const uploadImage = async (req, res) => {
 
     const imagePath = `/uploads/${req.file.filename}`;
     
-    // Generar URL completa para el cliente
     const protocol = req.protocol;
     const host = req.get('host');
     const fullUrl = `${protocol}://${host}${imagePath}`;
@@ -196,8 +185,6 @@ const uploadImage = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// ========== ESTADÍSTICAS ==========
 
 const getStats = async (req, res) => {
   try {
@@ -257,8 +244,6 @@ const getUserDataById = async (req, res) => {
   }
 };
 
-// ========== DATOS DE USUARIOS (READ-ONLY) ==========
-
 const getAllUserData = async (req, res) => {
   try {
     const { UserData } = require('../models');
@@ -271,7 +256,7 @@ const getAllUserData = async (req, res) => {
     const userData = await UserData.find(filter)
       .populate('userId', 'name email')
       .sort({ createdAt: -1 })
-      .limit(1000); // Limitar para no sobrecargar
+      .limit(1000);
     
     res.json({
       success: true,
@@ -305,30 +290,21 @@ const toggleUserDataActive = async (req, res) => {
   }
 };
 
-// ========== NIVELES GENERADOS (READ-ONLY) ==========
-
-
 module.exports = {
-  // Variables
   getVariables,
   createVariable,
   updateVariable,
   deleteVariable,
-  // Prizes
   getPrizes,
   createPrize,
   updatePrize,
   deletePrize,
-  // Users
   getUsers,
   getUserById,
   resetUserProgress,
   getUserDataById,
-  // Upload
   uploadImage,
-  // Stats
   getStats,
-  // UserData (Read-only)
   getAllUserData,
   toggleUserDataActive,
 };

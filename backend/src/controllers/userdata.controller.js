@@ -1,6 +1,5 @@
 const { UserData, Variable } = require('../models');
 
-// Obtener todos los datos del usuario
 const getUserData = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -22,13 +21,11 @@ const getUserData = async (req, res) => {
   }
 };
 
-// Crear nuevo dato
 const createUserData = async (req, res) => {
   try {
     const userId = req.user._id;
     const { tipoDato, valor, pregunta, pistas, categorias, imagePath, difficulty } = req.body;
 
-    // Validar que el tipoDato existe en Variables
     const variable = await Variable.findOne({ _id: tipoDato, active: true });
     if (!variable) {
       return res.status(400).json({
@@ -37,9 +34,7 @@ const createUserData = async (req, res) => {
       });
     }
 
-    // Validar tipo de dato vs valor
     if (variable.type === 'date') {
-      // Validar formato fecha
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(valor)) {
         return res.status(400).json({
@@ -76,7 +71,6 @@ const createUserData = async (req, res) => {
   }
 };
 
-// Actualizar dato
 const updateUserData = async (req, res) => {
   try {
     const { id } = req.params;
@@ -92,7 +86,6 @@ const updateUserData = async (req, res) => {
       });
     }
 
-    // Actualizar campos
     Object.keys(updates).forEach(key => {
       if (updates[key] !== undefined) {
         userDataItem[key] = updates[key];
@@ -116,7 +109,6 @@ const updateUserData = async (req, res) => {
   }
 };
 
-// Eliminar dato (soft delete)
 const deleteUserData = async (req, res) => {
   try {
     const { id } = req.params;
@@ -148,7 +140,6 @@ const deleteUserData = async (req, res) => {
   }
 };
 
-// Obtener tipos de datos disponibles
 const getAvailableTypes = async (req, res) => {
   try {
     const variables = await Variable.find({ active: true })
