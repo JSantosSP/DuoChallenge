@@ -1,0 +1,50 @@
+{
+  "cli": {
+    "version": ">= 3.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_PRO": "true",
+        "EXPO_PUBLIC_API_URL_PRO": "https://duochallenge.onrender.com",
+        "EXPO_PUBLIC_APP_NAME": "DuoChallenge",
+        "EXPO_PUBLIC_APP_VERSION": "1.0.0"
+      },
+      "android": {
+        "buildType": "apk",
+        "credentialsSource": "remote"
+      }
+    },
+    "preview": {
+      "env": {
+        "EXPO_PUBLIC_PRO": "false",
+        "EXPO_PUBLIC_API_URL_DEV": "http://192.168.0.33:4000",
+        "EXPO_PUBLIC_APP_NAME": "DuoChallenge",
+        "EXPO_PUBLIC_APP_VERSION": "1.0.0"
+      },
+      "android": {
+        "buildType": "apk",
+        "credentialsSource": "remote"
+      }
+    },
+    "development": {
+      "env": {
+        "EXPO_PUBLIC_PRO": "false",
+        "EXPO_PUBLIC_API_URL_DEV": "http://192.168.0.33:4000",
+        "EXPO_PUBLIC_APP_NAME": "DuoChallenge",
+        "EXPO_PUBLIC_APP_VERSION": "1.0.0"
+      },
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "credentialsSource": "remote"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
+

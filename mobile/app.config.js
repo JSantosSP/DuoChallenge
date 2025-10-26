@@ -48,7 +48,7 @@ module.exports = {
       EXPO_PUBLIC_APP_VERSION: process.env.EXPO_PUBLIC_APP_VERSION || '1.0.0',
       
       eas: {
-        projectId: 'tu-project-id',
+        projectId: 'eb805f0d-a2dc-4ee3-ac14-61e18a669650',
       },
     },
     
