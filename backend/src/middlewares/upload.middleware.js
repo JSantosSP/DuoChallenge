@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Middleware de Subida de Archivos
+ * @description Configura multer para gestionar la subida de imágenes
+ */
+
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -7,6 +12,12 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+/**
+ * @const storage
+ * @description Configuración de almacenamiento en disco para multer
+ * - Destino: carpeta especificada en UPLOAD_DIR o './uploads'
+ * - Nombre de archivo: {fieldname}-{timestamp}-{random}.{ext}
+ */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -18,6 +29,14 @@ const storage = multer.diskStorage({
   }
 });
 
+/**
+ * @function fileFilter
+ * @description Filtro que valida que solo se suban imágenes
+ * @param {Object} req - Request HTTP
+ * @param {Object} file - Archivo subido
+ * @param {Function} cb - Callback de multer
+ * @returns {void} Llama a cb con true si es válido, o error si no
+ */
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif|webp/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -30,6 +49,13 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+/**
+ * @const upload
+ * @description Instancia de multer configurada con:
+ * - Storage: almacenamiento en disco
+ * - Limits: tamaño máximo 5MB
+ * - FileFilter: solo imágenes
+ */
 const upload = multer({
   storage: storage,
   limits: {

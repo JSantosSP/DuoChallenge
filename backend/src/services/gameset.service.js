@@ -1,8 +1,24 @@
+/**
+ * @fileoverview Servicio de GameSet
+ * @description Gestiona la lógica de negocio para sets de juego: generación, completitud y reinicio
+ */
+
 const { GameSet, User, Challenge, Level } = require('../models');
 const { generateGameSeed, seededRandom } = require('../utils/seed.util');
 const { generateLevels } = require('../services/level.service');
 const { assignPrize } = require('../services/prize.service');
 
+/**
+ * @function generateNewGameSet
+ * @async
+ * @description Genera un nuevo set de juego con niveles aleatorios basados en una semilla
+ * @param {string} creatorId - ID del usuario creador de los datos
+ * @param {string} playerId - ID del usuario que jugará (puede ser el mismo que creatorId)
+ * @param {string|null} shareId - ID del GameShare si proviene de código compartido
+ * @param {string|null} shareCode - Código compartido usado
+ * @returns {Promise<GameSet>} Set de juego generado con niveles
+ * @throws {Error} Si no se puede generar el set
+ */
 const generateNewGameSet = async (creatorId, playerId = null, shareId = null, shareCode = null) => {
   try {
     const seed = generateGameSeed();
@@ -41,6 +57,14 @@ const generateNewGameSet = async (creatorId, playerId = null, shareId = null, sh
   }
 };
 
+/**
+ * @function checkGameSetCompletion
+ * @async
+ * @description Verifica si un set de juego está completado y asigna premio si es necesario
+ * @param {string} gameSetId - ID del set de juego
+ * @returns {Promise<{completed: boolean, prize?: Object, message?: string}>} Estado de completitud
+ * @throws {Error} Si no se puede verificar el set
+ */
 const checkGameSetCompletion = async (gameSetId) => {
   try {
     const gameSet = await GameSet.findById(gameSetId).populate('levels');
@@ -83,6 +107,14 @@ const checkGameSetCompletion = async (gameSetId) => {
   }
 };
 
+/**
+ * @function resetAndGenerateNewSet
+ * @async
+ * @description Abandona todos los sets activos del usuario y genera uno nuevo
+ * @param {string} userId - ID del usuario
+ * @returns {Promise<{success: boolean, gameSet: GameSet, message: string}>} Nuevo set generado
+ * @throws {Error} Si no se puede reiniciar
+ */
 const resetAndGenerateNewSet = async (userId) => {
   try {
     await GameSet.updateMany(
@@ -104,6 +136,14 @@ const resetAndGenerateNewSet = async (userId) => {
   }
 };
 
+/**
+ * @function updateGameSetProgress
+ * @async
+ * @description Actualiza el porcentaje de progreso de un set de juego
+ * @param {string} gameSetId - ID del set de juego
+ * @returns {Promise<GameSet|null>} Set actualizado o null si no existe
+ * @throws {Error} Si no se puede actualizar
+ */
 const updateGameSetProgress = async (gameSetId) => {
   try {
     const gameSet = await GameSet.findById(gameSetId);

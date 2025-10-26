@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Punto de entrada centralizado para todos los modelos
+ * @description Exporta todos los modelos de Mongoose para facilitar su importación
+ */
+
 module.exports = {
   User: require('./User.model'),
   PrizeTemplate: require('./PrizeTemplate.model'),

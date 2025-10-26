@@ -1,6 +1,17 @@
+/**
+ * @fileoverview Controlador de Plantillas de Premio
+ * @description Gestiona plantillas predefinidas de premios
+ */
+
 const { PrizeTemplate } = require('../models');
 
-// Obtener todas las plantillas de premio
+/**
+ * @function getPrizeTemplates
+ * @async
+ * @description Obtiene todas las plantillas de premio disponibles
+ * @returns {Object} 200 - Lista de plantillas
+ * @returns {Object} 500 - Error del servidor
+ */
 const getPrizeTemplates = async (req, res) => {
   try {
       const templates = await PrizeTemplate.find()
@@ -12,7 +23,15 @@ const getPrizeTemplates = async (req, res) => {
   }
 };
 
-// Obtener una plantilla de premio por ID
+/**
+ * @function getPrizeTemplateById
+ * @async
+ * @description Obtiene una plantilla específica por ID
+ * @param {string} req.params.id - ID de la plantilla
+ * @returns {Object} 200 - Plantilla encontrada
+ * @returns {Object} 404 - Plantilla no encontrada
+ * @returns {Object} 500 - Error del servidor
+ */
 const getPrizeTemplateById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -28,7 +47,14 @@ const getPrizeTemplateById = async (req, res) => {
   }
 };
 
-// Crear nueva plantilla de premio
+/**
+ * @function createPrizeTemplate
+ * @async
+ * @description Crea una nueva plantilla de premio
+ * @param {Object} req.body - Datos de la plantilla
+ * @returns {Object} 201 - Plantilla creada
+ * @returns {Object} 500 - Error del servidor
+ */
 const createPrizeTemplate = async (req, res) => {
   try {
     const template = new PrizeTemplate(req.body);
@@ -44,7 +70,16 @@ const createPrizeTemplate = async (req, res) => {
   }
 };
 
-// Actualizar plantilla de premio
+/**
+ * @function updatePrizeTemplate
+ * @async
+ * @description Actualiza una plantilla existente
+ * @param {string} req.params.id - ID de la plantilla
+ * @param {Object} req.body - Datos a actualizar
+ * @returns {Object} 200 - Plantilla actualizada
+ * @returns {Object} 404 - Plantilla no encontrada
+ * @returns {Object} 500 - Error del servidor
+ */
 const updatePrizeTemplate = async (req, res) => {
   try {
     const { id } = req.params;    
@@ -69,7 +104,15 @@ const updatePrizeTemplate = async (req, res) => {
   }
 };
 
-// Eliminar plantilla de premio
+/**
+ * @function deletePrizeTemplate
+ * @async
+ * @description Elimina una plantilla de premio
+ * @param {string} req.params.id - ID de la plantilla
+ * @returns {Object} 200 - Plantilla eliminada
+ * @returns {Object} 404 - Plantilla no encontrada
+ * @returns {Object} 500 - Error del servidor
+ */
 const deletePrizeTemplate = async (req, res) => {
   try {
     const { id } = req.params;

@@ -1,6 +1,16 @@
+/**
+ * @fileoverview Controlador de Compartir
+ * @description Gestiona la creación y uso de códigos para compartir juegos entre usuarios
+ */
+
 const { GameShare, User, UserData } = require('../models');
 const { generateNewGameSet } = require('../services/gameset.service');
 
+/**
+ * @function generateShareCode
+ * @description Genera un código único de 6 caracteres alfanuméricos
+ * @returns {string} Código generado
+ */
 const generateShareCode = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code = '';
@@ -10,6 +20,15 @@ const generateShareCode = () => {
   return code;
 };
 
+/**
+ * @function createShareCode
+ * @async
+ * @description Crea un nuevo código para compartir los datos personalizados del usuario
+ * @param {Object} req.user - Usuario autenticado (creador del código)
+ * @returns {Object} 201 - Código creado
+ * @returns {Object} 400 - Usuario sin datos personalizados
+ * @returns {Object} 500 - Error del servidor
+ */
 const createShareCode = async (req, res) => {
   try {
     const creatorId = req.user._id;
@@ -57,6 +76,14 @@ const createShareCode = async (req, res) => {
   }
 };
 
+/**
+ * @function getUserShareCodes
+ * @async
+ * @description Obtiene todos los códigos creados por el usuario
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Lista de códigos compartidos
+ * @returns {Object} 500 - Error del servidor
+ */
 const getUserShareCodes = async (req, res) => {
   try {
     const creatorId = req.user._id;
@@ -79,6 +106,14 @@ const getUserShareCodes = async (req, res) => {
   }
 };
 
+/**
+ * @function getUserUsedShareCodes
+ * @async
+ * @description Obtiene los códigos que el usuario ha utilizado
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Lista de códigos usados
+ * @returns {Object} 500 - Error del servidor
+ */
 const getUserUsedShareCodes = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -102,6 +137,16 @@ const getUserUsedShareCodes = async (req, res) => {
   }
 };
 
+/**
+ * @function verifyShareCode
+ * @async
+ * @description Verifica si un código compartido es válido
+ * @param {string} req.params.code - Código a verificar
+ * @returns {Object} 200 - Código válido con información del creador
+ * @returns {Object} 400 - Código expirado o alcanzó límite de usos
+ * @returns {Object} 404 - Código no válido
+ * @returns {Object} 500 - Error del servidor
+ */
 const verifyShareCode = async (req, res) => {
   try {
     const { code } = req.params;
@@ -147,6 +192,18 @@ const verifyShareCode = async (req, res) => {
   }
 };
 
+/**
+ * @function joinGame
+ * @async
+ * @description Permite a un usuario unirse a un juego usando un código compartido
+ * @param {Object} req.user - Usuario autenticado (jugador)
+ * @param {Object} req.body - Datos de unión
+ * @param {string} req.body.code - Código compartido
+ * @returns {Object} 200 - Nuevo set de juego generado
+ * @returns {Object} 400 - No puede usar su propio código
+ * @returns {Object} 404 - Código no válido
+ * @returns {Object} 500 - Error del servidor
+ */
 const joinGame = async (req, res) => {
   try {
     const playerId = req.user._id;
@@ -206,6 +263,14 @@ const joinGame = async (req, res) => {
   }
 };
 
+/**
+ * @function getGameInstances
+ * @async
+ * @description Obtiene las instancias de juegos compartidos del usuario
+ * @param {Object} req.user - Usuario autenticado
+ * @returns {Object} 200 - Lista de sets de juego compartidos
+ * @returns {Object} 500 - Error del servidor
+ */
 const getGameInstances = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -233,6 +298,16 @@ const getGameInstances = async (req, res) => {
   }
 };
 
+/**
+ * @function deactivateShareCode
+ * @async
+ * @description Desactiva un código compartido
+ * @param {string} req.params.id - ID del código
+ * @param {Object} req.user - Usuario autenticado (debe ser el creador)
+ * @returns {Object} 200 - Código desactivado
+ * @returns {Object} 404 - Código no encontrado
+ * @returns {Object} 500 - Error del servidor
+ */
 const deactivateShareCode = async (req, res) => {
   try {
     const { id } = req.params;
