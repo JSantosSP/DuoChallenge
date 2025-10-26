@@ -18,7 +18,7 @@ import LoadingOverlay from '../components/LoadingOverlay';
 import colors from '../utils/colors';
 
 const MyPrizesScreen = ({ navigation, route }) => {
-  const { userPrizes, loading, refetch, deletePrize } = usePrize();
+  const { userPrizes, loading, refetch, deletePrize, reactivatePrize, reactivateAllPrizes } = usePrize();
   const [refreshing, setRefreshing] = useState(false);
 
   // Refresh data when screen becomes visible
@@ -60,6 +60,55 @@ const MyPrizesScreen = ({ navigation, route }) => {
     }
   };
 
+  const handleReactivatePrize = async (prizeId) => {
+    Alert.alert(
+      'Reiniciar Premio',
+      '¿Seguro que deseas reiniciar este premio? Volverá a estar disponible para ser canjeado.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Sí, reiniciar',
+          onPress: async () => {
+            const result = await reactivatePrize(prizeId);
+            if (result.success) {
+              Alert.alert('✅ Éxito', 'Premio reiniciado correctamente');
+              await refetch();
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleReactivateAllPrizes = async () => {
+    const usedPrizes = userPrizes.filter(p => p.used);
+    if (usedPrizes.length === 0) {
+      Alert.alert('Info', 'No tienes premios canjeados para reiniciar');
+      return;
+    }
+
+    Alert.alert(
+      'Reiniciar Todos los Premios',
+      `Esta acción reiniciará todos los ${usedPrizes.length} premios canjeados. ¿Deseas continuar?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Reiniciar Todos',
+          onPress: async () => {
+            const result = await reactivateAllPrizes();
+            if (result.success) {
+              Alert.alert(
+                '✅ Éxito', 
+                `Se han reiniciado ${result.count} premio(s) correctamente`
+              );
+              await refetch();
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const getWeightColor = (weight) => {
     if (weight <= 3) return '#4CAF50'; // Verde
     if (weight <= 6) return colors.status.warning; // Naranja
@@ -67,42 +116,61 @@ const MyPrizesScreen = ({ navigation, route }) => {
   };
 
   const renderPrizeCard = (prize) => (
-    <TouchableOpacity
-      key={prize._id}
-      style={styles.prizeCard}
-      onPress={() => navigation.navigate('EditPrize', { prize })}
-    >
-      {prize.imagePath && (
-        <Image
-          source={{ uri: getImageUrl(prize.imagePath) }}
-          style={styles.prizeImage}
-        />
-      )}
-      <View style={styles.prizeInfo}>
-        <View style={styles.prizeHeader}>
-          <Text style={styles.prizeTitle}>{prize.title}</Text>
-        </View>
-        <Text style={styles.prizeDescription} numberOfLines={2}>
-          {prize.description}
-        </Text>
-        <View style={styles.prizeMeta}>
-          <View style={[styles.weightBadge, { backgroundColor: getWeightColor(prize.weight) }]}>
-            <Text style={styles.weightText}>Peso: {prize.weight}</Text>
-          </View>
-          {prize.used && (
-            <View style={styles.usedBadge}>
-              <Text style={styles.usedText}>Usado</Text>
-            </View>
-          )}
-        </View>
-      </View>
+    <View key={prize._id} style={styles.prizeCard}>
       <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => handleDelete(prize)}
+        style={styles.prizeCardContent}
+        onPress={() => navigation.navigate('EditPrize', { prize })}
       >
-        <Text style={styles.deleteButtonText}>🗑️</Text>
+        {prize.imagePath && (
+          <Image
+            source={{ uri: getImageUrl(prize.imagePath) }}
+            style={styles.prizeImage}
+          />
+        )}
+        <View style={styles.prizeInfo}>
+          <View style={styles.prizeHeader}>
+            <Text style={styles.prizeTitle}>{prize.title}</Text>
+          </View>
+          <Text style={styles.prizeDescription} numberOfLines={2}>
+            {prize.description}
+          </Text>
+          <View style={styles.prizeMeta}>
+            <View style={[styles.weightBadge, { backgroundColor: getWeightColor(prize.weight) }]}>
+              <Text style={styles.weightText}>Peso: {prize.weight}</Text>
+            </View>
+            {prize.used && (
+              <View style={styles.usedBadge}>
+                <Text style={styles.usedText}>✓ Canjeado</Text>
+              </View>
+            )}
+          </View>
+        </View>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            handleDelete(prize);
+          }}
+        >
+          <Text style={styles.deleteButtonText}>🗑️</Text>
+        </TouchableOpacity>
       </TouchableOpacity>
-    </TouchableOpacity>
+      
+      {/* Botón de reinicio solo para premios canjeados */}
+      {prize.used && (
+        <TouchableOpacity
+          style={styles.reactivateButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            handleReactivatePrize(prize._id);
+          }}
+        >
+          <Text style={styles.reactivateButtonText}>
+            🔄 Reiniciar Premio
+          </Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 
   if (loading && !refreshing) {
@@ -127,18 +195,40 @@ const MyPrizesScreen = ({ navigation, route }) => {
           </Text>
         </View>
 
-        {/* Filter Buttons */}
-        <View style={styles.filterContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity
-              style={[styles.filterButton, styles.filterActive]}
-            >
-              <Text style={[styles.filterText, styles.filterTextActive]}>
-                Todos
+        {/* Stats Card */}
+        {allPrizes.length > 0 && (
+          <View style={styles.statsCard}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{allPrizes.length}</Text>
+              <Text style={styles.statLabel}>Total</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                {allPrizes.filter(p => p.used).length}
               </Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
+              <Text style={styles.statLabel}>Canjeados</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                {allPrizes.filter(p => !p.used).length}
+              </Text>
+              <Text style={styles.statLabel}>Disponibles</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Reactivate All Button */}
+        {allPrizes.filter(p => p.used).length > 0 && (
+          <View style={styles.actionSection}>
+            <AppButton
+              title="🧹 Reiniciar Todos los Premios Canjeados"
+              onPress={handleReactivateAllPrizes}
+              variant="outline"
+            />
+          </View>
+        )}
 
         {/* Prizes List */}
         <View style={styles.section}>
@@ -192,37 +282,49 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666666',
   },
-  filterContainer: {
-    paddingHorizontal: 24,
-    marginBottom: 16,
-  },
-  filterButton: {
+  statsCard: {
+    flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 24,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  filterActive: {
-    backgroundColor: colors.forest.medium,
-    borderColor: colors.forest.medium,
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
   },
-  filterText: {
-    fontSize: 14,
+  statValue: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: colors.forest.medium,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
     color: '#666666',
-    fontWeight: '500',
+    textAlign: 'center',
   },
-  filterTextActive: {
-    color: '#FFFFFF',
+  statDivider: {
+    width: 1,
+    backgroundColor: '#E0E0E0',
+    marginHorizontal: 8,
+  },
+  actionSection: {
+    paddingHorizontal: 24,
+    paddingTop: 0,
+    paddingBottom: 16,
   },
   section: {
     padding: 24,
     paddingTop: 0,
   },
   prizeCard: {
-    flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
@@ -232,6 +334,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  prizeCardContent: {
+    flexDirection: 'row',
   },
   prizeImage: {
     width: 60,
@@ -302,6 +407,21 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     fontSize: 20,
+  },
+  reactivateButton: {
+    marginTop: 12,
+    backgroundColor: colors.forest.light,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.forest.medium,
+  },
+  reactivateButtonText: {
+    color: colors.forest.medium,
+    fontSize: 14,
+    fontWeight: '600',
   },
   emptyState: {
     alignItems: 'center',

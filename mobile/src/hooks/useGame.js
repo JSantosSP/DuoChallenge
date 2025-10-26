@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigation } from '@react-navigation/native';
 import { apiService } from '../api/api';
 import { Alert } from 'react-native';
 
@@ -7,8 +8,9 @@ import { Alert } from 'react-native';
  * Hook principal para gestionar juegos (GameSets)
  * Actualizado para soportar múltiples juegos activos
  */
-export const useGame = (gameSetId = null) => {
+export const useGame = (gameSetId = null, shareCode = null) => {
   const queryClient = useQueryClient();
+  const navigation = useNavigation();
 
   // Obtener niveles de un GameSet específico
   const {
@@ -99,7 +101,12 @@ export const useGame = (gameSetId = null) => {
           Alert.alert(
             '🎉 ¡Felicidades!',
             '¡Has completado todos los niveles! Tienes un premio esperándote',
-            [{ text: 'Ver Premio', onPress: () => {} }]
+            [{ 
+              text: 'Ver Premio', 
+              onPress: () => {
+                  navigation.navigate('WonPrizes');
+              }
+            }]
           );
         } else if (data.data.levelCompleted) {
           Alert.alert(
@@ -118,7 +125,7 @@ export const useGame = (gameSetId = null) => {
   const { data: prize, refetch: refetchPrize } = useQuery({
     queryKey: ['prize', gameSetId],
     queryFn: async () => {
-      const response = await apiService.getPrize();
+      const response = await apiService.getPrize(gameSetId);
       return response.data.data.prize;
     },
     enabled: false,

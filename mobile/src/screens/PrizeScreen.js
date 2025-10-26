@@ -7,6 +7,7 @@ import {
   Image,
   Animated,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGame } from '../hooks/useGame';
@@ -17,13 +18,33 @@ import LoadingOverlay from '../components/LoadingOverlay';
 
 const PrizeScreen = ({ route, navigation }) => {
   const { gameSetId, shareCode } = route.params || {};
-  const { prize, getPrize, restartGame } = useGame();
+  const { prize, getPrize, restartGame } = useGame(gameSetId, shareCode);
   const fadeAnim = new Animated.Value(0);
   const scaleAnim = new Animated.Value(0.8);
 
+  // Debug logs
   useEffect(() => {
+    console.log('PrizeScreen - Received params:', { gameSetId, shareCode });
+  }, [gameSetId, shareCode]);
+
+  useEffect(() => {
+    console.log('PrizeScreen - Fetching prize for gameSetId:', gameSetId);
     getPrize();
-  }, []);
+  }, [gameSetId]);
+
+  // Configurar botón back personalizado para navegar a WonPrizes
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('WonPrizes')}
+          style={{ marginLeft: 16, padding: 8 }}
+        >
+          <Text style={{ fontSize: 34, color: colors.neutral.textLight }}>‹</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   useEffect(() => {
     if (prize) {
@@ -117,11 +138,11 @@ const PrizeScreen = ({ route, navigation }) => {
 
           {/* Actions */}
           <View style={styles.actionsContainer}>
-            <AppButton
+            {shareCode && <AppButton
               title="Iniciar Nuevo Juego"
               onPress={handleNewGame}
               icon="🎮"
-            />
+            />}
             
             <AppButton
               title="Volver al Inicio"

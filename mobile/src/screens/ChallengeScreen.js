@@ -119,7 +119,7 @@ const ChallengeScreen = ({ route, navigation }) => {
         {
           onSuccess: (data) => {
             if (data.data.correct) {
-              navigation.pop(2);  // Volver a la pantalla detalles del juego
+              navigation.goBack();
             } else {
               // Verificar si se agotaron los intentos
               const hasNoAttemptsLeft = data.data.attemptsLeft === 0 || 

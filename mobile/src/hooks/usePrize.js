@@ -143,6 +143,41 @@ export const usePrize = () => {
     }
   };
 
+  // Reactivar un premio individual (solo creador)
+  const reactivatePrize = async (id) => {
+    try {
+      setLoading(true);
+      await apiService.reactivatePrize(id);
+      await fetchUserPrizes(); // Recargar lista
+      return { success: true };
+    } catch (error) {
+      console.error('Error reactivating prize:', error);
+      const message = error.response?.data?.message || 'Error al reactivar premio';
+      Alert.alert('Error', message);
+      return { success: false, message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reactivar todos los premios del usuario (solo creador)
+  const reactivateAllPrizes = async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.reactivateAllPrizes();
+      await fetchUserPrizes(); // Recargar lista
+      const count = response.data.data.reactivatedCount;
+      return { success: true, count };
+    } catch (error) {
+      console.error('Error reactivating all prizes:', error);
+      const message = error.response?.data?.message || 'Error al reactivar premios';
+      Alert.alert('Error', message);
+      return { success: false, message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Cargar datos iniciales
   useEffect(() => {
     fetchPrizeTemplates();
@@ -161,6 +196,8 @@ export const usePrize = () => {
     updatePrize,
     deletePrize,
     uploadImage,
+    reactivatePrize,
+    reactivateAllPrizes,
     refetch: () => {
       fetchPrizeTemplates();
       fetchUserPrizes();

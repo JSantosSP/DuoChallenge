@@ -60,7 +60,9 @@ export const apiService = {
   verifyLevel: (levelId, payload) => 
     api.post(`/api/game/level/${levelId}/verify`, payload),
   getProgress: (gameSetId) => api.get(`/api/game/${gameSetId}/progress`),
-  getPrize: () => api.get('/api/game/prize'),
+  getPrize: (gameSetId) => api.get('/api/game/prize', { 
+    params: gameSetId ? { gameSetId } : {} 
+  }),
   resetGame: () => api.post('/api/game/reset'),
   getGameHistory: (status) => api.get(`/api/game/history${status ? `?status=${status}` : ''}`),
   getGameStats: () => api.get('/api/game/stats'),

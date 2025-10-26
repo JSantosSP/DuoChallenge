@@ -79,9 +79,7 @@ const GameHistoryScreen = ({ navigation }) => {
   };
 
   const handleGamePress = (game) => {
-    if (game.status === 'active') {
-      navigation.navigate('GameDetail', { gameSet: game });
-    }
+    navigation.navigate('Prize', { gameSetId: game._id, shareCode: game.shareCode })
   };
 
   const renderGameCard = (game) => (
@@ -89,7 +87,6 @@ const GameHistoryScreen = ({ navigation }) => {
       key={game._id}
       style={styles.gameCard}
       onPress={() => handleGamePress(game)}
-      disabled={game.status !== 'active'}
     >
       <View style={styles.gameHeader}>
         <Text style={styles.gameType}>{getGameTypeLabel(game)}</Text>

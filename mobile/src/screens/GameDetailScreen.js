@@ -25,7 +25,7 @@ const GameDetailScreen = ({ route, navigation }) => {
     progress, 
     refetchLevels,
     refetchProgress
-  } = useGame(gameSet._id);
+  } = useGame(gameSet._id, gameSet.shareCode);
 
   const [refreshing, setRefreshing] = React.useState(false);
 
@@ -202,10 +202,16 @@ const GameDetailScreen = ({ route, navigation }) => {
           <View style={styles.section}>
             <AppButton
               title="Ver Tu Premio"
-              onPress={() => navigation.navigate('Prize', { 
-                gameSetId: gameSet._id,
-                shareCode: gameSet.shareCode
-              })}
+              onPress={() => {
+                console.log('GameDetailScreen - Navigating to Prize with:', {
+                  gameSetId: gameSet._id,
+                  shareCode: gameSet.shareCode
+                });
+                navigation.navigate('Prize', { 
+                  gameSetId: gameSet._id,
+                  shareCode: gameSet.shareCode
+                });
+              }}
               icon="🏆"
             />
           </View>

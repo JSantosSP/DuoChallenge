@@ -1,4 +1,4 @@
-import React,  { useState } from 'react';
+import React,  { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,19 +7,36 @@ import {
   RefreshControl,
   Image,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useWonPrizes } from '../hooks/useGame';
-import { apiService, getImageUrl } from '../api/api';
+import { getImageUrl } from '../api/api';
 import LoadingOverlay from '../components/LoadingOverlay';
-import AppButton from '../components/AppButton';
 import colors from '../utils/colors';
 
 const WonPrizesScreen = ({ navigation }) => {
   const { wonPrizes, isLoading, refetch, total } = useWonPrizes();
   const [refreshing, setRefreshing] = useState(false);
-  const [reactivating, setReactivating] = useState(false);
+
+  // Configurar botón back personalizado para navegar a Home
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => {
+            // Volver al inicio del stack (HomeScreen)
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Home' }],
+            });
+          }}
+          style={{ marginLeft: 16, padding: 8 }}
+        >
+          <Text style={{ fontSize: 34, color: colors.neutral.textLight }}>‹</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -51,120 +68,50 @@ const WonPrizesScreen = ({ navigation }) => {
     return 'Grande';
   };
 
-  const handleReactivatePrize = async (prizeId) => {
-    Alert.alert(
-      'Reactivar Premio',
-      '¿Quieres reactivar este premio para poder canjearlo nuevamente?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Reactivar',
-          onPress: async () => {
-            try {
-              setReactivating(true);
-              await apiService.reactivatePrize(prizeId);
-              Alert.alert('✅ Éxito', 'Premio reactivado correctamente');
-              await refetch();
-            } catch (error) {
-              const message = error.response?.data?.message || 'Error al reactivar premio';
-              Alert.alert('Error', message);
-            } finally {
-              setReactivating(false);
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const handleReactivateAll = () => {
-    const usedPrizes = wonPrizes.filter(p => p.used);
-    if (usedPrizes.length === 0) {
-      Alert.alert('Info', 'No tienes premios canjeados para reactivar');
-      return;
-    }
-
-    Alert.alert(
-      'Reactivar Todos',
-      `¿Quieres reactivar todos los ${usedPrizes.length} premios canjeados?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Reactivar Todos',
-          onPress: async () => {
-            try {
-              setReactivating(true);
-              await apiService.reactivateAllPrizes();
-              Alert.alert('✅ Éxito', 'Todos los premios han sido reactivados');
-              await refetch();
-            } catch (error) {
-              const message = error.response?.data?.message || 'Error al reactivar premios';
-              Alert.alert('Error', message);
-            } finally {
-              setReactivating(false);
-            }
-          },
-        },
-      ]
-    );
-  };
 
   const renderPrizeCard = (prize, index) => (
-    <View key={index} style={styles.prizeCard}>
-      {prize.imagePath && (
-        <Image
-          source={{ uri: getImageUrl(prize.imagePath) }}
-          style={styles.prizeImage}
-          resizeMode="cover"
-        />
-      )}
-      <View style={styles.prizeInfo}>
-        <View style={styles.prizeHeader}>
-          <Text style={styles.prizeTitle}>{prize.title}</Text>
-          {prize.used && (
-            <View style={styles.usedBadge}>
-              <Text style={styles.usedText}>✓ Canjeado</Text>
-            </View>
-          )}
-        </View>
-        
-        <Text style={styles.prizeDescription} numberOfLines={2}>
-          {prize.description}
-        </Text>
+      <View key={index} style={styles.prizeCard}>
+        {prize.imagePath && (
+          <Image
+            source={{ uri: getImageUrl(prize.imagePath) }}
+            style={styles.prizeImage}
+            resizeMode="cover"
+          />
+        )}
+        <View style={styles.prizeInfo}>
+          <View style={styles.prizeHeader}>
+            <Text style={styles.prizeTitle}>{prize.title}</Text>
+            {prize.used && (
+              <View style={styles.usedBadge}>
+                <Text style={styles.usedText}>✓ Canjeado</Text>
+              </View>
+            )}
+          </View>
+          
+          <Text style={styles.prizeDescription} numberOfLines={2}>
+            {prize.description}
+          </Text>
 
-        <View style={styles.prizeMeta}>
-          <View style={[styles.weightBadge, { backgroundColor: getWeightColor(prize.weight) }]}>
-            <Text style={styles.weightText}>
-              {getWeightLabel(prize.weight)} ({prize.weight}/10)
+          <View style={styles.prizeMeta}>
+            <View style={[styles.weightBadge, { backgroundColor: getWeightColor(prize.weight) }]}>
+              <Text style={styles.weightText}>
+                {getWeightLabel(prize.weight)} ({prize.weight}/10)
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.prizeDates}>
+            <Text style={styles.dateText}>
+              🎉 Ganado: {formatDate(prize.completedAt)}
             </Text>
+            {prize.usedAt && (
+              <Text style={styles.dateText}>
+                ✓ Canjeado: {formatDate(prize.usedAt)}
+              </Text>
+            )}
           </View>
         </View>
-
-        <View style={styles.prizeDates}>
-          <Text style={styles.dateText}>
-            🎉 Ganado: {formatDate(prize.completedAt)}
-          </Text>
-          {prize.usedAt && (
-            <Text style={styles.dateText}>
-              ✓ Canjeado: {formatDate(prize.usedAt)}
-            </Text>
-          )}
-        </View>
-
-        {/* Reactivate button for used prizes */}
-        {prize.used && (
-          <TouchableOpacity
-            style={styles.reactivateButton}
-            onPress={() => handleReactivatePrize(prize._id)}
-            disabled={reactivating}
-          >
-            <Text style={styles.reactivateButtonText}>
-              🔄 Reactivar Premio
-            </Text>
-          </TouchableOpacity>
-        )}
       </View>
-    </View>
   );
 
   if (isLoading && !refreshing) {
@@ -210,19 +157,6 @@ const WonPrizesScreen = ({ navigation }) => {
               </Text>
               <Text style={styles.statLabel}>Disponibles</Text>
             </View>
-          </View>
-        )}
-
-        {/* Reactivate All Button */}
-        {wonPrizes.filter(p => p.used).length > 0 && (
-          <View style={styles.actionSection}>
-            <AppButton
-              title="Reactivar Todos los Premios Canjeados"
-              onPress={handleReactivateAll}
-              icon="🔄"
-              variant="outline"
-              disabled={reactivating}
-            />
           </View>
         )}
 
@@ -423,26 +357,6 @@ const styles = StyleSheet.create({
   emptyButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
-  },
-  actionSection: {
-    paddingHorizontal: 24,
-    paddingTop: 0,
-    paddingBottom: 16,
-  },
-  reactivateButton: {
-    marginTop: 12,
-    backgroundColor: colors.forest.light,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.forest.medium,
-  },
-  reactivateButtonText: {
-    color: colors.forest.medium,
-    fontSize: 14,
     fontWeight: '600',
   },
 });

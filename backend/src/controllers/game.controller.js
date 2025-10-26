@@ -249,13 +249,41 @@ const verifyLevel = async (req, res) => {
 };
 
 /**
- * Obtener premio actual del usuario
+ * Obtener premio actual del usuario o de un GameSet específico
  */
 const getPrize = async (req, res) => {
   try {
     const userId = req.user._id;
+    const { gameSetId } = req.query;
 
-    const prize = await getUserPrize(userId);
+    let prize;
+
+    // Si se proporciona gameSetId, obtener el premio de ese juego específico
+    if (gameSetId) {
+      const gameSet = await GameSet.findOne({
+        _id: gameSetId,
+        userId: userId
+      }).populate('prizeId');
+
+      if (!gameSet) {
+        return res.status(404).json({
+          success: false,
+          message: 'Juego no encontrado'
+        });
+      }
+
+      if (gameSet.status !== 'completed' || !gameSet.prizeId) {
+        return res.status(404).json({
+          success: false,
+          message: 'Este juego no tiene premio asignado aún'
+        });
+      }
+
+      prize = gameSet.prizeId;
+    } else {
+      // Si no hay gameSetId, obtener el premio actual del usuario (último completado)
+      prize = await getUserPrize(userId);
+    }
 
     if (!prize) {
       return res.status(404).json({
