@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }) => {
     loadStoredAuth();
   }, []);
 
-  // Registrar la función logout en el interceptor de api.js
   useEffect(() => {
     setLogoutCallback(logout);
   }, []);

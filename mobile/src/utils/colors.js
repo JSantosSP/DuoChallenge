@@ -1,48 +1,39 @@
-// Forest and Ocean Color Palette
-// Inspired by natural tones for a romantic, elegant feel
-
 export const colors = {
-  // Primary colors (for "her" elements or warm accents)
   forest: {
-    dark: '#1B4332',      // Dark forest green
-    medium: '#2D6A4F',   // Medium moss green
-    light: '#95D5B2',    // Soft green accent
+    dark: '#1B4332',
+    medium: '#2D6A4F',
+    light: '#95D5B2',
   },
   
-  // Secondary colors (for "his" elements or cool zones)
   ocean: {
-    dark: '#014F86',      // Deep ocean blue
-    medium: '#2A9D8F',    // Medium turquoise
-    light: '#A9D6E5',     // Light blue accent
+    dark: '#014F86',
+    medium: '#2A9D8F',
+    light: '#A9D6E5',
   },
   
-  // Neutral colors
   neutral: {
-    backgroundLight: '#F5F8F6',  // Light background
-    backgroundDark: '#0B1D1B',   // Dark background
-    textLight: '#1C1C1C',        // Text for light mode
-    textDark: '#E8F0EE',         // Text for dark mode
-    muted: '#A0B1AD',            // Muted text
-    border: '#DDE5E2',           // Soft borders
+    backgroundLight: '#F5F8F6',
+    backgroundDark: '#0B1D1B',
+    textLight: '#1C1C1C',
+    textDark: '#E8F0EE',
+    muted: '#A0B1AD',
+    border: '#DDE5E2',
   },
   
-  // Status colors
   status: {
-    success: '#2D6A4F',    // Forest green for success
-    warning: '#FF9800',    // Orange for warnings (keep existing)
-    error: '#F44336',      // Red for errors (keep existing)
-    info: '#2A9D8F',       // Turquoise for info
+    success: '#2D6A4F',
+    warning: '#FF9800',
+    error: '#F44336',
+    info: '#2A9D8F',
   },
   
-  // Gradients
   gradients: {
-    primary: ['#2D6A4F', '#2A9D8F'],      // Forest to turquoise
-    secondary: ['#1B4332', '#014F86'],    // Dark forest to deep ocean
-    accent: ['#95D5B2', '#A9D6E5'],      // Light green to light blue
+    primary: ['#2D6A4F', '#2A9D8F'],
+    secondary: ['#1B4332', '#014F86'],
+    accent: ['#95D5B2', '#A9D6E5'],
   }
 };
 
-// Theme variants for different contexts
 export const themes = {
   light: {
     background: colors.neutral.backgroundLight,

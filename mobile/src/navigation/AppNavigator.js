@@ -25,7 +25,6 @@ import PrizeTemplatesScreen from '../screens/PrizeTemplatesScreen';
 
 const Stack = createNativeStackNavigator();
 
-// Main Stack
 const MainStack = () => {
   return (
     <Stack.Navigator
@@ -182,7 +181,6 @@ const MainStack = () => {
   );
 };
 
-// Auth Stack (sin cambios)
 const AuthStack = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -191,7 +189,6 @@ const AuthStack = () => {
   );
 };
 
-// Main Navigator (sin cambios)
 const AppNavigator = () => {
   const { isAuthenticated, loading } = useAuth();
 

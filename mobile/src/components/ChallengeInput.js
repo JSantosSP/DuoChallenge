@@ -5,15 +5,10 @@ import { getImageUrl } from '../api/api';
 import PuzzleGame from './PuzzleGame';
 import { colors } from '../utils/colors';
 
-/**
- * Componente genérico para entrada de respuestas de retos
- * Renderiza según el tipo de reto (text, date, photo)
- */
 const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete, style }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(value ? new Date(value) : new Date());
 
-  // Handler para cambio de fecha
   const handleDateChange = (event, date) => {
     if (Platform.OS === 'android') {
       setShowDatePicker(false);
@@ -21,7 +16,6 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
     
     if (date) {
       setSelectedDate(date);
-      // Formatear a YYYY-MM-DD
       const formatted = date.toISOString().split('T')[0];
       onChangeText(formatted);
     }
@@ -44,7 +38,7 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
       return dateString;
     }
   };
-  // Renderizar según tipo de reto
+
   switch (type) {
     case 'fecha':
       return (
@@ -83,7 +77,6 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
       );
     
     case 'foto':
-      // Puzzle interactivo
       if (challenge && challenge.imagePath) {
         return (
           <PuzzleGame
@@ -94,7 +87,6 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
           />
         );
       }
-      // Fallback si no hay imagen
       return (
         <View style={[styles.input, style, { justifyContent: 'center', alignItems: 'center' }]}>
           <Text style={styles.errorText}>No hay imagen disponible para este puzzle</Text>
@@ -102,7 +94,6 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
       );
     
     case 'lugar':
-      // Tipo lugar: entrada de texto con placeholder específico
       return (
         <TextInput
           style={[styles.input, style]}
@@ -115,7 +106,6 @@ const ChallengeInput = ({ type, value, onChangeText, challenge, onPuzzleComplete
     
     case 'texto':
     default:
-      // Tipo texto: entrada libre normalizada
       return (
         <TextInput
           style={[styles.input, style]}

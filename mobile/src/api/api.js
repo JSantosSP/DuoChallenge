@@ -8,15 +8,12 @@ const api = axios.create({
   timeout: 10000,
 });
 
-// Variable para guardar la referencia al logout del AuthContext
 let logoutCallback = null;
 
-// Función para setear el callback de logout desde el AuthContext
 export const setLogoutCallback = (callback) => {
   logoutCallback = callback;
 };
 
-// Interceptor para añadir token
 api.interceptors.request.use(
   async (config) => {
     try {
@@ -34,12 +31,10 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para manejar errores
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      // Token expirado o inválido
       await SecureStore.deleteItemAsync('token');
       await SecureStore.deleteItemAsync('user');
       Alert.alert('Sesión expirada', 'Por favor, inicia sesión nuevamente');
@@ -53,18 +48,13 @@ api.interceptors.response.use(
 
 export default api;
 
-// Helper para convertir rutas de imagen relativas a URLs completas
-// (Re-exportado desde config/env.js para mantener compatibilidad)
 export { getImageUrl } from '../config/env';
 
-// Funciones API
 export const apiService = {
-  // Auth
   login: (email, password) => api.post('/auth/login', { email, password }),
   refreshToken: (refreshToken) => api.post('/auth/refresh', { refreshToken }),
   getProfile: () => api.get('/auth/profile'),
 
-  // Game
   generateGame: () => api.post('/api/game/generate'),
   getLevels: (gameSetId) => api.get(`/api/game/${gameSetId}/levels`),
   getLevel: (levelId) => api.get(`/api/game/level/${levelId}`),
@@ -79,25 +69,21 @@ export const apiService = {
   getGameStats: () => api.get('/api/game/stats'),
   getActiveGames: () => api.get('/api/game/active'),
 
-  // UserData (NUEVO)
   getUserData: () => api.get('/api/userdata'),
   getAvailableTypes: () => api.get('/api/userdata/types'),
   createUserData: (data) => api.post('/api/userdata', data),
   updateUserData: (id, data) => api.put(`/api/userdata/${id}`, data),
   deleteUserData: (id) => api.delete(`/api/userdata/${id}`),
   
-  // Upload (formData already created by caller)
   uploadImage: (formData) => {
     return api.post('/api/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
 
-  // Prize Templates
   getPrizeTemplates: () => api.get('/api/prize-templates'),
   getPrizeTemplateById: (id) => api.get(`/api/prize-templates/${id}`),
 
-  // Prizes
   getUserPrizes: () => api.get('/api/prizes'),
   getWonPrizes: () => api.get('/api/prizes/won'),
   createPrize: (data) => api.post('/api/prizes', data),
@@ -106,10 +92,8 @@ export const apiService = {
   reactivatePrize: (id) => api.put(`/api/prizes/${id}/reactivate`),
   reactivateAllPrizes: () => api.put('/api/prizes/reactivate-all'),
 
-  // Categories (for UserData)
   getCategories: () => api.get('/api/categories'),
 
-  // Share
   createShareCode: () => api.post('/api/share/create'),
   getUserShareCodes: () => api.get('/api/share/codes'),
   getUserUsedShareCodes: () => api.get('/api/share/used-codes'),

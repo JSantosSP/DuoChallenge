@@ -11,12 +11,8 @@ import {
 import { colors } from '../utils/colors';
 
 const { width: screenWidth } = Dimensions.get('window');
-const PUZZLE_SIZE = Math.min(screenWidth - 48, 400); // Tamaño del puzzle con margen
+const PUZZLE_SIZE = Math.min(screenWidth - 48, 400);
 
-/**
- * Componente de puzzle interactivo
- * Divide una imagen en piezas y permite reordenarlas
- */
 const PuzzleGame = ({ imageUri, gridSize = 3, onComplete, style }) => {
   const [pieces, setPieces] = useState([]);
   const [selectedPiece, setSelectedPiece] = useState(null);
@@ -26,16 +22,14 @@ const PuzzleGame = ({ imageUri, gridSize = 3, onComplete, style }) => {
     initializePuzzle();
   }, [imageUri, gridSize]);
 
-  // Inicializar el puzzle con piezas desordenadas
   const initializePuzzle = () => {
     const totalPieces = gridSize * gridSize;
     const initialPieces = Array.from({ length: totalPieces }, (_, i) => ({
-      id: i + 1, // ID de la pieza (1 a 9 para 3x3)
-      currentPosition: i, // Posición actual en el grid
-      correctPosition: i, // Posición correcta en el grid
+      id: i + 1,
+      currentPosition: i,
+      correctPosition: i,
     }));
 
-    // Desordenar las piezas
     const shuffled = shuffleArray(initialPieces);
     shuffled.forEach((piece, index) => {
       piece.currentPosition = index;
@@ -44,59 +38,48 @@ const PuzzleGame = ({ imageUri, gridSize = 3, onComplete, style }) => {
     setPieces(shuffled);
   };
 
-  // Algoritmo de Fisher-Yates para desordenar
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    // Asegurar que al menos una pieza esté fuera de lugar
     const isSolved = shuffled.every((piece, index) => piece.id === index + 1);
     if (isSolved) {
-      return shuffleArray(array); // Volver a desordenar
+      return shuffleArray(array);
     }
     return shuffled;
   };
 
-  // Manejar selección y swap de piezas
   const handlePiecePress = (index) => {
     if (selectedPiece === null) {
-      // Primera selección
       setSelectedPiece(index);
     } else {
       if (selectedPiece === index) {
-        // Deseleccionar si se presiona la misma pieza
         setSelectedPiece(null);
       } else {
-        // Intercambiar piezas
         swapPieces(selectedPiece, index);
         setSelectedPiece(null);
       }
     }
   };
 
-  // Intercambiar dos piezas
   const swapPieces = (index1, index2) => {
     const newPieces = [...pieces];
     [newPieces[index1], newPieces[index2]] = [newPieces[index2], newPieces[index1]];
     
-    // Actualizar posiciones actuales
     newPieces[index1].currentPosition = index1;
     newPieces[index2].currentPosition = index2;
     
     setPieces(newPieces);
 
-    // Verificar si el puzzle está completo
     checkCompletion(newPieces);
   };
 
-  // Verificar si el puzzle está completo
   const checkCompletion = (currentPieces) => {
     const isComplete = currentPieces.every((piece, index) => piece.id === index + 1);
     
     if (isComplete) {
-      // Obtener el orden actual para enviar al backend
       const order = currentPieces.map(piece => piece.id);
       Alert.alert(
         '¡Felicitaciones! 🎉',
@@ -106,7 +89,6 @@ const PuzzleGame = ({ imageUri, gridSize = 3, onComplete, style }) => {
     }
   };
 
-  // Obtener la posición de recorte de la imagen original para cada pieza
   const getPieceImageStyle = (piece) => {
     const row = Math.floor(piece.correctPosition / gridSize);
     const col = piece.correctPosition % gridSize;
@@ -120,7 +102,6 @@ const PuzzleGame = ({ imageUri, gridSize = 3, onComplete, style }) => {
     };
   };
 
-  // Renderizar una pieza del puzzle
   const renderPiece = (piece, index) => {
     const isSelected = selectedPiece === index;
     
@@ -146,10 +127,6 @@ const PuzzleGame = ({ imageUri, gridSize = 3, onComplete, style }) => {
             resizeMode="cover"
           />
         </View>
-        {/* Número de pieza para debug (opcional) */}
-        {/* <View style={styles.pieceNumber}>
-          <Text style={styles.pieceNumberText}>{piece.id}</Text>
-        </View> */}
       </TouchableOpacity>
     );
   };

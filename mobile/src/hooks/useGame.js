@@ -4,15 +4,10 @@ import { useNavigation } from '@react-navigation/native';
 import { apiService } from '../api/api';
 import { Alert } from 'react-native';
 
-/**
- * Hook principal para gestionar juegos (GameSets)
- * Actualizado para soportar múltiples juegos activos
- */
 export const useGame = (gameSetId = null, shareCode = null) => {
   const queryClient = useQueryClient();
   const navigation = useNavigation();
 
-  // Obtener niveles de un GameSet específico
   const {
     data: levels,
     isLoading: levelsLoading,
@@ -27,7 +22,6 @@ export const useGame = (gameSetId = null, shareCode = null) => {
     enabled: !!gameSetId,
   });
 
-  // Obtener progreso de un GameSet específico
   const { 
     data: progress, 
     refetch: refetchProgress 
@@ -41,7 +35,6 @@ export const useGame = (gameSetId = null, shareCode = null) => {
     enabled: !!gameSetId,
   });
 
-  // Obtener juegos activos del usuario
   const {
     data: activeGames,
     isLoading: activeGamesLoading,
@@ -54,13 +47,11 @@ export const useGame = (gameSetId = null, shareCode = null) => {
     },
   });
 
-  // Obtener historial de juegos
   const getHistory = async (status = null) => {
     const response = await apiService.getGameHistory(status);
     return response.data.data.gameSets;
   };
 
-  // Obtener estadísticas del usuario
   const {
     data: stats,
     refetch: refetchStats
@@ -72,24 +63,20 @@ export const useGame = (gameSetId = null, shareCode = null) => {
     },
   });
 
-  // Verificar nivel
   const verifyMutation = useMutation({
     mutationFn: ({ levelId, payload }) => 
       apiService.verifyLevel(levelId, payload),
     onSuccess: (data) => {
-      // Invalidar queries para actualizar el estado
       queryClient.invalidateQueries(['levels', gameSetId]);
       queryClient.invalidateQueries(['progress', gameSetId]);
       queryClient.invalidateQueries(['activeGames']);
       queryClient.invalidateQueries(['gameStats']);
       
-      // Verificar si se agotaron los intentos
       const hasNoAttemptsLeft = data.data.attemptsLeft === 0 || 
                                data.data.levelLocked === true ||
                                data.data.message?.includes('Límite de intentos alcanzado');
       
       if (hasNoAttemptsLeft) {
-        // Forzar actualización inmediata del cache para reflejar el estado inactivo
         queryClient.refetchQueries(['activeGames']);
         queryClient.refetchQueries(['levels', gameSetId]);
         queryClient.refetchQueries(['progress', gameSetId]);
@@ -121,7 +108,6 @@ export const useGame = (gameSetId = null, shareCode = null) => {
     },
   });
 
-  // Obtener premio de un juego completado
   const { data: prize, refetch: refetchPrize } = useQuery({
     queryKey: ['prize', gameSetId],
     queryFn: async () => {
@@ -131,7 +117,6 @@ export const useGame = (gameSetId = null, shareCode = null) => {
     enabled: false,
   });
 
-  // Reiniciar juego usando el código compartido original
   const restartGameMutation = useMutation({
     mutationFn: async ({ shareCode }) => {
       if (!shareCode) {
@@ -169,7 +154,6 @@ export const useGame = (gameSetId = null, shareCode = null) => {
     },
   });
 
-  // Generar nuevo juego
   const generateMutation = useMutation({
     mutationFn: () => apiService.generateGame(),
     onSuccess: (response) => {
@@ -191,17 +175,14 @@ export const useGame = (gameSetId = null, shareCode = null) => {
   });
 
   return {
-    // Datos de un GameSet específico
     levels,
     levelsLoading,
     progress,
     
-    // Juegos activos y estadísticas
     activeGames,
     activeGamesLoading,
     stats,
     
-    // Métodos
     verifyLevel: verifyMutation.mutate,
     verifyLoading: verifyMutation.isPending,
     prize,
@@ -216,13 +197,9 @@ export const useGame = (gameSetId = null, shareCode = null) => {
   };
 };
 
-/**
- * Hook para gestionar códigos compartidos y juegos compartidos
- */
 export const useGameShare = () => {
   const queryClient = useQueryClient();
 
-  // Obtener códigos del usuario
   const { 
     data: shareCodes, 
     isLoading: codesLoading, 
@@ -235,7 +212,6 @@ export const useGameShare = () => {
     },
   });
 
-  // Obtener juegos compartidos (GameSets de juegos unidos)
   const { 
     data: sharedGames, 
     isLoading: sharedGamesLoading, 
@@ -248,7 +224,6 @@ export const useGameShare = () => {
     },
   });
 
-  // Crear código
   const createCodeMutation = useMutation({
     mutationFn: () => apiService.createShareCode(),
     onSuccess: () => {
@@ -260,12 +235,10 @@ export const useGameShare = () => {
     },
   });
 
-  // Verificar código
   const verifyCodeMutation = useMutation({
     mutationFn: (code) => apiService.verifyShareCode(code),
   });
 
-  // Unirse a juego
   const joinGameMutation = useMutation({
     mutationFn: (code) => apiService.joinGame(code),
     onSuccess: () => {
@@ -279,7 +252,6 @@ export const useGameShare = () => {
     },
   });
 
-  // Desactivar código
   const deactivateCodeMutation = useMutation({
     mutationFn: (id) => apiService.deactivateShareCode(id),
     onSuccess: () => {
@@ -304,9 +276,6 @@ export const useGameShare = () => {
   };
 };
 
-/**
- * Hook para premios ganados
- */
 export const useWonPrizes = () => {
   const { data: wonPrizes, isLoading, refetch } = useQuery({
     queryKey: ['wonPrizes'],
