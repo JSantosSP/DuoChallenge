@@ -4,7 +4,7 @@ const isProd = process.env.PRO === 'true';
 
 const config = {
   isProd,
-  nodeEnv: process.env.NODE_ENV || (isProd ? 'production' : 'development'),
+  nodeEnv: (isProd ? 'production' : 'development'),
   
   port: process.env.PORT || 4000,
   host: '0.0.0.0',
